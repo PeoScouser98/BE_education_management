@@ -33,7 +33,9 @@ const list = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.list = list;
 const create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const newStudent = yield new student_model_1.default(req.body).save();
+        const newStudent = new student_model_1.default(req.body);
+        yield newStudent.save();
+        console.log("new student:>>", newStudent);
         return res.status(201).json(newStudent);
     }
     catch (error) {
