@@ -104,6 +104,6 @@
 		"noImplicitAny": true,
 		"moduleResolution": "node",
 		"sourceMap": false,
-		"outDir": "dist"
+		"outDir": "build"
 	}
 }
