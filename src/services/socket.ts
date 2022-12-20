@@ -5,7 +5,7 @@ import {
 	InterServerEvents,
 	ServerToClientEvents,
 	SocketData,
-} from "./interfaces/socket.interface";
+} from "../interfaces/socket.interface";
 
 const connectSocketIO = (server: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>) => {
 	const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(server, {

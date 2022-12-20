@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import app from "./app";
 import "dotenv/config";
 import http from "http";
-import connectSocketIO from "./socket";
+import connectSocketIO from "./services/socket";
 
 const server = http.createServer(app);
 
