@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import app from "./app";
+import app from "./src/app";
 import "dotenv/config";
 import http from "http";
-import connectSocketIO from "./services/socket";
+import connectSocketIO from "./src/services/socket";
 
 const server = http.createServer(app);
 

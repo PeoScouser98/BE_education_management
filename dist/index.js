@@ -4,10 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
-const app_1 = __importDefault(require("./app"));
+const app_1 = __importDefault(require("./src/app"));
 require("dotenv/config");
 const http_1 = __importDefault(require("http"));
-const socket_1 = __importDefault(require("./services/socket"));
+const socket_1 = __importDefault(require("./src/services/socket"));
 const server = http_1.default.createServer(app_1.default);
 const PORT = process.env.PORT || 3004;
 app_1.default.listen(PORT, () => {
