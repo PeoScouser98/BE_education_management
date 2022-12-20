@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.list = void 0;
+exports.create = exports.list = void 0;
 // import Student from "../models/student.model";
 const student_model_1 = __importDefault(require("../models/student.model"));
 const http_errors_1 = __importDefault(require("http-errors"));
@@ -31,3 +31,15 @@ const list = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.list = list;
+const create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const newStudent = yield new student_model_1.default(req.body).save();
+        return res.status(201).json(newStudent);
+    }
+    catch (error) {
+        return res.status(error.status).json({
+            message: error.message,
+        });
+    }
+});
+exports.create = create;

@@ -16,3 +16,14 @@ export const list = async (req: Request, res: Response) => {
 		});
 	}
 };
+
+export const create = async (req: Request, res: Response) => {
+	try {
+		const newStudent = await new Student(req.body).save();
+		return res.status(201).json(newStudent);
+	} catch (error: any) {
+		return res.status(error.status).json({
+			message: error.message,
+		});
+	}
+};

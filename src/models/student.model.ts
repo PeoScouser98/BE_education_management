@@ -12,6 +12,7 @@ const studentSchema = new Schema<Student>({
 	dateOfBirth: {
 		type: Date,
 		require: true,
+		default: new Date(),
 	},
 	class: {
 		type: Types.ObjectId,

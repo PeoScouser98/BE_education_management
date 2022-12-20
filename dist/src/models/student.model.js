@@ -13,6 +13,7 @@ const studentSchema = new mongoose_1.Schema({
     dateOfBirth: {
         type: Date,
         require: true,
+        default: new Date(),
     },
     class: {
         type: mongoose_1.Types.ObjectId,
