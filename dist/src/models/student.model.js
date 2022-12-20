@@ -1,32 +1,34 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = require("mongoose");
-const studentSchema = new mongoose_1.Schema({
+const mongoose_1 = __importDefault(require("mongoose"));
+const studentSchema = new mongoose_1.default.Schema({
     fullName: {
         type: String,
-        require: true,
+        // require: true,
     },
     gender: {
         type: Boolean,
-        require: true,
+        // require: true,
     },
     dateOfBirth: {
         type: Date,
-        require: true,
+        // require: true,
         default: new Date(),
     },
     class: {
-        type: mongoose_1.Types.ObjectId,
+        type: mongoose_1.default.Types.ObjectId,
         ref: "Classes",
     },
     schoolYear: {
         type: String,
-        require: true,
+        // require: true,
     },
     parentPhoneNumber: {
         type: String,
-        require: true,
+        // require: true,
     },
 });
-const Student = (0, mongoose_1.model)("Students", studentSchema);
-exports.default = Student;
+exports.default = mongoose_1.default.model("Students", studentSchema);

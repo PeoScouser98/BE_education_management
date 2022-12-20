@@ -17,6 +17,9 @@ app_1.default.listen(PORT, () => {
 const DB_URI = process.env.DB_URI;
 mongoose_1.default.set("strictQuery", true);
 mongoose_1.default
-    .connect(DB_URI, { serverSelectionTimeoutMS: 5000 })
-    .then((data) => console.log("Connected to database"))
+    .connect(DB_URI)
+    .then((data) => {
+    // console.log(data);
+    console.log("Connected to database");
+})
     .catch((error) => console.log(error.message));
