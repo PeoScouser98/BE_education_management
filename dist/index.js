@@ -3,22 +3,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = __importDefault(require("mongoose"));
 const app_1 = __importDefault(require("./src/app"));
 require("dotenv/config");
 const http_1 = __importDefault(require("http"));
 const socket_1 = __importDefault(require("./src/services/socket"));
+const db_config_1 = __importDefault(require("./src/configs/db.config"));
 const server = http_1.default.createServer(app_1.default);
 const PORT = process.env.PORT || 3004;
 app_1.default.listen(PORT, () => {
+    if (process.env.NODE_ENV === "DEVELOPMENT") {
+        console.log(`Server is listening on: http://localhost:${PORT}`);
+    }
     (0, socket_1.default)(server);
-    console.log(`Server is listening on: http://localhost:${PORT}`);
+    (0, db_config_1.default)();
 });
-const databaseUri = process.env.NODE_ENV === "PRODUCTION" ? process.env.DB_URI : process.env.DB_LOCAL_URI;
-mongoose_1.default.set("strictQuery", true);
-mongoose_1.default
-    .connect(databaseUri)
-    .then((data) => {
-    console.log("Connected to database");
-})
-    .catch((error) => console.log(error.message));
