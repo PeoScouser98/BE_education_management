@@ -3,18 +3,10 @@
 	"buildCommand": "npm run build",
 	"devCommand": "npm run dev",
 	"outputDirectory": "dist",
-	"env": {
-		"NODE_ENV": "PRODUCTION",
-		"DB_URI": "mongodb+srv://quanghiep03198:03011998@datn.xprv2z6.mongodb.net/DATN"
-	},
 	"builds": [
 		{
 			"src": "dist/index.js",
-			"use": "@vercel/node",
-			"env": {
-				"NODE_ENV": "PRODUCTION",
-				"DB_URI": "mongodb+srv://quanghiep03198:03011998@datn.xprv2z6.mongodb.net/DATN"
-			}
+			"use": "@vercel/node"
 		}
 	],
 	"routes": [
