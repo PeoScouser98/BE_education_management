@@ -16,6 +16,8 @@ app.use((0, cors_1.default)());
 // * Using router
 app.use("/api", student_route_1.default);
 app.get("/", (req, res) => {
-    res.send("Server now is running!");
+    res.json({
+        message: "Server now is running!",
+    });
 });
 exports.default = app;

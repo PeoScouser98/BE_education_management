@@ -16,7 +16,9 @@ app.use(cors());
 app.use("/api", __Student);
 
 app.get("/", (req, res) => {
-	res.send("Server now is running!");
+	res.json({
+		message: "Server now is running!",
+	});
 });
 
 export default app;
