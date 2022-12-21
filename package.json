@@ -4,8 +4,8 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"start": "SET NODE_ENV=production && ts-node index.ts",
-		"dev": "SET NODE_ENV=development && nodemon index.ts",
+		"start": "SET NODE_ENV=PRODUCTION && ts-node index.ts",
+		"dev": "SET NODE_ENV=DEVELOPMENT && nodemon index.ts",
 		"build": "npx tsc"
 	},
 	"keywords": [],
