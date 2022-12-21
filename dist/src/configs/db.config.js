@@ -18,9 +18,8 @@ const connectMongoDB = () => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         const isProductionEnv = ((_a = process.env.NODE_ENV) === null || _a === void 0 ? void 0 : _a.indexOf("production")) != -1;
-        console.log("current node env:>>", isProductionEnv);
+        console.log("Node ENV:>>", isProductionEnv);
         const databaseUri = isProductionEnv ? process.env.DB_URI : process.env.LOCAL_DB_URI;
-        console.log(databaseUri);
         mongoose_1.default.set("strictQuery", true);
         yield mongoose_1.default.connect(databaseUri);
         console.log("Connected to database");

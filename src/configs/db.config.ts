@@ -4,9 +4,8 @@ import "dotenv/config";
 const connectMongoDB = async () => {
 	try {
 		const isProductionEnv = process.env.NODE_ENV?.indexOf("production") != -1;
-		console.log("current node env:>>", isProductionEnv);
+		console.log("Node ENV:>>", isProductionEnv);
 		const databaseUri = isProductionEnv ? process.env.DB_URI! : process.env.LOCAL_DB_URI!;
-		console.log(databaseUri);
 		mongoose.set("strictQuery", true);
 		await mongoose.connect(databaseUri);
 		console.log("Connected to database");
