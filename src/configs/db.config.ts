@@ -2,7 +2,8 @@ import mongoose, { MongooseError } from "mongoose";
 import "dotenv/config";
 const connectMongoDB = async () => {
 	try {
-		const databaseUri = process.env.NODE_ENV == "PRODUCTION" ? process.env.DB_URI! : process.env.LOCAL_DB_URI!;
+		const databaseUri =
+			process.env.NODE_ENV && process.env.NODE_ENV == "PRODUCTION" ? process.env.DB_URI! : process.env.LOCAL_DB_URI!;
 		mongoose.set("strictQuery", true);
 		await mongoose.connect(databaseUri);
 		console.log("Connected to database");
