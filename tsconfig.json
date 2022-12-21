@@ -26,7 +26,6 @@
 
 		/* Modules */
 		"module": "CommonJS" /* Specify what module code is generated. */,
-		// "rootDir": "./",                                  /* Specify the root folder within your source files. */
 		// "moduleResolution": "node",                       /* Specify how TypeScript looks up a file from a given module specifier. */
 		// "baseUrl": "./",                                  /* Specify the base directory to resolve non-relative module names. */
 		// "paths": {},                                      /* Specify a set of entries that re-map imports to additional lookup locations. */
@@ -104,12 +103,13 @@
 		"noImplicitAny": true,
 		"moduleResolution": "node",
 		"sourceMap": false,
-		"outDir": "dist/",
-		"baseUrl": ".",
-		"paths": {
-			"*": ["node_modules/*"],
-			"@/*": ["src/*"]
-		}
+		// "rootDir": "src" /* Specify the root folder within your source files. */,
+		"outDir": "dist/"
+		// "baseUrl": "."
+		// "paths": {
+		// 	// "*": ["node_modules/*"],
+		// 	"@/*": ["src/*", "dist/*"]
+		// }
 	},
 	"include": ["src", "index.ts"]
 }
