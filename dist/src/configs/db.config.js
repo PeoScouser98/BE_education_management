@@ -16,7 +16,9 @@ const mongoose_1 = __importDefault(require("mongoose"));
 require("dotenv/config");
 const connectMongoDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        // console.log(ip.);
         const databaseUri = process.env.NODE_ENV == "production" ? process.env.DB_URI : process.env.LOCAL_DB_URI;
+        console.log(process.env.NODE_ENV);
         mongoose_1.default.set("strictQuery", true);
         yield mongoose_1.default.connect(databaseUri);
         console.log("Connected to database");

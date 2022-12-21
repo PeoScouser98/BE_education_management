@@ -1,9 +1,12 @@
 import mongoose, { MongooseError } from "mongoose";
+import ip from "ip";
 import "dotenv/config";
 const connectMongoDB = async () => {
 	try {
-		const databaseUri = process.env.NODE_ENV == "production" ? process.env.DB_URI! : process.env.LOCAL_DB_URI!;
-		console.log(process.env.NODE_ENV);
+		const isProductionEnv = process.env.NODE_ENV?.indexOf("production") != -1;
+		console.log("current node env:>>", isProductionEnv);
+		const databaseUri = isProductionEnv ? process.env.DB_URI! : process.env.LOCAL_DB_URI!;
+		console.log(databaseUri);
 		mongoose.set("strictQuery", true);
 		await mongoose.connect(databaseUri);
 		console.log("Connected to database");
