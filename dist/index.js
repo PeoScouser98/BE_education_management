@@ -14,12 +14,11 @@ app_1.default.listen(PORT, () => {
     (0, socket_1.default)(server);
     console.log(`Server is listening on: http://localhost:${PORT}`);
 });
-const DB_URI = process.env.DB_URI;
+const databaseUri = process.env.NODE_ENV === "PRODUCTION" ? process.env.DB_URI : process.env.DB_LOCAL_URI;
 mongoose_1.default.set("strictQuery", true);
 mongoose_1.default
-    .connect(DB_URI)
+    .connect(databaseUri)
     .then((data) => {
-    // console.log(data);
     console.log("Connected to database");
 })
     .catch((error) => console.log(error.message));
