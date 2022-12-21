@@ -1,33 +1,31 @@
-import { Schema, model, Types } from "mongoose";
+import mongoose from "mongoose";
 import { Student } from "../interfaces/student.interface";
-const studentSchema = new Schema<Student>({
+const studentSchema = new mongoose.Schema<Student>({
 	fullName: {
 		type: String,
-		require: true,
+		// require: true,
 	},
 	gender: {
 		type: Boolean,
-		require: true,
+		// require: true,
 	},
 	dateOfBirth: {
 		type: Date,
-		require: true,
+		// require: true,
 		default: new Date(),
 	},
 	class: {
-		type: Types.ObjectId,
+		type: mongoose.Types.ObjectId,
 		ref: "Classes",
 	},
 	schoolYear: {
 		type: String,
-		require: true,
+		// require: true,
 	},
 	parentPhoneNumber: {
 		type: String,
-		require: true,
+		// require: true,
 	},
 });
 
-const Student = model("Students", studentSchema);
-
-export default Student;
+export default mongoose.model("Students", studentSchema);
