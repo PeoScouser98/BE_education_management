@@ -1,6 +1,6 @@
 ## Deployed API
- [![image alt text](https://drive.google.com/file/d/1N_85fCRgV12AiJvPHID7r4PjjjJMK4JV/view?usp=sharing)](https://quan-ly-giao-duc-api.vercel.app/)
 
+[![deployed_API](https://docs.google.com/uc?export=download&id=1N_85fCRgV12AiJvPHID7r4PjjjJMK4JV)](https://quan-ly-giao-duc-api.vercel.app/)
 
 ---
 
