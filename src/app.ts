@@ -9,7 +9,7 @@ import path from "path";
 
 const app = express();
 
-const yamlFile = yaml.load("./src/docs.yaml");
+const yamlFile = yaml.load(path.resolve(path.join(__dirname, "/docs.yaml")));
 
 // * Using middlewares
 app.use(express.json());
