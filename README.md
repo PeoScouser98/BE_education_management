@@ -10,14 +10,19 @@
 
 ## Usage
 
-### Install - Clone project 
+### Install  
 $ npm install
 
-### Dev command - Sử dụng local database  & phát triển product trên môi trường Development
-$ npm run dev
 
-### Build command - Compile Typescript -> Javascript
+### Dev command 
+$ npm run dev
+-> Sử dụng local database & phát triển product trên môi trường Development
+
+
+### Build command 
 $ npm run build
+-> Compile Typescript -> Javascript
+
 
 ### Run application trên môi trường Production
 $ npm start
