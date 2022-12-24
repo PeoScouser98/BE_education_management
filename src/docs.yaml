@@ -1,0 +1,50 @@
+openapi: 3.0.0
+swagger: 2.0
+
+info:
+  title: Education Management API
+  description: Education Management API
+
+servers:
+  - url: http://localhost:3001/api
+    description: "Education Management API"
+
+paths:
+  tag: Student
+  /students:
+    get:
+      summary: Trả về danh sách học sinh
+      description: return type of json
+      responses:
+        "200":
+          content:
+            application/json:
+              description: A JSON array of students
+              schema:
+                type: array
+                items:
+                  type: object
+                  $ref: "#/components/schemas/Student"
+
+        "404":
+          description: không tìm thấy học sinh nào
+
+    post:
+      summary: Thêm mới học sinh
+      description: chỉ dành cho accound có vai trò là "teacher"
+      responses:
+        201:
+
+components:
+  schemas:
+    Student:
+      type: object
+      properties:
+        _id:
+          type: string
+        fullName:
+          type: string
+
+      example:
+        _id: "63774fb00f138e11fe6c88d8"
+        fullName: "Học sinh 1"
