@@ -1,8 +1,6 @@
 ## Deployed API
+ [![image alt text](https://drive.google.com/file/d/1N_85fCRgV12AiJvPHID7r4PjjjJMK4JV/view?usp=sharing)](https://quan-ly-giao-duc-api.vercel.app/)
 
-<a href="https://quan-ly-giao-duc-api.vercel.app/">
- <img src="https://drive.google.com/file/d/1N_85fCRgV12AiJvPHID7r4PjjjJMK4JV/view?usp=sharing"/>
-</a>
 
 ---
 
