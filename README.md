@@ -19,12 +19,12 @@ $ npm run dev
 ### Build command - Compile Typescript -> Javascript
 $ npm run build
 
-### npm start - Run application trên môi trường Production
+### Run application trên môi trường Production
 $ npm start
 
 
 
-## Notices
+### Notices
 * Không sử dụng online database trong quá trình phát triển product
 
 
