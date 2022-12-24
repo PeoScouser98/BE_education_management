@@ -2,14 +2,13 @@
 
 <a href="https://quan-ly-giao-duc-api.vercel.app/"><img src="https://docs.google.com/uc?export=download&id=1N_85fCRgV12AiJvPHID7r4PjjjJMK4JV" style="width: 540px; height: 320px; object-fit:cover"/></a>
 
----
-
-## API Document
+#### **API Document**
 
 https://quan-ly-giao-duc-api.vercel.app/api/docs
 
----
-
+<br/>
+ 
+ ---
 ## Usage
 
 ### 1. Install
