@@ -3,15 +3,16 @@ import { Student } from "../interfaces/student.interface";
 const studentSchema = new mongoose.Schema<Student>({
 	fullName: {
 		type: String,
-		// require: true,
+		require: true,
+		trim: true,
 	},
 	gender: {
 		type: Boolean,
-		// require: true,
+		require: true,
 	},
 	dateOfBirth: {
 		type: Date,
-		// require: true,
+		require: true,
 		default: new Date(),
 	},
 	class: {
@@ -26,6 +27,22 @@ const studentSchema = new mongoose.Schema<Student>({
 		type: String,
 		// require: true,
 	},
+	attendance: [
+		{
+			date: {
+				type: Date,
+				default: new Date(),
+			},
+			isPresent: {
+				type: Boolean,
+				require: true,
+			},
+			hasPermision: Boolean,
+			reason: String,
+		},
+	],
 });
+
+studentSchema.statics.resetAttandanceEveryMonth = function () {};
 
 export default mongoose.model("Students", studentSchema);

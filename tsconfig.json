@@ -106,5 +106,5 @@
 		"sourceMap": false,
 		"outDir": "dist/"
 	},
-	"include": ["src", "index.ts"]
+	"include": ["src", "config", "index.ts"]
 }

@@ -8,4 +8,10 @@ export interface Student {
 	class: ObjectId;
 	schoolYear: string;
 	parentPhoneNumber: string;
+	attendance: Array<{
+		_id?: string;
+		date: Date;
+		isPresent: boolean;
+		reason: string;
+	}>;
 }

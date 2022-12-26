@@ -1,32 +1,33 @@
 ## Deployed API
 
--> https://quan-ly-giao-duc-api.vercel.app/
+<a href="https://quan-ly-giao-duc-api.vercel.app/"><img src="https://docs.google.com/uc?export=download&id=1N_85fCRgV12AiJvPHID7r4PjjjJMK4JV" style="width: 540px; height: 320px; object-fit:cover"/></a>
 
-## API Document
+#### **API Document**
 
--> https://quan-ly-giao-duc-api.vercel.app/api/docs
+https://quan-ly-giao-duc-api.vercel.app/api/docs
 
+<br/>
+ 
+ ---
 ## Usage
 
-### Install
+### 1. Install
 
-$ npm install
+     npm install
 
-### Dev command
+### 2. Dev command
 
-$ npm run dev
+    npm run dev
 
-#### -> Sử dụng local database & phát triển product trên môi trường Development
+### 3. Build command
 
-### Build command
+    npm run build
 
-$ npm run build
+### 4. Run application trên môi trường Production
 
-#### -> Compile Typescript -> Javascript
+    npm start
 
-### Run application trên môi trường Production
-
-$ npm start
+---
 
 ## Notices
 
