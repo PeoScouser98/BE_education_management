@@ -1,4 +1,4 @@
-import { Student } from "../interfaces/student.interface";
+import { Student } from "../interfaces/schemas.interface";
 import StudentModel from "../models/student.model";
 
 export const getAll = async () => await StudentModel.find().exec();
