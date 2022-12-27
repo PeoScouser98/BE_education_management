@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
-import { Student } from "../interfaces/student.interface";
+import { Student } from "../interfaces/schemas.interface";
+
 const studentSchema = new mongoose.Schema<Student>({
+	_id: {
+		type: mongoose.Types.ObjectId,
+		default: new mongoose.Types.ObjectId(),
+	},
 	fullName: {
 		type: String,
 		require: true,
@@ -13,19 +18,18 @@ const studentSchema = new mongoose.Schema<Student>({
 	dateOfBirth: {
 		type: Date,
 		require: true,
-		default: new Date(),
 	},
 	class: {
 		type: mongoose.Types.ObjectId,
 		ref: "Classes",
 	},
 	schoolYear: {
-		type: String,
-		// require: true,
+		type: mongoose.Types.ObjectId,
+		ref: "SchoolYear",
 	},
 	parentPhoneNumber: {
 		type: String,
-		// require: true,
+		require: true,
 	},
 	attendance: [
 		{
@@ -42,7 +46,7 @@ const studentSchema = new mongoose.Schema<Student>({
 		},
 	],
 });
-
-studentSchema.statics.resetAttandanceEveryMonth = function () {};
+studentSchema.set("autoIndex", true);
+// studentSchema.statics.resetAttandanceEveryMonth = function () {};
 
 export default mongoose.model("Students", studentSchema);
