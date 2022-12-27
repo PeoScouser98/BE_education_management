@@ -2,11 +2,13 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import bodyParser from "body-parser";
-import studentRouter from "./api/routes/student.route";
 import swaggerUI from "swagger-ui-express";
 import yaml from "yamljs";
 import path from "path";
 import helmet from "helmet";
+
+import studentRouter from "./api/routes/student.route";
+import eduBackgroundRouter from "./api/routes/eduBackground.route";
 
 const app = express();
 
@@ -22,6 +24,7 @@ app.use("/api/docs", swaggerUI.serve, swaggerUI.setup(yamlFile));
 
 // * Using router
 app.use("/api", studentRouter);
+app.use("/api/education-background", eduBackgroundRouter);
 
 app.get("/", (req, res) => {
 	res.json({

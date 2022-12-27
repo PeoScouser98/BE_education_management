@@ -31,7 +31,7 @@ const studentSchema = new mongoose.Schema<Student>({
 		type: String,
 		require: true,
 	},
-	attendance: [
+	absents: [
 		{
 			date: {
 				type: Date,
