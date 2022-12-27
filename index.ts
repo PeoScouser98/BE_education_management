@@ -1,7 +1,7 @@
 import app from "./src/app";
 import "dotenv/config";
 import http from "http";
-import connectSocketIO from "./src/api/services/socket";
+import connectSocketIO from "./src/app/socket";
 import connectMongoDB from "./src/configs/db.config";
 
 const server = http.createServer(app);
