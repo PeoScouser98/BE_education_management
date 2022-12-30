@@ -9,6 +9,7 @@ import helmet from "helmet";
 
 import studentRouter from "./api/routes/student.route";
 import eduBackgroundRouter from "./api/routes/eduBackground.route";
+import schoolYearRouter from "./api/routes/schoolYear.route";
 
 const app = express();
 
@@ -24,7 +25,8 @@ app.use("/api/docs", swaggerUI.serve, swaggerUI.setup(yamlFile));
 
 // * Using router
 app.use("/api", studentRouter);
-app.use("/api/education-background", eduBackgroundRouter);
+app.use("/api", eduBackgroundRouter);
+app.use("/api", schoolYearRouter);
 
 app.get("/", (req, res) => {
 	res.json({
