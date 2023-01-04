@@ -13,3 +13,6 @@ export const edit = async (data: EduBackground, eduBackgroundId: String) =>
 	await eduBackgroundModel.findByIdAndUpdate(eduBackgroundId, data, { new: true });
 
 export const remove = async (eduBackgroundId: String) => await eduBackgroundModel.findByIdAndDelete(eduBackgroundId);
+
+// export const sortRemove = async (eduBackgroundId: String) =>
+//     await eduBackgroundModel.delete(eduBackgroundId);

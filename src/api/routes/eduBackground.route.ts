@@ -3,9 +3,9 @@ import * as eduBackgroundController from "../controllers/eduBackground.controlle
 
 const router = express.Router();
 
-router.get("/eduBackground", eduBackgroundController.list);
-router.post("/eduBackground", eduBackgroundController.create);
-router.put("/eduBackground/:id", eduBackgroundController.update);
-router.delete("/eduBackground/:id", eduBackgroundController.remove);
+router.get("/get-all", eduBackgroundController.list);
+router.post("/create", eduBackgroundController.create);
+router.put("/update/:eduBackgroundId", eduBackgroundController.update);
+router.delete("/delete/:eduBackgroundId", eduBackgroundController.remove);
 
 export default router;

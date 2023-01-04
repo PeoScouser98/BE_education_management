@@ -11,6 +11,7 @@ import { ErrorRequestHandler } from "express-serve-static-core";
 
 import studentRouter from "./api/routes/student.route";
 import eduBackgroundRouter from "./api/routes/eduBackground.route";
+import schoolYearRouter from "./api/routes/schoolYear.route";
 
 const app = express();
 const yamlFile = yaml.load(path.resolve(path.join(__dirname, "/docs.yaml")));
@@ -26,7 +27,8 @@ app.use("/api/docs", swaggerUI.serve, swaggerUI.setup(yamlFile));
 // * Using router
 
 app.use("/api", studentRouter);
-app.use("/api", eduBackgroundRouter);
+app.use("/api/education-background", eduBackgroundRouter);
+
 app.get("/", (req, res) => {
 	res.json({
 		message: "Server now is running!",

@@ -54,3 +54,20 @@ export const remove = async (req: Request, res: Response) => {
 		return res.status(500).json(error);
 	}
 };
+
+// // 
+// export const sortRemove = async (req: Request, res: Response) => {
+//     try {
+//         const eduBackgroundId: string = req.params.eduBackgroundId;
+//         if (eduBackgroundId) {
+//             await EduBackgroundService.remove(eduBackgroundId);
+//             res.status(200).json({
+//                 message: 'Delete education bacground successfully!',
+//             });
+//         } else {
+//             throw HttpError.NotFound('Page not found!');
+//         }
+//     } catch (error) {
+//         return res.status(500).json(error);
+//     }
+// };
