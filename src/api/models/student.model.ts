@@ -23,21 +23,19 @@ const studentSchema = new mongoose.Schema<Student>({
 		type: mongoose.Types.ObjectId,
 		ref: "Classes",
 	},
-	schoolYear: {
-		type: mongoose.Types.ObjectId,
-		ref: "SchoolYear",
-	},
+
 	parentPhoneNumber: {
 		type: String,
 		require: true,
 	},
-	absents: [
+
+	absentDays: [
 		{
 			date: {
 				type: Date,
 				default: new Date(),
 			},
-
+			schoolYear: { type: mongoose.Types.ObjectId, ref: "SchoolYear" },
 			hasPermision: { type: Boolean, default: false },
 			reason: {
 				type: String,
@@ -48,6 +46,7 @@ const studentSchema = new mongoose.Schema<Student>({
 		},
 	],
 });
+
 studentSchema.set("autoIndex", true);
 
 export default mongoose.model("Students", studentSchema);

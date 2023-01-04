@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import createHttpError from "http-errors";
 import * as SubjectServices from "../services/subject.service";
-import { HttpException } from "../../types/error.interface";
+import { HttpException } from "../../types/error.type";
 
 export const list = async (req: Request, res: Response) => {
 	try {

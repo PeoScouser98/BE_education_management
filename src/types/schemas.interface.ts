@@ -1,4 +1,4 @@
-import { ObjectId, Document } from "mongoose";
+import { Document, ObjectId } from "mongoose";
 
 interface User {
 	email?: string;
@@ -25,7 +25,7 @@ export interface SchoolYear extends Document {
 export interface TimeTable {
 	_id?: ObjectId;
 	class: ObjectId;
-	morning: [2, 3, 4, 5][];
+	morning: {};
 	afternoon: [][];
 }
 
@@ -46,7 +46,7 @@ export interface Teacher extends User, Document {
 	headClass: ObjectId;
 	inChargeOfSpecialities: Array<{
 		class: ObjectId;
-		subject: [ObjectId];
+		subject: Array<ObjectId>;
 	}>;
 	position: ObjectId;
 	eduBackground: ObjectId;
@@ -58,60 +58,45 @@ export interface Student extends Document {
 	gender: boolean;
 	dateOfBirth: Date;
 	class: ObjectId;
-	schoolYear: ObjectId;
+
 	parentPhoneNumber: string;
-	absents: Array<{
+	schoolTranscript: Array<SubjectTranscript>;
+	absentDays: Array<{
 		_id?: ObjectId;
 		date: Date;
-		haPermision: boolean;
+		hasPermision: boolean;
 		reason: string;
 	}>;
 }
-
+export interface SubjectTranscript extends Document {
+	schoolYear: ObjectId;
+	subject: ObjectId;
+	firstSemester: {
+		midtermTest?: {
+			type: Number;
+			min: 0;
+			max: 10;
+		};
+		finalTest: {
+			type: Number;
+			min: 0;
+			max: 10;
+		};
+	};
+	secondSemester: {
+		midtermTest?: {
+			type: Number;
+			min: 0;
+			max: 10;
+		};
+		finalTest: {
+			type: Number;
+			min: 0;
+			max: 10;
+		};
+	};
+}
 export interface Subject extends Document {
 	_id?: ObjectId;
 	subjectName: string;
 }
-
-// export interface bangDiem {
-// 	student: ObjectId;
-// 	results: [
-// 		{
-// 			subject: ObjectId; // ref subject
-// 			hangMuc: [
-// 				{
-// 					giuaKy:
-// 				}
-// 			]
-
-// 		},
-// 	];
-// }
-
-/*
-[
-	{
-		limit:5
-		page: 1,
-		docs:[
-			{
-				id:1
-				name:'abc'
-			},
-			{
-				id:1
-				name:'abc'
-			},
-			{
-				id:1
-				name:'abc'
-			},
-			{
-				id:1
-				name:'abc'
-			},
-		]
-	}	
-]
-	
- */

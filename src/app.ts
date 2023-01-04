@@ -1,4 +1,4 @@
-import { HttpException } from "./types/error.interface";
+import { HttpException } from "./types/error.type";
 import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import morgan from "morgan";
