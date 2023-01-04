@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Teacher } from "../interfaces/schemas.interface";
+import { Teacher } from "../../types/schemas.interface";
 
 const teacherSchema = new mongoose.Schema<Teacher>(
 	{

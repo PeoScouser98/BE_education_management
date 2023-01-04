@@ -1,11 +1,11 @@
-import mongoose from 'mongoose';
-import {EduBackground} from '../interfaces/schemas.interface';
+import mongoose from "mongoose";
+import { EduBackground } from "../../types/schemas.interface";
 
 const eduBackgroundSchema = new mongoose.Schema<EduBackground>({
-    level: {
-        type: String,
-        required: true,
-    },
+	level: {
+		type: String,
+		required: true,
+	},
 });
 
-export default mongoose.model('EduBackgrounds', eduBackgroundSchema);
+export default mongoose.model("EduBackgrounds", eduBackgroundSchema);

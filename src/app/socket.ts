@@ -1,11 +1,6 @@
 import http from "http";
 import { Server } from "socket.io";
-import {
-	ClientToServerEvents,
-	InterServerEvents,
-	ServerToClientEvents,
-	SocketData,
-} from "../api/interfaces/socket.interface";
+import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from "../types/socket.interface";
 
 const connectSocketIO = (server: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>) => {
 	const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(server, {

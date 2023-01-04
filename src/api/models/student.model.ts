@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Student } from "../interfaces/schemas.interface";
+import { Student } from "../../types/schemas.interface";
 
 const studentSchema = new mongoose.Schema<Student>({
 	_id: {
@@ -37,16 +37,17 @@ const studentSchema = new mongoose.Schema<Student>({
 				type: Date,
 				default: new Date(),
 			},
-			isPresent: {
-				type: Boolean,
-				require: true,
+
+			hasPermision: { type: Boolean, default: false },
+			reason: {
+				type: String,
+				minlength: 8,
+				maxLength: 256,
+				default: "Không có lý do",
 			},
-			hasPermision: Boolean,
-			reason: String,
 		},
 	],
 });
 studentSchema.set("autoIndex", true);
-// studentSchema.statics.resetAttandanceEveryMonth = function () {};
 
 export default mongoose.model("Students", studentSchema);

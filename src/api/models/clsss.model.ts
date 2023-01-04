@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Class } from "../interfaces/schemas.interface";
+import { Class } from "../../types/schemas.interface";
 
 const classSchema = new mongoose.Schema<Class>({
 	className: {

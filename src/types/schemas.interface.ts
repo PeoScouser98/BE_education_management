@@ -64,6 +64,7 @@ export interface Student extends Document {
 		_id?: ObjectId;
 		date: Date;
 		haPermision: boolean;
+		reason: string;
 	}>;
 }
 

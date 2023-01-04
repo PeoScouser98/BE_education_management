@@ -13,7 +13,7 @@ https://quan-ly-giao-duc-api.vercel.app/api/docs
 
 ### 1. Install
 
-     npm install
+    npm install
 
 ### 2. Dev command
 
