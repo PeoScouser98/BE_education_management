@@ -20,7 +20,13 @@ const yamlFile = yaml.load(path.resolve(path.join(__dirname, "/docs.yaml")));
 app.use(express.json());
 app.use(helmet());
 app.use(bodyParser.json());
-app.use(cors());
+app.use(
+	cors({
+		origin: "*",
+		methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+		allowedHeaders: ["token"],
+	}),
+);
 app.use(morgan("tiny"));
 app.use("/api/docs", swaggerUI.serve, swaggerUI.setup(yamlFile));
 
