@@ -1,66 +1,71 @@
-import mongoose from "mongoose";
-import { Teacher } from "../../types/schemas.interface";
+import mongooseAutoPopulate from "mongoose-autopopulate";
+import mongoose, { ObjectId } from "mongoose";
 
-const teacherSchema = new mongoose.Schema<Teacher>(
-	{
-		_id: mongoose.Types.ObjectId,
-		email: {
-			type: String,
-			require: true,
-			trim: true,
-		},
-		password: {
-			type: String,
-			require: true,
-			default: "123@123",
-			trim: true,
-		},
-		fullName: {
-			type: String,
-			require: true,
-			trim: true,
-		},
-		phone: {
-			type: String,
-			require: true,
-			minlength: 10,
-			maxLength: 11,
-		},
-		dateOfBirth: {
-			type: Date,
-			require: true,
-		},
-		gender: {
-			type: Boolean,
-			require: true,
-			default: true,
-		},
-		headClass: {
-			type: mongoose.Types.ObjectId,
-		},
-		inChargeOfSpecialities: [
-			{
-				class: {
-					type: mongoose.Types.ObjectId,
-					ref: "Classes",
-				},
-				subject: [
-					{
-						type: mongoose.Types.ObjectId,
-					},
-				],
-			},
-		],
-		position: {
-			type: mongoose.Types.ObjectId,
-		},
-		eduBackground: {
-			type: mongoose.Types.ObjectId,
-		},
-	},
-	{
-		timestamps: true,
-	},
+export interface Teacher extends Document {
+    _id: ObjectId;
+    email: string;
+    password: string;
+    fullName: string;
+    phone: string;
+    dateOfBirth: Date;
+    gender: boolean;
+    eduBackground: ObjectId;
+}
+
+const TeacherSchema = new mongoose.Schema<Teacher>(
+    {
+        _id: mongoose.Types.ObjectId,
+        email: {
+            type: String,
+            require: true,
+            trim: true,
+            unique: true,
+            validate: {
+                validator: function (value: string) {
+                    return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g.test(value);
+                },
+                message: (props: any) => `${props.value} is not a valid email address!`,
+            },
+        },
+        password: {
+            type: String,
+            require: true,
+            trim: true,
+            minlength: 6,
+            maxLength: 16,
+        },
+        fullName: {
+            type: String,
+            require: true,
+            trim: true,
+        },
+        phone: {
+            type: String,
+            require: true,
+            minlength: 10,
+            maxLength: 11,
+        },
+        dateOfBirth: {
+            type: Date,
+            require: true,
+        },
+        gender: {
+            type: Boolean,
+            require: true,
+            default: true,
+        },
+        eduBackground: {
+            type: String,
+            autopopulate: { select: "level" },
+        },
+    },
+    {
+        timestamps: true,
+    },
 );
 
-export default mongoose.model("Teachers", teacherSchema);
+TeacherSchema.plugin(mongooseAutoPopulate);
+
+const TeacherModel = mongoose.model<Teacher>("Teachers", TeacherSchema);
+
+export default TeacherModel;

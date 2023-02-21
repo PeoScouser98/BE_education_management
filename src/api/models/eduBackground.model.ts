@@ -1,20 +1,25 @@
 import mongoose from "mongoose";
 import mongooseDelete from "mongoose-delete";
-import { EduBackground } from "../../types/schemas.interface";
+
+export interface EduBackground extends Document {
+    _id: mongoose.Types.ObjectId;
+    level: string;
+}
 
 const eduBackgroundSchema = new mongoose.Schema<EduBackground>({
-	level: {
-		type: String,
-		required: true,
-	},
+    level: {
+        type: String,
+        enum: ["Cao Đẳng", "Đại Học"],
+        required: true,
+    },
 });
 
 // add plugin
 eduBackgroundSchema.plugin(mongooseDelete, {
-	deletedAt: true,
-	overrideMethods: "all",
+    deletedAt: true,
+    overrideMethods: "all",
 });
 
-// const model: SoftDeleteModel = mongoose.model<EduBackground>('EduBackgrounds', eduBackgroundSchema);
+const EducationBackgroundModel = mongoose.model<EduBackground>("EduBackgrounds", eduBackgroundSchema);
 
-export default mongoose.model("EduBackgrounds", eduBackgroundSchema);
+export default EducationBackgroundModel;

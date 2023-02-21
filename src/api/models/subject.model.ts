@@ -1,8 +1,12 @@
-import mongoose from "mongoose";
-import { Subject } from "../../types/schemas.interface";
+import mongoose, { ObjectId } from "mongoose";
+
+export interface Subject extends Document {
+    _id: ObjectId;
+    subjectName: string;
+}
 
 const subjectSchema = new mongoose.Schema<Subject>({
-	subjectName: String,
+    subjectName: String,
 });
 
-export default mongoose.model("Subjects", subjectSchema);
+export default mongoose.model<Subject>("Subjects", subjectSchema);

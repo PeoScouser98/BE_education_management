@@ -1,14 +1,12 @@
-import schoolYearModel from '../models/schoolYear.model';
-import {SchoolYear} from '../interfaces/schemas.interface';
+import SchoolYearModel, { SchoolYear } from "../models/schoolYear.model";
 
 export const getAll = async (limit: number, currPage: number) => {
-    const schoolYears = await schoolYearModel
-        .find()
+    const schoolYears = await SchoolYearModel.find()
         .limit(limit)
         .skip(limit * currPage - limit)
         .exec();
 
-    const countDocumentSchoolYear = await schoolYearModel.countDocuments();
+    const countDocumentSchoolYear = await SchoolYearModel.countDocuments();
     return {
         schoolYears,
         pages: Math.ceil(countDocumentSchoolYear / limit),
@@ -16,13 +14,11 @@ export const getAll = async (limit: number, currPage: number) => {
 };
 
 export const create = async (data: SchoolYear) => {
-    const newSchoolYear = new schoolYearModel(data);
+    const newSchoolYear = new SchoolYearModel(data);
     await newSchoolYear.save();
     return newSchoolYear;
 };
 
-export const update = async (data: SchoolYear, schoolYearId: string) =>
-    await schoolYearModel.findByIdAndUpdate(schoolYearId, data, {new: true});
+export const update = async (data: SchoolYear, schoolYearId: string) => await SchoolYearModel.findByIdAndUpdate(schoolYearId, data, { new: true });
 
-export const remove = async (schoolYearId: string) =>
-    await schoolYearModel.findByIdAndDelete(schoolYearId);
+export const remove = async (schoolYearId: string) => await SchoolYearModel.findByIdAndDelete(schoolYearId);

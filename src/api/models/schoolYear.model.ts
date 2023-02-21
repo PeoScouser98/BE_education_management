@@ -1,16 +1,24 @@
-import { SchoolYear } from "../../types/schemas.interface";
+import mongooseAutoPopulate from "mongoose-autopopulate";
 import mongoose from "mongoose";
 
-const schoolYearSchema = new mongoose.Schema<SchoolYear>({
-	startAt: {
-		type: Number,
-		default: new Date().getFullYear(),
-	},
-	endAt: String,
+export interface SchoolYear extends Document {
+    _id: string;
+    startAt: number;
+    endAt: number;
+}
+
+const SchoolYearSchema = new mongoose.Schema<SchoolYear>({
+    startAt: {
+        type: Number,
+        default: new Date().getFullYear(),
+    },
+    endAt: String,
 });
 
-schoolYearSchema.pre("save", function () {
-	this.endAt = this.startAt + 1;
+SchoolYearSchema.pre("save", function () {
+    this.endAt = this.startAt + 1;
 });
 
-export default mongoose.model("SchoolYears", schoolYearSchema);
+SchoolYearSchema.plugin(mongooseAutoPopulate);
+
+export default mongoose.model<SchoolYear>("SchoolYears", SchoolYearSchema);

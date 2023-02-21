@@ -1,52 +1,65 @@
-import mongoose from "mongoose";
-import { Student } from "../../types/schemas.interface";
+import mongooseAutoPopulate from "mongoose-autopopulate";
+import mongoose, { ObjectId } from "mongoose";
+export interface Student extends Document {
+    _id: ObjectId;
+    fullName: string;
+    gender: boolean;
+    dateOfBirth: Date;
+    class: ObjectId;
+    parentPhoneNumber: string;
+    schoolTranscript: Array<any>;
+    absentDays: Array<{
+        _id: ObjectId;
+        date: Date;
+        hasPermision: boolean;
+        reason: string;
+    }>;
+}
 
-const studentSchema = new mongoose.Schema<Student>({
-	_id: {
-		type: mongoose.Types.ObjectId,
-		default: new mongoose.Types.ObjectId(),
-	},
-	fullName: {
-		type: String,
-		require: true,
-		trim: true,
-	},
-	gender: {
-		type: Boolean,
-		require: true,
-	},
-	dateOfBirth: {
-		type: Date,
-		require: true,
-	},
-	class: {
-		type: mongoose.Types.ObjectId,
-		ref: "Classes",
-	},
+const StudentSchema = new mongoose.Schema<Student>({
+    _id: {
+        type: mongoose.Types.ObjectId,
+        default: new mongoose.Types.ObjectId(),
+    },
+    fullName: {
+        type: String,
+        require: true,
+        trim: true,
+    },
+    gender: {
+        type: Boolean,
+        require: true,
+    },
+    dateOfBirth: {
+        type: Date,
+        require: true,
+    },
 
-	parentPhoneNumber: {
-		type: String,
-		require: true,
-	},
+    parentPhoneNumber: {
+        type: String,
+        require: true,
+    },
 
-	absentDays: [
-		{
-			date: {
-				type: Date,
-				default: new Date(),
-			},
-			schoolYear: { type: mongoose.Types.ObjectId, ref: "SchoolYear" },
-			hasPermision: { type: Boolean, default: false },
-			reason: {
-				type: String,
-				minlength: 8,
-				maxLength: 256,
-				default: "Không có lý do",
-			},
-		},
-	],
+    absentDays: [
+        {
+            date: {
+                type: Date,
+                default: new Date(),
+            },
+            schoolYear: { type: mongoose.Types.ObjectId, ref: "SchoolYear", autopopulate: true },
+            hasPermision: { type: Boolean, default: false },
+            reason: {
+                type: String,
+                minlength: 8,
+                maxLength: 256,
+                default: "Không có lý do",
+            },
+        },
+    ],
 });
 
-studentSchema.set("autoIndex", true);
+StudentSchema.plugin(mongooseAutoPopulate);
 
-export default mongoose.model("Students", studentSchema);
+const StudentModel = mongoose.model<Student>("Students", StudentSchema);
+
+export default StudentModel;

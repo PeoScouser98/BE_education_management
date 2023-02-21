@@ -44,6 +44,8 @@ module.exports = {
         jsonwebtoken: "commonjs jsonwebtoken",
         mongoose: "commonjs mongoose",
         "mongoose-autopopulate": "commonjs mongoose-autopopulate",
+        "mongoose-delete": "commonjs mongoose-delete",
         morgan: "commonjs morgan",
+        helmet: "commonjs helmet",
     },
 };
