@@ -1,78 +1,46 @@
-import mongoose, { ObjectId } from "mongoose";
-import mongooseAutoPopulate from "mongoose-autopopulate";
-import { Subject } from "./subject.model";
-import { Teacher } from "./teacher.model";
+import mongoose, { ObjectId } from 'mongoose';
+import mongooseAutoPopulate from 'mongoose-autopopulate';
+import { Subject } from './subject.model';
+import { Teacher } from './teacher.model';
 
 export interface Timetable {
-    class: ObjectId;
-    dayOfWeek: string;
-    morning: Array<{
-        subject: ObjectId | Pick<Subject, "subjectName" & "_id">;
-        teacher: ObjectId | Pick<Teacher, "teacherName" & "_id">;
-        period: number;
-    }>;
-    afternoon: Array<{
-        subject: ObjectId | Pick<Subject, "subjectName" & "_id">;
-        teacher: ObjectId | Pick<Teacher, "teacherName" & "_id">;
-        period: number;
-    }>;
+	class: ObjectId;
+	dayOfWeek: number;
+	period: number;
+	subject: Subject;
+	teacher: Pick<Teacher, '_id' | 'fullName'>;
 }
 
 const TimetableSchema = new mongoose.Schema({
-    class: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Class",
-        required: true,
-    },
-    dayOfWeek: {
-        type: String,
-        enum: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6"],
-        required: true,
-    },
-    morning: [
-        {
-            subject: {
-                type: mongoose.Types.ObjectId,
-                ref: "Subjects",
-                autopopulate: { select: "subjectName" },
-                required: true,
-            },
-            teacher: {
-                type: mongoose.Types.ObjectId,
-                ref: "Teachers",
-                autopopulate: { select: "fullName _id" },
-                required: true,
-            },
-            period: {
-                type: Number,
-                enum: [1, 2, 3, 4, 5],
-                required: true,
-            },
-        },
-    ],
-    afternoon: [
-        {
-            subject: {
-                type: String,
-                required: true,
-            },
-            teacher: {
-                type: mongoose.Types.ObjectId,
-                ref: "Teachers",
-                required: true,
-                autopopulate: { select: "fullName _id" },
-            },
-            period: {
-                type: Number,
-                enum: [1, 2, 3, 4, 5],
-                required: true,
-            },
-        },
-    ],
+	class: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Class',
+		required: true,
+	},
+	dayOfWeek: {
+		type: Number,
+		enum: [2, 3, 4, 5, 6],
+		require: true,
+	},
+	period: {
+		type: Number,
+		enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+	},
+	subject: {
+		type: mongoose.Types.ObjectId,
+		ref: 'Subjects',
+		require: true,
+		autopopulate: true,
+	},
+	teacher: {
+		type: mongoose.Types.ObjectId,
+		ref: 'Teachers',
+		autopopulate: { select: 'fullName _id' },
+	},
 });
 
 TimetableSchema.plugin(mongooseAutoPopulate);
 
-const TimetableModel = mongoose.model("Timetables", TimetableSchema);
+const TimetableModel = mongoose.model<Timetable>('Timetables', TimetableSchema);
 
 export default TimetableModel;
