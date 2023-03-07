@@ -8,6 +8,7 @@ export interface Student extends Document {
 	class: ObjectId;
 	parentPhoneNumber: string;
 	schoolTranscript: Array<any>;
+	isPolicyBeneficiary: boolean;
 	absentDays: Array<{
 		_id: ObjectId;
 		date: Date;
@@ -39,7 +40,10 @@ const StudentSchema = new mongoose.Schema<Student>({
 		type: String,
 		require: true,
 	},
-
+	isPolicyBeneficiary: {
+		type: Boolean,
+		default: false,
+	},
 	absentDays: [
 		{
 			date: {
