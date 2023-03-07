@@ -7,7 +7,7 @@ export interface Teacher extends Document, User {
 	_id: ObjectId;
 	fullName: string;
 	dateOfBirth: Date;
-	gender: boolean;
+	gender: string;
 	eduBackground: ObjectId;
 	employmentStatus: string;
 }
@@ -49,9 +49,10 @@ const TeacherSchema = new mongoose.Schema<Teacher>(
 			require: true,
 		},
 		gender: {
-			type: Boolean,
+			type: String,
 			require: true,
-			default: true,
+			default: 'NỮ',
+			enum: ['NAM', 'NỮ'],
 		},
 		eduBackground: {
 			type: String,
