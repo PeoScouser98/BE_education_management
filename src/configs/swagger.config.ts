@@ -1,7 +1,7 @@
 import swaggerJSDoc from 'swagger-jsdoc';
 
 /**
- * @description:
+ * @description: config swagger
  */
 const swaggerSpec = swaggerJSDoc({
 	definition: {
