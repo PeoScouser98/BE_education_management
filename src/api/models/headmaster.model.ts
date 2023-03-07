@@ -47,7 +47,7 @@ HeadmasterSchema.methods = {
 };
 
 HeadmasterSchema.pre('save', function (next) {
-	this.password = this.encryptPassword(this.password);
+	this.password = this.encryptPassword(this.password!);
 	this.photoUrl = 'https://ui-avatars.com/api/?name=' + this.fullName.at(0);
 	next();
 });
