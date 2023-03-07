@@ -30,10 +30,11 @@
 		"nodemailer": "^6.9.1",
 		"socket.io": "^4.5.4",
 		"swagger": "^0.7.5",
-		"swagger-jsdoc": "^6.2.7",
-		"swagger-ui-express": "^4.6.0",
+		"swagger-jsdoc": "^6.2.8",
+		"swagger-ui-express": "^4.6.2",
 		"ts-node": "^10.9.1",
-		"vercel": "^28.9.0"
+		"vercel": "^28.9.0",
+		"yaml": "^2.2.1"
 	},
 	"devDependencies": {
 		"@types/bcrypt": "^5.0.0",
