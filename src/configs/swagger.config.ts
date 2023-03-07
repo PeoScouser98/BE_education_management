@@ -1,18 +1,19 @@
 import swaggerJSDoc from 'swagger-jsdoc';
 
 /**
- * @description: config swagger
+ * @description config swagger
  */
-const swaggerSpec = swaggerJSDoc({
+const swaggerOptions = swaggerJSDoc({
 	definition: {
 		openapi: '3.0.0',
+		basePath: '/api',
 		info: {
-			title: 'API Documentation',
+			title: 'APIs Documentation',
 			version: '1.0.0',
 			description: 'Documentation for all endpoints',
 		},
 	},
-	apis: ['./api/controllers/*.ts'],
+	apis: ['documents/**/*.yaml'],
 });
 
-export default swaggerSpec;
+export default swaggerOptions;
