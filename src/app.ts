@@ -7,6 +7,7 @@ import swaggerUI from 'swagger-ui-express';
 import studentRouter from './api/routes/student.route';
 import swaggerSpec from './configs/swagger.config';
 import headmasterRouter from './api/routes/headmaster.route';
+import teacherRouter from './api/routes/teacher.route';
 const app = express();
 
 /**
@@ -30,6 +31,7 @@ app.use(
  */
 app.use('/api', studentRouter);
 app.use('/api', headmasterRouter);
+app.use('/api', teacherRouter);
 
 /**
  * @description: Using apis routes
