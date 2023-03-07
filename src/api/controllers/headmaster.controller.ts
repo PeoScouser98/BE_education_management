@@ -16,13 +16,16 @@ import { Headmaster } from './../models/headmaster.model';
  * @description sign in as head master role using email & password
  * @returns {Partial<Headmaster>}
  */
+
 export const signinAsHeadmaster = async (req: Request, res: Response) => {
 	try {
 		if (!req.body.hasOwnProperty('email') || !req.body.hasOwnProperty('password')) {
 			throw createHttpError.BadRequest('Please provide both email and password to signin!');
 		}
 		// get teacher info
-		const headmasterInfo = (await HeadmasterService.authenticateHeadmaster(req.body as Pick<Headmaster, 'email' | 'password'>)) as Partial<Headmaster>;
+		const headmasterInfo = (await HeadmasterService.authenticateHeadmaster(
+			req.body as Pick<Headmaster, 'email' | 'password'>
+		)) as Partial<Headmaster>;
 		// sign new access token
 		const accessToken = jwt.sign({ auth: headmasterInfo }, privateKey, { algorithm: 'RS256', expiresIn: '30m' });
 		// attach access token to cookie
@@ -63,7 +66,7 @@ export const createTeacherAccount = async (req: Request, res: Response) => {
 				html: /* html */ `
 			<div>
 				<p>
-					Dear Mr/Mrs ${req.body.fullName}!
+					Dear ${req.body.gender === 'Nam' ? 'Mr' : 'Mrs'} ${req.body.fullName}!
 					<p>
 						Giáo viên nhận được mail này vui lòng sử dụng email này mật khẩu dưới đây để đăng nhập vào hệ thống của nhà trường.
 					</p>
