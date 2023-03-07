@@ -1,9 +1,9 @@
-import createHttpError from 'http-errors';
-import { NextFunction, Request, Response } from 'express';
-import jwt, { JsonWebTokenError } from 'jsonwebtoken';
 import 'dotenv/config';
+import { NextFunction, Request, Response } from 'express';
+import createHttpError from 'http-errors';
+import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import { publicKey } from '../../helpers/readKeys';
-import HeadmasterModel, { Headmaster } from '../models/headmaster.model';
+import HeadmasterModel from '../models/headmaster.model';
 import TeacherModel, { Teacher } from '../models/teacher.model';
 
 export const checkIsHeadmaster = async (req: Request, res: Response, next: NextFunction) => {
@@ -11,19 +11,17 @@ export const checkIsHeadmaster = async (req: Request, res: Response, next: NextF
 		const accessToken = req.cookies['access_token'];
 		if (!accessToken) throw createHttpError.Forbidden('Access token must be provided!');
 
-		const decodedPayload = jwt.verify(accessToken, publicKey, { algorithms: ['RS256'] }) as Partial<Headmaster>;
-		await HeadmasterModel.exists({ email: decodedPayload.email }, (error, result) => {
+		const decoded = jwt.verify(accessToken, publicKey, { algorithms: ['RS256'] }) as JwtPayload;
+		await HeadmasterModel.exists({ email: decoded.auth?.email }, (error, result) => {
 			if (error) {
 				return res.status(403).json({
-					message: 'Only user who plays a role as Head master allowed to access this request!',
+					message: 'Only user who plays a role as Headmaster allowed to access this request!',
 					status: 403,
 				});
 			} else {
 				next();
 			}
 		});
-
-		// handle logic ...
 	} catch (error) {
 		return res.status(401).json({
 			message: (error as JsonWebTokenError).message,
