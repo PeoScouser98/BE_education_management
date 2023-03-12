@@ -8,7 +8,7 @@ export interface Timetable {
 	dayOfWeek: number;
 	period: number;
 	subject: Subject;
-	teacher: Pick<Teacher, '_id' | 'fullName'>;
+	teacher: Pick<Teacher, 'userId'>;
 }
 
 const TimetableSchema = new mongoose.Schema({
