@@ -8,7 +8,7 @@ import {
 } from 'passport-google-oauth2';
 import { Strategy as LocalStrategy } from 'passport-local';
 import UserModel from '../api/models/user.model';
-import { authenticateUserService } from '../api/services/auth.service';
+import { authenticateParents } from '../api/services/auth.service';
 /**
  * @param options @interface StrategyOptionsWithRequest
  * @param done @type {trategyOptionsWithRequest}
@@ -40,23 +40,20 @@ passport.use(
  * @param options @interface IStrategyOptionsWithRequest
  * @param done @interface VerifyFunctionWithRequest
  */
-passport.use(
-	new LocalStrategy(
-		{
-			usernameField: 'phone',
-			passwordField: 'password',
-			passReqToCallback: true,
-		},
-		async (req, phone, password, done) => {
-			console.log(phone);
-			const user = await authenticateUserService({
-				phone,
-				password,
-			});
-			return user ? done(null, user) : done(null, false);
-		}
-	)
-);
+// passport.use(
+// 	new LocalStrategy(
+// 		{
+// 			usernameField: 'phone',
+// 			passwordField: 'password',
+// 			passReqToCallback: true,
+// 		},
+// 		async (req, phone, password, done) => {
+// 			console.log(phone);
+// 			const user = await authenticateParents(phone);
+// 			return user ? done(null, user) : done(null, false);
+// 		}
+// 	)
+// );
 
 passport.serializeUser((user, done) => done(null, user));
 
