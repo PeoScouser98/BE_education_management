@@ -6,7 +6,7 @@ export interface Student extends Document {
 	gender: boolean;
 	dateOfBirth: Date;
 	class: ObjectId;
-	parentPhoneNumber: string;
+	parentsPhoneNumber: string;
 	schoolTranscript: Array<any>;
 	isPolicyBeneficiary: boolean;
 	isGraduated: boolean;
@@ -23,6 +23,10 @@ const StudentSchema = new mongoose.Schema<Student>({
 		type: mongoose.Types.ObjectId,
 		default: new mongoose.Types.ObjectId(),
 	},
+	class: {
+		type: mongoose.Types.ObjectId,
+		ref: 'Classes',
+	},
 	fullName: {
 		type: String,
 		require: true,
@@ -37,7 +41,7 @@ const StudentSchema = new mongoose.Schema<Student>({
 		type: Date,
 		require: true,
 	},
-	parentPhoneNumber: {
+	parentsPhoneNumber: {
 		type: String,
 		require: true,
 	},
