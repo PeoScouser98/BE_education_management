@@ -9,6 +9,7 @@ export interface Student extends Document {
 	parentPhoneNumber: string;
 	schoolTranscript: Array<any>;
 	isPolicyBeneficiary: boolean;
+	isGraduated: boolean;
 	absentDays: Array<{
 		_id: ObjectId;
 		date: Date;
@@ -41,6 +42,10 @@ const StudentSchema = new mongoose.Schema<Student>({
 		require: true,
 	},
 	isPolicyBeneficiary: {
+		type: Boolean,
+		default: false,
+	},
+	isGraduated: {
 		type: Boolean,
 		default: false,
 	},
