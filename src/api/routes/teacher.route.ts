@@ -3,6 +3,6 @@ import * as TeacherController from '../controllers/teacher.controller';
 
 const router = express.Router();
 
-router.post('/auth/signin-as-teacher', TeacherController.signinAsTeacher);
+// router.post('/auth/signin-as-teacher', TeacherController.signinAsTeacher);
 
 export default router;

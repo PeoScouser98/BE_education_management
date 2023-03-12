@@ -1,0 +1,11 @@
+{
+	"web": {
+		"client_id": "327767891667-rvmg4le30vijgpvls00806bkn50n2sgr.apps.googleusercontent.com",
+		"project_id": "education-management-380206",
+		"auth_uri": "https://accounts.google.com/o/oauth2/auth",
+		"token_uri": "https://oauth2.googleapis.com/token",
+		"auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+		"client_secret": "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",
+		"redirect_uris": ["http://localhost:3001", "http://localhost:3000"]
+	}
+}
