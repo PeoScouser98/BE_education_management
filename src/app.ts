@@ -1,55 +1,58 @@
 // libraries
-import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import express, { Request, Response } from 'express';
+import session, { MemoryStore } from 'express-session';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import passport from 'passport';
+import './app/passport';
+import 'dotenv/config';
 // swagger
 import swaggerUI from 'swagger-ui-express';
 import swaggerOptions from './configs/swagger.config';
 // routers
-import headmasterRouter from './api/routes/headmaster.route';
-import studentRouter from './api/routes/student.route';
-import teacherRouter from './api/routes/teacher.route';
+import rootRouter from './api/routes';
 
-/**
- * @description Express app
- * @type Express
- */
+// Initialize Express app
 const app = express();
 
-/**
- * @description: Using middlewares
- */
-app.use(express.json()); // for parsing  application/json
-app.use(helmet()); // secure api
-app.use(cookieParser()); // reading cookie of request
-app.use(morgan('tiny')); // logging request/response
+// for parsing application / json
+app.use(express.json());
+
+// set security HTTP headers
+app.use(helmet());
+// logging request/response
+app.use(morgan('tiny'));
+
+// use session - cookie
+app.use(cookieParser());
 app.use(
-	cors({
-		origin: '*',
-		credentials: true,
-		methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
-		allowedHeaders: ['token'],
+	session({
+		saveUninitialized: false,
+		secret: process.env.KEY_SESSION!,
+		store: new MemoryStore(),
 	})
 );
 
-/**
- * @description Using apis routes
- */
-app.use('/api', studentRouter);
-app.use('/api', headmasterRouter);
-app.use('/api', teacherRouter);
+// enable cors
+app.use(
+	cors({
+		origin: 'http://localhost:3000',
+		credentials: true,
+		methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+	})
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
-/**
- * @description APIs document
- */
+// Use routers
+app.use('/api', rootRouter);
 
+// Swagger
 app.use('/api/document', swaggerUI.serve, swaggerUI.setup(swaggerOptions));
 
-/**
- * @description Default reponse
- */
+// Default response
 app.get('/', async (req: Request, res: Response) => {
 	return res.status(200).json({
 		message: 'Server now is running!',
