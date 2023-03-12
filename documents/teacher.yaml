@@ -1,3 +1,48 @@
+definitions:
+    Teacher:
+        type: object
+        properties:
+            fullName:
+                type: string
+            gender:
+                type: string
+                format: uppercase
+                default: NỮ
+                enum:
+                    - NAM
+                    - NỮ
+            email:
+                type: string
+            password:
+                type: string
+            eduBackground:
+                type: string
+            phone:
+                type: string
+            dateOfBirth:
+                type: Date
+            employmentStatus:
+                type: string
+                format: uppercase
+                default: ĐANG CÔNG TÁC
+                enum:
+                    - ĐANG CÔNG TÁC
+                    - ĐÃ NGHỈ VIỆC
+                    - CHUYỂN CÔNG TÁC
+        require:
+            - fullName
+            - email
+            - eduBackground
+            - phone
+            - dateOfBirth
+    HttpError:
+        type: object
+        properties:
+            message:
+                type: string
+            statusCode:
+                type: number
+
 paths:
     /auth/signin-as-teacher:
         post:
@@ -38,35 +83,72 @@ paths:
                     content:
                         application/json:
                             schema:
-                                properties:
-                                    message:
-                                        type: string
-                                        example: BAD REQUEST
-                                    statusCode:
-                                        type: number
-                                        example: 400
+                                $ref: '#/definitions/HttpError'
+                            example: { messsage: 'BAD REQUEST', statusCode: 400 }
 
                 404:
                     description: Account does not exist
                     content:
                         application/json:
                             schema:
-                                properties:
-                                    message:
-                                        type: string
-                                        example: NOT FOUND
-                                    statusCode:
-                                        type: number
-                                        example: 404
+                                $ref: '#/definitions/HttpError'
+                            example: { messsage: 'NOT FOUND', statusCode: 404 }
                 5xx:
                     description: Unexpected error
                     content:
                         application/json:
                             schema:
-                                properties:
-                                    message:
-                                        type: string
-                                        example: INTERNAL ERROR
-                                    statusCode:
-                                        type: number
-                                        example: 500
+                                $ref: '#/definitions/HttpError'
+                            example: { messsage: 'INTERNAL ERROR', statusCode: 500 }
+
+    /create-teacher-account:
+        post:
+            tags:
+                - Teacher
+            summary: Tạo mới giáo viên (chỉ có User role là Headmaster mới tạo được)
+            description: Trả về thông tin tài khoản giáo viên và gửi mật khẩu về mail cho giáo viên
+            requestBody:
+                type: object
+                schema:
+                    $ref: '#/definitions/Teacher'
+                example:
+                    {
+                        email: 'quanghiep03198@gmail.com',
+                        password: '123123',
+                        fullName: 'Quang Hiep',
+                        dateOfBirth: '1/1/1980',
+                        eduBackground: 'ĐẠI HỌC',
+                        employmentStatus: 'ĐANG CÔNG TÁC',
+                        phone: '0336089988',
+                    }
+            responses:
+                201:
+                    description: Created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/definitions/Teacher'
+                            example:
+                                {
+                                    email: 'quanghiep03198@gmail.com',
+                                    password: '123123',
+                                    fullName: 'Quang Hiep',
+                                    dateOfBirth: '1/1/1980',
+                                    eduBackground: 'ĐẠI HỌC',
+                                    employmentStatus: 'ĐANG CÔNG TÁC',
+                                    phone: '0336089988',
+                                }
+                400:
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/definitions/HttpError'
+                            example: { message: 'BAD REQUEST', statusCode: 400 }
+                5xx:
+                    description: Unexpected Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/definitions/HttpError'
+                            example: { message: 'INTERNAL ERROR', statusCode: 500 }

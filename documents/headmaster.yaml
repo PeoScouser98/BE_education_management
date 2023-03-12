@@ -36,7 +36,7 @@ paths:
             description: Trả về access token và thông tin User, và gửi về access token theo cookie của response, lần request tiếp theo access token sẽ tự động gửi lên theo cookie của request.
             summary: Đăng nhập với vai trò là Headmaster.
             requestBody:
-                require: true
+                required: true
                 content:
                     application/json:
                         schema:
