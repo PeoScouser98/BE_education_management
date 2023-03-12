@@ -1,3 +1,4 @@
+import { authenticateParents } from './../services/auth.service';
 import mongoose, { ObjectId } from 'mongoose';
 import { NextFunction, Request, Response } from 'express';
 import createHttpError, { HttpError } from 'http-errors';
@@ -11,21 +12,22 @@ import UserModel, { User } from '../models/user.model';
  * @returns {Partial<User>}
  */
 
-export const signinWithPhoneNumber = async (req: Request, res: Response, next: NextFunction) => {
+export const signinWithPhoneNumber = async (req: Request, res: Response) => {
 	try {
-		const accessToken = jwt.sign({ auth: req.user }, privateKey, {
+		const user = await authenticateParents(req.body.phone as string);
+		const accessToken = jwt.sign({ auth: user._id }, privateKey, {
 			algorithm: 'RS256',
 			expiresIn: '30m',
 		});
-		const refreshToken = jwt.sign({ auth: req.user }, process.env.REFRESH_TOKEN_SECRET!, {
+		const refreshToken = jwt.sign({ auth: user._id }, process.env.REFRESH_TOKEN_SECRET!, {
 			expiresIn: '30d',
 		});
 
 		await Promise.all([
-			redisClient.set(`access_token__${(req.user as Partial<User>)._id}`, accessToken, {
+			redisClient.set(`access_token__${user._id}`, accessToken, {
 				EX: 60 * 60,
 			}),
-			redisClient.set(`refresh_token__${(req.user as Partial<User>)._id}`, refreshToken, {
+			redisClient.set(`refresh_token__${user._id}`, refreshToken, {
 				EX: 60 * 60 * 24 * 30,
 			}),
 		]);
@@ -36,18 +38,10 @@ export const signinWithPhoneNumber = async (req: Request, res: Response, next: N
 		res.cookie('authId', JSON.stringify((req.user as Partial<User>)._id), {
 			maxAge: 60 * 60 * 1000 * 24 * 30,
 		});
-
-		res.cookie(
-			'user',
-			() => {
-				delete (req.user as Partial<User>)._id;
-				delete (req.user as Partial<User>).password;
-				return JSON.stringify(req.user);
-			},
-			{
-				maxAge: 60 * 60 * 1000,
-			}
-		);
+		const { _id: _, ...rest } = user;
+		res.cookie('user', rest, {
+			maxAge: 60 * 60 * 1000,
+		});
 		res.status(200).json({
 			accessToken: accessToken,
 			refreshToken: refreshToken,
