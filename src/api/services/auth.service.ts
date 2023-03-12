@@ -7,29 +7,17 @@ import { validateSigninData } from '../validations/user.validation';
  * @param password
  */
 
-export const authenticateUserService = async (payload: Pick<User, 'phone' | 'password'>) => {
+export const authenticateParents = async (phoneNumber: string) => {
 	try {
-		const { error } = validateSigninData(payload);
-		if (error) {
-			throw createHttpError.BadRequest(error.message);
-		}
-		const user = await UserModel.findOne({ phone: payload.phone });
+		const user = await UserModel.findOne({
+			phone: phoneNumber,
+			role: 'PARENTS',
+		}).exec();
+
 		if (!user) {
 			throw createHttpError.NotFound('Account does not exist!');
 		}
-		if (!user.authenticate(payload.password)) {
-			throw createHttpError.BadRequest('Incorrect password!');
-		}
-
-		return user;
-	} catch (error) {
-		throw error;
-	}
-};
-
-export const createUser = async (payload: User) => {
-	try {
-		return await new UserModel(payload).save();
+		return user as User;
 	} catch (error) {
 		throw error;
 	}
