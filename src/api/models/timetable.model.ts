@@ -1,14 +1,14 @@
 import mongoose, { ObjectId } from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
 import { Subject } from './subject.model';
-import { Teacher } from './teacher.model';
+import { User } from './user.model';
 
 export interface Timetable {
 	class: ObjectId;
 	dayOfWeek: number;
 	period: number;
 	subject: Subject;
-	teacher: Pick<Teacher, 'userId'>;
+	teacher: Pick<User, '_id'>;
 }
 
 const TimetableSchema = new mongoose.Schema({
@@ -34,8 +34,8 @@ const TimetableSchema = new mongoose.Schema({
 	},
 	teacher: {
 		type: mongoose.Types.ObjectId,
-		ref: 'Teachers',
-		autopopulate: { select: 'fullName _id' },
+		ref: 'Users',
+		autopopulate: { select: 'username _id' },
 	},
 });
 
