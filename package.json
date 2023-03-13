@@ -6,8 +6,7 @@
 	"scripts": {
 		"start": "node ./dist/bundle.js",
 		"dev": "concurrently \"SET NODE_ENV=development && nodemon ./src/server.ts\"",
-		"build": "npx tsc",
-		"webpack": "npx webpack --config webpack.config.js",
+		"build": "npx webpack --config webpack.config.js",
 		"cleanup": "rm -rf dist && rm -rf build",
 		"eslint:fix": "eslint --fix"
 	},
