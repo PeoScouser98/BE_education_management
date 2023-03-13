@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import { User } from '../models/user.model';
+
 export const emailRegex = /^[a-z0-9](\.?[a-z0-9]){5,}@g(oogle)?mail\.com$/g;
 
 export const validateSigninData = (payload: Pick<User, 'phone' & 'password'>) => {
@@ -34,4 +35,7 @@ export const validateTeacherAccount = (payload: Omit<User, '_id'>) => {
 		eduBackground: Joi.string().required().valid('TRUNG CẤP', 'CAO ĐẲNG', 'ĐẠI HỌC', 'CAO HỌC'),
 	});
 	return schema.validate(payload);
+};
+export const validateAccessTokenData = (payload: string) => {
+	return Joi.string().validate(payload);
 };

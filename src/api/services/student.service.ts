@@ -4,7 +4,7 @@ import StudentModel, { Student } from '../models/student.model';
 // list students group by class
 export const getStudentsByClass = async (classId: string) => {
 	try {
-		await StudentModel.find({ class: classId }).exec();
+		await StudentModel.findOne({ class: classId }).populate({ path: 'students', select: '_id fullName' }).exec();
 	} catch (error) {
 		return error as MongooseError;
 	}
