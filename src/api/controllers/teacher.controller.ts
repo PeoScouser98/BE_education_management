@@ -1,5 +1,11 @@
 // đánh điểm danh
-
+export const markingAttendance = async () => {
+	try {
+		// handle logic ...
+	} catch (error) {
+		// handle errors
+	}
+};
 // thống kê điểm danh
 
 // confirm đơn xin nghỉ
