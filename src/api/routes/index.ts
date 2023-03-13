@@ -4,7 +4,7 @@ import teacherRouter from './teacher.route';
 import studentRouter from './student.route';
 import schoolYearRouter from './schoolYear.route';
 import authRouter from './auth.router';
-
+import classRouter from './class.route';
 const router = express.Router();
 
 const rootRouters: Array<Router> = [
@@ -13,6 +13,7 @@ const rootRouters: Array<Router> = [
 	studentRouter,
 	schoolYearRouter,
 	authRouter,
+	classRouter,
 ];
 
 rootRouters.forEach((route) => {
