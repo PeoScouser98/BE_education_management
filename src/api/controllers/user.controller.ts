@@ -1,3 +1,4 @@
+import { validateTeacherAccount } from './../validations/user.validation';
 import crypto from 'crypto';
 import 'dotenv/config';
 import { Request, Response } from 'express';
@@ -13,8 +14,9 @@ import { createUser } from '../services/user.service';
  */
 export const createTeacherAccount = async (req: Request, res: Response) => {
 	try {
-		if (!req.body) {
-			throw createHttpError.BadRequest('New teacher info must be provided!');
+		const { error } = validateTeacherAccount({ ...req.body, role: 'TEACHER' });
+		if (error) {
+			throw createHttpError.BadRequest('Invalid teacher data!');
 		}
 		const newUser = await createUser({ ...req.body, role: 'TEACHER' });
 		transporter.sendMail(
