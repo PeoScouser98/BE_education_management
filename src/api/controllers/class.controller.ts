@@ -2,6 +2,7 @@ import { validateClassData } from './../validations/class.validation';
 import { Request, Response } from 'express';
 import * as ClassService from '../services/class.service';
 import createHttpError, { HttpError } from 'http-errors';
+
 // class feature
 export const createClass = async (req: Request, res: Response) => {
 	try {
