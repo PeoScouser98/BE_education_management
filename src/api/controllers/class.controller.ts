@@ -1,7 +1,7 @@
 import { validateClassData } from './../validations/class.validation';
 import { Request, Response } from 'express';
 import * as ClassService from '../services/class.service';
-import createHttpError, { HttpError } from 'http-errors';
+import createHttpError, { HttpError, isHttpError } from 'http-errors';
 import { Class } from '../models/class.model';
 // class feature
 
@@ -39,9 +39,16 @@ export const updateClass = async (req: Request, res: Response) => {
 			message: 'Class update successful',
 		});
 	} catch (error) {
-		return res.status((error as HttpError).status).json({
-			message: (error as HttpError).message,
-			statusCode: (error as HttpError).status,
-		});
+		if ((error as any)?.code === 11000) {
+			return res.status(500).json({
+				statusCode: 11000,
+				message: `Class name ${(error as any).keyValue?.className} already exists`,
+			});
+		} else if (isHttpError(error)) {
+			return res.status(error.status).json({
+				message: error.message,
+				statusCode: error.status,
+			});
+		}
 	}
 };

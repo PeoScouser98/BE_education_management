@@ -56,7 +56,11 @@ export const updateClasses = async (payload: Partial<Omit<Class, '_id'>>, _id: s
 		const { exists, classe } = await checkClassesExists(_id);
 
 		// trường hợp className và grade không khớp nhau
-		if (!(payload.className && payload.className.startsWith(JSON.stringify(classe?.grade)))) {
+		if (
+			payload.className &&
+			!payload.grade &&
+			!payload.className.startsWith(JSON.stringify(classe?.grade))
+		) {
 			throw createHttpError.BadRequest('Invalid Class name, classname: grade+"A|B|C|D..."');
 		}
 
