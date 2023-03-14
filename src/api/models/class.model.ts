@@ -3,7 +3,7 @@ import mongooseAutoPopulate from 'mongoose-autopopulate';
 
 export interface Class extends Document {
 	_id: ObjectId;
-	grade: ObjectId;
+	grade: 1 | 2 | 3 | 4 | 5;
 	className: string;
 	headTeacher: ObjectId;
 	students: Array<ObjectId>;
@@ -26,6 +26,9 @@ const ClassSchema = new mongoose.Schema<Class>({
 		ref: 'Teachers',
 		autopopulate: { select: '_id fullName phone email' },
 	},
+}, {
+	collection: 'classes',
+	timestamps: true
 });
 
 ClassSchema.virtual('students', {
