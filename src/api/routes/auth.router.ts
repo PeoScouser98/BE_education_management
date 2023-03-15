@@ -22,5 +22,6 @@ router.post(
 	AuthController.signinWithPhoneNumber
 );
 router.get('/auth/signout', AuthController.signout);
+router.get('/auth/verify-account', AuthController.verifyAccount);
 
 export default router;
