@@ -5,15 +5,21 @@ import { emailRegex } from '../validations/user.validation';
 export interface User extends Document {
 	_id: string;
 	email: string;
-	username: string;
+	displayName: string;
 	password: string;
-	photoUrl: string;
+	picture: string;
 	dateOfBirth: Date;
 	gender: string;
 	phone: string;
 	role: string;
-	eduBackground?: string;
+	eduBackground?: {
+		universityName: string;
+		graduatedAt: Date;
+		qualification: string;
+	};
 	employmentStatus?: boolean;
+	isVerified: boolean;
+	findOneOrCreate: (condition: Object) => Partial<User>;
 	// authenticate: (password: string) => boolean;
 	// encryptPassword: (password: string) => string;
 }
@@ -37,7 +43,7 @@ const UserSchema = new mongoose.Schema<User>(
 			require: true,
 			unique: true,
 		},
-		username: {
+		displayName: {
 			type: String,
 			require: true,
 			trim: true,
@@ -50,47 +56,41 @@ const UserSchema = new mongoose.Schema<User>(
 			type: String,
 			require: true,
 			lowercase: true,
-			default: 'nữ',
 			enum: ['nam', 'nữ'],
 		},
-		photoUrl: {
+		picture: {
 			type: String,
 			trim: true,
 			require: true,
 		},
 
 		eduBackground: {
-			type: String,
-			uppercase: true,
-			enum: ['TRUNG CẤP', 'CAO ĐẲNG', 'ĐẠI HỌC', 'CAO HỌC'],
+			type: {
+				qualification: String, // học vấn
+				universityName: String, // tên trường đã tốt nghiệp
+				graduatedAt: Date,
+			},
+			required: true,
 		},
 		employmentStatus: {
 			type: Boolean,
-			default: true,
+			default: false,
 		},
 		role: {
 			type: String,
 			uppercase: true,
 			enum: ['HEADMASTER', 'TEACHER', 'PARENTS'],
 		},
+		isVerified: {
+			type: Boolean,
+			default: false,
+		},
 	},
-	{ timestamps: true, toJSON: { virtuals: true } }
+	{
+		timestamps: true,
+		toJSON: { virtuals: true },
+	}
 );
-
-// UserSchema.methods = {
-// 	authenticate(password: string) {
-// 		return bcrypt.compareSync(password, this.password);
-// 	},
-// 	encryptPassword(password: string) {
-// 		return bcrypt.hashSync(password, bcrypt.genSaltSync(10));
-// 	},
-// };
-
-// UserSchema.pre('save', function (next) {
-// 	this.password = this.encryptPassword(this.password!);
-// 	this.photoUrl = 'https://ui-avatars.com/api/?name=' + this.username.at(0);
-// 	next();
-// });
 
 UserSchema.virtual('children', {
 	localField: 'phone',

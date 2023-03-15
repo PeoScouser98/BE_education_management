@@ -5,8 +5,8 @@ const router = express.Router();
 
 router.post(
 	'/create-teacher-account',
-	checkAuthenticated,
-	checkIsHeadmaster,
+	// checkAuthenticated,
+	// checkIsHeadmaster,
 	HeadmasterControler.createTeacherAccount
 );
 router.post('/create-parents-account');
