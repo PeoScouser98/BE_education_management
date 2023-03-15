@@ -1,14 +1,7 @@
 import 'dotenv/config';
 import passport from 'passport';
-import {
-	Strategy as GoogleStrategy,
-	VerifyFunctionWithRequest,
-	StrategyOptionsWithRequest,
-	VerifyCallback,
-} from 'passport-google-oauth2';
-import { Strategy as LocalStrategy } from 'passport-local';
-import UserModel from '../api/models/user.model';
-import { authenticateParents } from '../api/services/auth.service';
+import { Strategy as GoogleStrategy, VerifyFunctionWithRequest } from 'passport-google-oauth2';
+import UserModel, { User } from '../api/models/user.model';
 /**
  * @param options @interface StrategyOptionsWithRequest
  * @param done @type {trategyOptionsWithRequest}
@@ -23,12 +16,14 @@ passport.use(
 		},
 		function (req, accessToken, refreshToken, profile, done) {
 			try {
-				console.log(profile);
-				UserModel.findOne({ email: profile.email })
-					.select('-password')
-					.exec((err, user) => {
-						return err ? done(null, false) : done(null, user);
-					});
+				UserModel.findOne({ email: profile.email }).exec((err, user) => {
+					if (err) {
+						return done(null, false);
+					} else {
+						const displayPicture = user?.picture || profile.picture;
+						return done(null, { ...user?.toObject(), picture: displayPicture });
+					}
+				});
 			} catch (error) {
 				console.log((error as Error).message);
 			}
@@ -36,10 +31,6 @@ passport.use(
 	)
 );
 
-/**
- * @param options @interface IStrategyOptionsWithRequest
- * @param done @interface VerifyFunctionWithRequest
- */
 // passport.use(
 // 	new LocalStrategy(
 // 		{

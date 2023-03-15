@@ -1,12 +1,12 @@
-import { authenticateParents } from './../services/auth.service';
-import mongoose, { ObjectId } from 'mongoose';
 import { NextFunction, Request, Response } from 'express';
 import createHttpError, { HttpError } from 'http-errors';
-import jwt from 'jsonwebtoken';
+import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
+import path from 'path';
 import '../../app/passport';
 import redisClient from '../../app/redis';
-import { privateKey, publicKey } from '../../helpers/readKeys';
+import { privateKey } from '../../helpers/readKeys';
 import UserModel, { User } from '../models/user.model';
+import { authenticateParents } from './../services/auth.service';
 /**
  * @description sign in as head master role using email & password
  * @returns {Partial<User>}
@@ -58,11 +58,14 @@ export const signinWithPhoneNumber = async (req: Request, res: Response) => {
 export const signinWithGoogle = async (req: Request, res: Response) => {
 	try {
 		const user = req.user as Partial<User>;
-
-		const accessToken = jwt.sign({ auth: (req.user as User)._id }, privateKey, {
-			algorithm: 'RS256',
-			expiresIn: '30m',
-		});
+		console.log(user);
+		const accessToken = jwt.sign(
+			{ auth: (req.user as User)._id },
+			process.env.ACCESS_TOKEN_SECRET!,
+			{
+				expiresIn: '1h',
+			}
+		);
 
 		const refreshToken = jwt.sign(
 			{ auth: (req.user as User)._id },
@@ -71,17 +74,6 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 				expiresIn: '30d',
 			}
 		);
-		res.cookie('access_token', accessToken, {
-			maxAge: 60 * 60 * 1000,
-			httpOnly: true,
-			secure: true,
-		});
-		res.cookie('authId', user._id!.toString(), {
-			httpOnly: true,
-			secure: true,
-		});
-		const { _id: _, ...rest } = user;
-		res.cookie('user', JSON.stringify(rest));
 
 		await Promise.all([
 			redisClient.set(`access_token__${user._id}`, accessToken, {
@@ -91,10 +83,30 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 				EX: 60 * 60 * 24 * 30,
 			}),
 		]);
+		res.cookie('access_token', accessToken, {
+			maxAge: 60 * 60 * 1000,
+			httpOnly: true,
+			secure: true,
+		});
+		res.cookie('authId', user._id!.toString(), {
+			httpOnly: true,
+			secure: true,
+		});
 
-		return user.role === 'HEADMASTER'
-			? res.redirect(`${process.env.CLIENT_URL}/headmaster/dashboard`)
-			: res.redirect(`${process.env.CLIENT_URL}/teacher/dashboard`);
+		const { _id: _, ...rest } = user;
+		res.cookie('user', JSON.stringify(rest));
+
+		switch (user.role) {
+			case 'HEADMASTER':
+				res.redirect(`${process.env.CLIENT_URL}/headmaster/dashboard`);
+				break;
+			case 'TEACHER':
+				res.redirect(`${process.env.CLIENT_URL}/teacher/dashboard`);
+				break;
+			case 'PARENTS':
+				res.redirect(`${process.env.CLIENT_URL}/parents/dashboard`);
+				break;
+		}
 	} catch (error) {
 		return res.status(400).json({
 			message: 'Failed to signin!',
@@ -105,13 +117,16 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 
 export const refreshToken = async (req: Request, res: Response) => {
 	try {
-		const existedUser = await UserModel.exists({ _id: req.params.userId });
-		if (!existedUser) {
-			throw createHttpError.NotFound('Invalid user!');
+		const storedRefreshToken = await redisClient.get(`refresh_token__${req.params.userId}`);
+		if (!storedRefreshToken) {
+			throw createHttpError.BadRequest('Invalid refresh token!');
 		}
-		const newAccessToken = jwt.sign({ auth: req.params.userId }, privateKey, {
-			algorithm: 'RS256',
-			expiresIn: '1h',
+		const { auth } = jwt.verify(
+			storedRefreshToken,
+			process.env.REFRESH_TOKEN_SECRET!
+		) as JwtPayload;
+		const newAccessToken = jwt.sign({ auth: auth._id }, process.env.ACCESS_TOKEN_SECRET!, {
+			expiresIn: '30m',
 		});
 		await redisClient.set(req.params.userId, newAccessToken);
 		return res.status(200).json({
@@ -146,10 +161,15 @@ export const signout = async (req: Request, res: Response) => {
 			redisClient.del(`refresh_token__${req.cookies.authId}`),
 		]);
 		// Reset all client's cookies
+		req.logout((err) => {
+			if (err) throw err;
+		});
 		res.cookie('access_token', '');
 		res.cookie('authId', '');
 		res.cookie('user', '');
-
+		req.session.destroy((err) => {
+			if (err) throw err;
+		});
 		return res.status(202).json({
 			message: 'Signed out!',
 			statusCode: 202,
@@ -158,6 +178,29 @@ export const signout = async (req: Request, res: Response) => {
 		return res.status(400).json({
 			message: 'Failed to signout!',
 			statusCode: 400,
+		});
+	}
+};
+
+export const verifyAccount = async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		const token = req.query.token as string;
+		if (!token) {
+			throw createHttpError.Unauthorized('Access token must be provided!');
+		}
+		const { auth } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as JwtPayload;
+		const updateUserData =
+			req.query.user_type === 'teacher'
+				? { isVerified: true, employmentStatus: true }
+				: { isVerified: true };
+		await UserModel.findOneAndUpdate({ email: auth }, updateUserData, {
+			new: true,
+		});
+		return res.send('kích hoạt tài khoản thành công!');
+	} catch (error) {
+		return res.status(401).json({
+			message: (error as HttpError | JsonWebTokenError | Error).message,
+			statusCode: (error as HttpError).status,
 		});
 	}
 };
