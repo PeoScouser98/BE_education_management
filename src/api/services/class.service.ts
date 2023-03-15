@@ -1,12 +1,110 @@
 import createHttpError from 'http-errors';
 import mongoose from 'mongoose';
-import { compareObject } from '../../helpers/toolkit';
+import { compareObject, getPropertieOfArray } from '../../helpers/toolkit';
 import ClassModel, { Class } from '../models/class.model';
-import { validateClassEditData } from '../validations/class.validation';
+import { validateClassData, validateClassEditData } from '../validations/class.validation';
 
-export const createClass = async (payload: Omit<Class, '_id'>) => {
+interface ErrorPayloadCreates {
+	className: string;
+	message?: string;
+}
+
+export const createClass = async (payload: Omit<Class, '_id'> | Omit<Class, '_id'>[]) => {
+	let error: { statusCode: number; errorData?: ErrorPayloadCreates[]; message?: string } | null =
+		null;
 	try {
-		return await new ClassModel(payload).save();
+		// trường hợp thêm nhiều class
+		if (Array.isArray(payload)) {
+			// không có data gửi lên
+			if (payload.length === 0) {
+				error = {
+					statusCode: 204,
+					message: 'No content',
+				};
+				return { error };
+			}
+
+			// check validate data
+			const errorValidateData: ErrorPayloadCreates[] = [];
+			const suitableValidateData: Omit<Class, '_id'>[] = payload.filter((item) => {
+				let { error } = validateClassData(item);
+				if (error) {
+					errorValidateData.push({
+						className: item.className,
+						message: error.message,
+					});
+				}
+				return !Boolean(error);
+			});
+
+			if (errorValidateData.length > 0) {
+				error = { statusCode: 502, errorData: errorValidateData };
+				return { error };
+			}
+
+			const classNameData = getPropertieOfArray(suitableValidateData, 'className');
+
+			// kiểm tra tồn tại của className trong db
+			const checkClassName: Pick<Class, 'className'>[] = await ClassModel.find({
+				className: { $in: classNameData },
+			}).select(['className']);
+
+			const errorExistData: ErrorPayloadCreates[] = [];
+			const suitableData: Omit<Class, '_id'>[] = suitableValidateData.filter((item) => {
+				let check = checkClassName.find(
+					(itemClassName) => item.className === itemClassName.className
+				);
+				if (check) {
+					errorExistData.push({
+						className: check.className,
+					});
+				}
+
+				return !Boolean(check);
+			});
+
+			if (errorExistData.length > 0) {
+				error = {
+					statusCode: 409,
+					message: 'Classes already exists',
+					errorData: errorExistData,
+				};
+				return { error };
+			}
+
+			const classesResult: Class[] = await ClassModel.insertMany(suitableData);
+
+			return {
+				classes: classesResult,
+			};
+		} else {
+			// thêm 1
+			const validateCheck = validateClassData(payload);
+
+			if (validateCheck.error) {
+				return {
+					error: {
+						statusCode: 502,
+						message: validateCheck.error.message,
+					},
+				};
+			}
+			const { exists } = await checkClassesExists('', { className: payload.className });
+
+			if (exists) {
+				return {
+					error: {
+						statusCode: 409,
+						message: `Class ${payload.className} already exists`,
+					},
+				};
+			}
+
+			const classResult: Class = await new ClassModel(payload).save();
+			return {
+				classes: classResult,
+			};
+		}
 	} catch (error) {
 		throw error;
 	}

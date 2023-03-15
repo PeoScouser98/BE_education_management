@@ -1,24 +1,24 @@
-import { validateClassData } from './../validations/class.validation';
 import { Request, Response } from 'express';
 import * as ClassService from '../services/class.service';
-import createHttpError, { HttpError, isHttpError } from 'http-errors';
+import { HttpError, isHttpError } from 'http-errors';
 import { Class } from '../models/class.model';
-// class feature
 
 // [POST] /api/classes (create classes)
 export const createClass = async (req: Request, res: Response) => {
 	try {
-		const { error } = validateClassData(req.body);
+		const { error, classes } = await ClassService.createClass(req.body);
 		if (error) {
-			throw createHttpError.BadGateway(error.message);
+			return res.status((error as any).statusCode).json(error);
 		}
-		const newClass = await ClassService.createClass(req.body);
-		return res.status(201).json(newClass);
+		return res.status(200).json(classes);
 	} catch (error) {
-		return res.status((error as HttpError).status).json({
-			message: (error as HttpError).message,
-			statusCode: (error as HttpError).status,
-		});
+		if (isHttpError(error)) {
+			return res.status((error as HttpError).status).json({
+				message: (error as HttpError).message,
+				statusCode: (error as HttpError).status,
+			});
+		}
+		return res.json(error);
 	}
 };
 
