@@ -10,18 +10,12 @@ interface ErrorPayloadCreates {
 }
 
 export const createClass = async (payload: Omit<Class, '_id'> | Omit<Class, '_id'>[]) => {
-	let error: { statusCode: number; errorData?: ErrorPayloadCreates[]; message?: string } | null =
-		null;
 	try {
 		// trường hợp thêm nhiều class
 		if (Array.isArray(payload)) {
 			// không có data gửi lên
 			if (payload.length === 0) {
-				error = {
-					statusCode: 204,
-					message: 'No content',
-				};
-				return { error };
+				throw createHttpError(204);
 			}
 
 			// check validate data
@@ -38,8 +32,7 @@ export const createClass = async (payload: Omit<Class, '_id'> | Omit<Class, '_id
 			});
 
 			if (errorValidateData.length > 0) {
-				error = { statusCode: 502, errorData: errorValidateData };
-				return { error };
+				throw createHttpError(502, 'Bad Gateway', { errorData: errorValidateData });
 			}
 
 			const classNameData = getPropertieOfArray(suitableValidateData, 'className');
@@ -64,12 +57,7 @@ export const createClass = async (payload: Omit<Class, '_id'> | Omit<Class, '_id
 			});
 
 			if (errorExistData.length > 0) {
-				error = {
-					statusCode: 409,
-					message: 'Classes already exists',
-					errorData: errorExistData,
-				};
-				return { error };
+				throw createHttpError(409, 'Classes already exists', { errorData: errorExistData });
 			}
 
 			const classesResult: Class[] = await ClassModel.insertMany(suitableData);
@@ -82,22 +70,12 @@ export const createClass = async (payload: Omit<Class, '_id'> | Omit<Class, '_id
 			const validateCheck = validateClassData(payload);
 
 			if (validateCheck.error) {
-				return {
-					error: {
-						statusCode: 502,
-						message: validateCheck.error.message,
-					},
-				};
+				throw createHttpError(502, validateCheck.error.message);
 			}
 			const { exists } = await checkClassesExists('', { className: payload.className });
 
 			if (exists) {
-				return {
-					error: {
-						statusCode: 409,
-						message: `Class ${payload.className} already exists`,
-					},
-				};
+				throw createHttpError(409, `Class ${payload.className} already exists`);
 			}
 
 			const classResult: Class = await new ClassModel(payload).save();
@@ -140,15 +118,9 @@ export const checkClassesExists = async (_id: string, condition: Partial<Class> 
 
 export const updateClasses = async (payload: Partial<Omit<Class, '_id'>>, _id: string) => {
 	try {
-		let errorResult: { message: string; statusCode: number } | null = null;
 		// trường hợp data rỗng
 		if (Object.keys(payload).length === 0) {
-			errorResult = {
-				message: 'Not Modified',
-				statusCode: 304,
-			};
-
-			return { errorResult };
+			throw createHttpError(304);
 		}
 
 		const { exists, classe } = await checkClassesExists(_id);
@@ -181,20 +153,12 @@ export const updateClasses = async (payload: Partial<Omit<Class, '_id'>>, _id: s
 				return compareObject({ ...classOld, ...payload }, classOld);
 			})()
 		) {
-			errorResult = {
-				message: 'Not Modified',
-				statusCode: 304,
-			};
-
-			return {
-				errorResult,
-			};
+			throw createHttpError(304);
 		}
 		const newClasses = await ClassModel.findOneAndUpdate({ _id }, payload, { new: true });
 
 		return {
 			newClasses,
-			errorResult,
 		};
 	} catch (error) {
 		throw error;

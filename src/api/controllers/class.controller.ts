@@ -7,16 +7,15 @@ import mongoose from 'mongoose';
 // [POST] /api/classes (create classes)
 export const createClass = async (req: Request, res: Response) => {
 	try {
-		const { error, classes } = await ClassService.createClass(req.body);
-		if (error) {
-			return res.status((error as any).statusCode).json(error);
-		}
+		const { classes } = await ClassService.createClass(req.body);
+
 		return res.status(200).json(classes);
 	} catch (error) {
 		if (isHttpError(error)) {
-			return res.status((error as HttpError).status).json({
-				message: (error as HttpError).message,
-				statusCode: (error as HttpError).status,
+			return res.status(error.status).json({
+				message: error.message,
+				statusCode: error.status,
+				errorData: 'errorData' in error ? error.errorData : undefined,
 			});
 		}
 		return res.json(error);
@@ -29,11 +28,7 @@ export const updateClass = async (req: Request, res: Response) => {
 		const _id: unknown = req.params._id;
 		const data: Partial<Omit<Class, '_id'>> = req.body;
 
-		const { newClasses, errorResult } = await ClassService.updateClasses(data, _id as string);
-
-		if (errorResult) {
-			return res.status(errorResult.statusCode).json(errorResult);
-		}
+		const { newClasses } = await ClassService.updateClasses(data, _id as string);
 
 		return res.status(200).json({
 			classe: newClasses,
