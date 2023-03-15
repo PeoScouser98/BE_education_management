@@ -1,12 +1,11 @@
+import 'dotenv/config';
 import { NextFunction, Request, Response } from 'express';
 import createHttpError, { HttpError } from 'http-errors';
 import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import '../../app/passport';
 import redisClient from '../../app/redis';
-import { privateKey } from '../../helpers/readKeys';
 import UserModel, { User } from '../models/user.model';
 import { authenticateParents } from './../services/auth.service';
-import 'dotenv/config';
 
 /**
  * @description sign in as head master role using email & password
@@ -16,8 +15,7 @@ import 'dotenv/config';
 export const signinWithPhoneNumber = async (req: Request, res: Response) => {
 	try {
 		const user = await authenticateParents(req.body.phone as string);
-		const accessToken = jwt.sign({ auth: user._id }, privateKey, {
-			algorithm: 'RS256',
+		const accessToken = jwt.sign({ auth: user._id }, process.env.ACCESS_TOKEN_SECRET!, {
 			expiresIn: '30m',
 		});
 		const refreshToken = jwt.sign({ auth: user._id }, process.env.REFRESH_TOKEN_SECRET!, {
