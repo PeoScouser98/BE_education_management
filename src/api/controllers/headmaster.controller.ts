@@ -1,4 +1,3 @@
-import { validateTeacherAccount } from './../validations/user.validation';
 import crypto from 'crypto';
 import 'dotenv/config';
 import { Request, Response } from 'express';
@@ -14,11 +13,11 @@ import { createUser } from '../services/user.service';
  */
 export const createTeacherAccount = async (req: Request, res: Response) => {
 	try {
-		const { error } = validateTeacherAccount({ ...req.body, role: 'TEACHER' });
-		if (error) {
-			throw createHttpError.BadRequest('Invalid teacher data!');
+		if (!req.body) {
+			throw createHttpError.BadRequest('New teacher info must be provided!');
 		}
-		const newUser = await createUser({ ...req.body, role: 'TEACHER' });
+		const defaultPassword = crypto.randomBytes(32).toString('hex').slice(0, 6);
+		const newUser = await createUser(req.body);
 		transporter.sendMail(
 			{
 				from: process.env.ADMIN_EMAIL!,
@@ -29,10 +28,9 @@ export const createTeacherAccount = async (req: Request, res: Response) => {
 				<p>
 					Dear ${req.body.gender === 'male' ? 'Mr' : 'Ms/Mrs'} ${req.body.username}!
 					<p>
-						Giáo viên nhận được mail này có thể sử dụng mail này để đăng nhập vào hệ thống quản lý theo đường <a href='${
-							req.protocol + '://' + req.hostname + req.originalUrl
-						}/signin'>link</a> này.
+						Giáo viên nhận được mail này vui lòng sử dụng email này mật khẩu dưới đây để đăng nhập vào hệ thống của nhà trường.
 					</p>
+					<i>Mật khẩu đăng nhập</i> : <b>${defaultPassword}</b> 
 				</p>
 				<hr>
 				<p>
