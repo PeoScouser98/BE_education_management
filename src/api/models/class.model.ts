@@ -1,5 +1,5 @@
-import mongoose, { ObjectId } from 'mongoose';
-import mongooseAutoPopulate from 'mongoose-autopopulate';
+import mongoose, { Model, ObjectId } from 'mongoose';
+import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 
 export interface Class extends Document {
 	_id: ObjectId;
@@ -9,7 +9,13 @@ export interface Class extends Document {
 	students: Array<ObjectId>;
 }
 
-const ClassSchema = new mongoose.Schema<Class>(
+interface ClassDocument extends Omit<SoftDeleteDocument, '_id'>, Class {}
+
+interface ClassModel extends Model<ClassDocument> {}
+
+interface SoftDeleteClassModel extends SoftDeleteModel<ClassDocument, ClassModel> {}
+
+const ClassSchema = new mongoose.Schema<ClassDocument>(
 	{
 		className: {
 			type: String,
@@ -35,12 +41,17 @@ const ClassSchema = new mongoose.Schema<Class>(
 	}
 );
 
+ClassSchema.plugin(mongooseDelete);
+
 ClassSchema.virtual('students', {
 	localField: '_id',
 	foreignField: 'class',
 	ref: 'students',
 });
 
-const ClassModel = mongoose.model<Class>('Classes', ClassSchema);
+const ClassModel: SoftDeleteClassModel = mongoose.model<ClassDocument, SoftDeleteClassModel>(
+	'Classes',
+	ClassSchema
+);
 
 export default ClassModel;

@@ -200,3 +200,42 @@ export const updateClasses = async (payload: Partial<Omit<Class, '_id'>>, _id: s
 		throw error;
 	}
 };
+
+export const softDeleteClass = async (id: string) => {
+	try {
+		await ClassModel.delete({ _id: id });
+
+		return {
+			message: 'moved the class to the trash',
+			statusCode: 200,
+		};
+	} catch (error) {
+		throw error;
+	}
+};
+
+export const restoreClass = async (id: string) => {
+	try {
+		await ClassModel.restore({ _id: id });
+
+		return {
+			message: 'Class have been restored',
+			statusCode: 200,
+		};
+	} catch (error) {
+		throw error;
+	}
+};
+
+export const forceDeleteClass = async (id: string) => {
+	try {
+		await ClassModel.deleteOne({ _id: id });
+
+		return {
+			message: 'Class has been permanently deleted',
+			statusCode: 200,
+		};
+	} catch (error) {
+		throw error;
+	}
+};
