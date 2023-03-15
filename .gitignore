@@ -5,3 +5,4 @@ database
 mocks
 .vscode
 ./package-lock.json
+./note.txt
