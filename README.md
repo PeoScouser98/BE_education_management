@@ -4,7 +4,7 @@
 
 #### **API Document**
 
-https://education-management-backend.vercel.app/api/docs
+https://education-management-backend.vercel.app/api/document
 
 <br/>
  
