@@ -19,9 +19,6 @@ export interface User extends Document {
 	};
 	employmentStatus?: boolean;
 	isVerified: boolean;
-	findOneOrCreate: (condition: Object) => Partial<User>;
-	// authenticate: (password: string) => boolean;
-	// encryptPassword: (password: string) => string;
 }
 
 const UserSchema = new mongoose.Schema<User>(
@@ -79,7 +76,7 @@ const UserSchema = new mongoose.Schema<User>(
 		role: {
 			type: String,
 			uppercase: true,
-			enum: ['HEADMASTER', 'TEACHER', 'PARENTS'],
+			enum: ['ADMIN', 'HEADMASTER', 'TEACHER', 'PARENTS'],
 		},
 		isVerified: {
 			type: Boolean,

@@ -25,17 +25,33 @@ export const validateSigninData = (payload: Pick<User, 'phone' & 'password'>) =>
 	return schema.validate(payload);
 };
 
-export const validateTeacherAccount = (payload: Omit<User, '_id'>) => {
+export const validateNewTeacherData = (payload: Omit<User, '_id'>) => {
 	const schema = Joi.object({
 		email: Joi.string().email().pattern(emailRegex).required(),
 		password: Joi.string().min(6).max(24),
-		username: Joi.string().required(),
+		displayName: Joi.string().required(),
 		dateOfBirth: Joi.date().required(),
 		gender: Joi.string().required().valid('nam', 'nữ'),
-		eduBackground: Joi.string().required().valid('TRUNG CẤP', 'CAO ĐẲNG', 'ĐẠI HỌC', 'CAO HỌC'),
+		eduBackground: Joi.object({
+			universityName: Joi.string().required(),
+			graduatedAt: Joi.date().required(),
+			qualification: Joi.string(),
+		}),
 	});
 	return schema.validate(payload);
 };
-export const validateAccessTokenData = (payload: string) => {
-	return Joi.string().validate(payload);
+
+export const validateUpdateUserData = (payload: Partial<User>) => {
+	const schema = Joi.object({
+		displayName: Joi.string().optional(),
+		dateOfBirth: Joi.date().optional(),
+		gender: Joi.string().optional(),
+		picture: Joi.string().optional(),
+		eduBackground: Joi.object({
+			universityName: Joi.string().required(),
+			graduatedAt: Joi.date().required(),
+			qualification: Joi.string().required(),
+		}).optional(),
+	});
+	return schema.validate(payload);
 };

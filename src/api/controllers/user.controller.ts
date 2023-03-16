@@ -5,20 +5,21 @@ import jwt from 'jsonwebtoken';
 import { SMTPError } from 'nodemailer/lib/smtp-connection';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import transporter from '../../app/nodemailer';
-import { createUser } from '../services/user.service';
 import { paramsStringify } from './../../helpers/queryParams';
-import { validateTeacherAccount } from './../validations/user.validation';
+import { validateNewTeacherData, validateUpdateUserData } from './../validations/user.validation';
+import * as userService from '../services/user.service';
+import { MongooseError } from 'mongoose';
 /**
  * @description Create new teacher and account to signin for this teacher, only user play a role as headmaster allowed to create teacher account
  * @returns {Teacher}
  */
 export const createTeacherAccount = async (req: Request, res: Response) => {
 	try {
-		const { error } = validateTeacherAccount({ ...req.body, role: 'TEACHER' });
+		const { error } = validateNewTeacherData({ ...req.body, role: 'TEACHER' });
 		if (error) {
 			throw createHttpError.BadRequest('Invalid teacher data!');
 		}
-		const newUser = await createUser({ ...req.body, role: 'TEACHER' });
+		const newUser = await userService.createUser({ ...req.body, role: 'TEACHER' });
 		const token = jwt.sign({ auth: newUser.email }, process.env.ACCESS_TOKEN_SECRET!, {
 			expiresIn: '7d',
 		});
@@ -60,6 +61,27 @@ export const createTeacherAccount = async (req: Request, res: Response) => {
 		return res.status((error as HttpError).status || 500).json({
 			message: (error as HttpError | SMTPError | Error).message,
 			statusCode: (error as HttpError).status || 500,
+		});
+	}
+};
+
+export const updateUserInfo = async (req: Request, res: Response) => {
+	try {
+		console.log(req.auth);
+		const { error } = validateUpdateUserData(req.body);
+		if (error) {
+			throw createHttpError.BadRequest(error.message);
+		}
+
+		const updatedUser = await userService.updateUserInfo(req.auth, req.body);
+		if (!updatedUser) {
+			throw createHttpError.BadRequest('User does not exist!');
+		}
+		return res.status(201).json(updatedUser);
+	} catch (error) {
+		return res.status((error as HttpError).status || 500).json({
+			message: (error as HttpError | Error | MongooseError).message,
+			statusCode: (error as HttpError).status,
 		});
 	}
 };

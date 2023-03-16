@@ -7,17 +7,24 @@ import { validateSigninData } from '../validations/user.validation';
  * @param password
  */
 
-export const authenticateParents = async (phoneNumber: string) => {
+export const authenticateUser = async (payload: string) => {
 	try {
 		const user = await UserModel.findOne({
-			phone: phoneNumber,
-			role: 'PARENTS',
+			$or: [
+				{
+					phone: payload,
+				},
+				{
+					email: payload,
+				},
+			],
 		}).exec();
 
 		if (!user) {
 			throw createHttpError.NotFound('Account does not exist!');
 		}
-		return user as User;
+
+		return user;
 	} catch (error) {
 		throw error;
 	}

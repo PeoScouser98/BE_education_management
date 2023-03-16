@@ -15,4 +15,6 @@ router.post(
 	checkIsHeadmaster,
 	userController.createTeacherAccount
 );
+
+router.patch('/update-user', checkAuthenticated, userController.updateUserInfo);
 export default router;
