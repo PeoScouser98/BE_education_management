@@ -73,7 +73,7 @@ export const updateUserInfo = async (req: Request, res: Response) => {
 			throw createHttpError.BadRequest(error.message);
 		}
 
-		const updatedUser = await userService.updateUserInfo(req.auth, req.body);
+		const updatedUser = await userService.updateUserInfo(req.auth as string, req.body);
 		if (!updatedUser) {
 			throw createHttpError.BadRequest('User does not exist!');
 		}
