@@ -170,7 +170,7 @@ export const softDeleteClass = async (id: string) => {
 		await ClassModel.delete({ _id: id });
 
 		return {
-			message: 'moved the class to the trash',
+			message: 'Moved the class to the trash',
 			statusCode: 200,
 		};
 	} catch (error) {

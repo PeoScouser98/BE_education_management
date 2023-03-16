@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as ClassService from '../services/class.service';
-import createHttpError, { HttpError, isHttpError } from 'http-errors';
+import createHttpError, { isHttpError } from 'http-errors';
 import ClassModel, { Class } from '../models/class.model';
 import mongoose from 'mongoose';
 
@@ -73,11 +73,7 @@ export const removeClass = async (req: Request, res: Response) => {
 				break;
 
 			default:
-				result = {
-					statusCode: 204,
-					message: 'No Content',
-				};
-				break;
+				throw createHttpError.InternalServerError('InternalServerError');
 		}
 
 		return res.status(result.statusCode).json(result);
@@ -143,7 +139,31 @@ export const getClassOne = async (req: Request, res: Response) => {
 
 		const classResult = await ClassModel.findOne({ _id: id });
 
+		if (!classResult) {
+			throw createHttpError.NotFound('Class not found');
+		}
+
 		return res.status(200).json(classResult);
+	} catch (error) {
+		if (isHttpError(error)) {
+			return res.status(error.statusCode).json({
+				message: error.message,
+				statusCode: error.status,
+			});
+		} else {
+			return res.status(500).json(error);
+		}
+	}
+};
+
+// [GET] /api/classes/trash
+export const getClassTrash = async (req: Request, res: Response) => {
+	try {
+		const result = await ClassModel.findWithDeleted({
+			deleted: true,
+		});
+
+		return res.status(200).json(result);
 	} catch (error) {
 		if (isHttpError(error)) {
 			return res.status(error.statusCode).json({
