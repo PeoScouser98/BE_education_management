@@ -32,4 +32,4 @@ https://education-management-backend.vercel.app/api/document
 ## Notices
 
 - Không sử dụng online database trong quá trình phát triển product
-- Nếu API document bị lỗi CSS -> run code trên local để chạy: http://localhost:3001/api/docs
+- Nếu API document bị lỗi CSS -> run code trên local để chạy: http://localhost:3001/api/document
