@@ -5,22 +5,32 @@ import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import '../../app/passport';
 import redisClient from '../../app/redis';
 import UserModel, { User } from '../models/user.model';
-import { authenticateParents } from './../services/auth.service';
+import { authenticateUser } from './../services/auth.service';
 
 /**
  * @description sign in as head master role using email & password
  * @returns {Partial<User>}
  */
 
-export const signinWithPhoneNumber = async (req: Request, res: Response) => {
+export const signinWithPhoneOrEmail = async (req: Request, res: Response) => {
 	try {
-		const user = await authenticateParents(req.body.phone as string);
-		const accessToken = jwt.sign({ auth: user._id }, process.env.ACCESS_TOKEN_SECRET!, {
-			expiresIn: '30m',
-		});
-		const refreshToken = jwt.sign({ auth: user._id }, process.env.REFRESH_TOKEN_SECRET!, {
-			expiresIn: '30d',
-		});
+		const verifyData = req.body.phone || req.body.email;
+		const user = await authenticateUser(verifyData as string);
+		console.log(user);
+		const accessToken = jwt.sign(
+			{ payload: { id: user._id, role: user.role } },
+			process.env.ACCESS_TOKEN_SECRET!,
+			{
+				expiresIn: '30m',
+			}
+		);
+		const refreshToken = jwt.sign(
+			{ payload: { id: user._id, role: user.role } },
+			process.env.REFRESH_TOKEN_SECRET!,
+			{
+				expiresIn: '30d',
+			}
+		);
 
 		await Promise.all([
 			redisClient.set(`access_token__${user._id}`, accessToken, {
@@ -34,18 +44,14 @@ export const signinWithPhoneNumber = async (req: Request, res: Response) => {
 			maxAge: 60 * 60 * 1000,
 			httpOnly: true,
 		});
-		res.cookie('authId', JSON.stringify((req.user as Partial<User>)._id), {
+		res.cookie('authId', user.toObject()._id, {
 			maxAge: 60 * 60 * 1000 * 24 * 30,
 		});
 		const { _id: _, ...rest } = user;
 		res.cookie('user', rest, {
 			maxAge: 60 * 60 * 1000,
 		});
-		res.status(200).json({
-			accessToken: accessToken,
-			refreshToken: refreshToken,
-			user: req.user,
-		});
+		res.status(200).json({ user, accessToken, refreshToken });
 	} catch (error) {
 		return res.status((error as HttpError).status || 500).json({
 			message: (error as HttpError | Error).message,
@@ -59,16 +65,20 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 		const user = req.user as Partial<User>;
 
 		const accessToken = jwt.sign(
-			{ auth: (req.user as User)._id },
+			{ payload: { id: user._id, role: user.role } },
 			process.env.ACCESS_TOKEN_SECRET!,
 			{
 				expiresIn: '1h',
 			}
 		);
 
-		const refreshToken = jwt.sign({ auth: user._id }, process.env.REFRESH_TOKEN_SECRET!, {
-			expiresIn: '30d',
-		});
+		const refreshToken = jwt.sign(
+			{ payload: { id: user._id, role: user.role } },
+			process.env.REFRESH_TOKEN_SECRET!,
+			{
+				expiresIn: '30d',
+			}
+		);
 
 		await Promise.all([
 			redisClient.set(`access_token__${user._id}`, accessToken, {
@@ -117,11 +127,12 @@ export const refreshToken = async (req: Request, res: Response) => {
 		if (!storedRefreshToken) {
 			throw createHttpError.BadRequest('Invalid refresh token!');
 		}
-		const { auth } = jwt.verify(
+		const decoded = jwt.verify(
 			storedRefreshToken,
 			process.env.REFRESH_TOKEN_SECRET!
 		) as JwtPayload;
-		const newAccessToken = jwt.sign({ auth: auth._id }, process.env.ACCESS_TOKEN_SECRET!, {
+
+		const newAccessToken = jwt.sign(decoded, process.env.ACCESS_TOKEN_SECRET!, {
 			expiresIn: '30m',
 		});
 		await redisClient.set(req.params.userId, newAccessToken);

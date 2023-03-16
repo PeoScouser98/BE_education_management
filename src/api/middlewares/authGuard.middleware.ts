@@ -14,10 +14,13 @@ export const checkAuthenticated = async (req: Request, res: Response, next: Next
 		const accessToken = req.cookies['access_token'];
 		if (!accessToken) throw createHttpError.Forbidden('Access token must be provided!');
 
-		const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET!, {}) as JwtPayload;
-
-		req.auth = (decoded as JwtPayload).auth?._id;
-		req.role = (decoded as JwtPayload).auth.role;
+		const { payload } = jwt.verify(
+			accessToken,
+			process.env.ACCESS_TOKEN_SECRET!,
+			{}
+		) as JwtPayload;
+		req.auth = payload.id;
+		req.role = payload.role;
 		next();
 	} catch (error) {
 		return res.status(401).json({

@@ -15,12 +15,7 @@ router.get(
 );
 
 router.get('/auth/signin/success', AuthController.signinWithGoogle);
-
-router.post(
-	'/auth/signin',
-	// passport.authenticate('local', { failureRedirect: `${process.env.CLIENT_URL}/signin` }),
-	AuthController.signinWithPhoneNumber
-);
+router.post('/auth/signin', AuthController.signinWithPhoneOrEmail);
 router.get('/auth/signout', AuthController.signout);
 router.get('/auth/verify-account', AuthController.verifyAccount);
 
