@@ -13,7 +13,7 @@ export const getStudentsByClass = async (classId: string) => {
 // create new student using form
 export const createStudent = async (data: Student) => {
 	try {
-		await new StudentModel(data).save;
+		await new StudentModel(data).save();
 	} catch (error) {
 		return error as MongooseError;
 	}
