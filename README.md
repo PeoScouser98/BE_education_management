@@ -13,19 +13,19 @@ https://education-management-backend.vercel.app/api/document
 
 ### 1. Install
 
-    npm install
+   ```bash npm install```
 
 ### 2. Dev command
 
-    npm run dev
+   ```bash npm run dev```
 
 ### 3. Build command
 
-    npm run build
+   ``` bash npm run build```
 
 ### 4. Run application trên môi trường Production
 
-    npm start
+   ```bash npm start```
 
 ---
 
