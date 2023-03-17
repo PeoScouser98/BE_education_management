@@ -1,13 +1,20 @@
 import mongooseAutoPopulate from "mongoose-autopopulate";
 import mongoose, { ObjectId } from 'mongoose';
 
-export interface Permission extends Document {
+
+type PermissionsType = Array<{
+    _id: ObjectId,
+    name: string,
+    code: string,
+}>
+export interface IPermission extends Document {
     _id: ObjectId;
     role: string;
     type: string;
+    permissions: PermissionsType
 }
 
-const PermissionSchema = new mongoose.Schema<Permission>({
+const PermissionSchema = new mongoose.Schema<IPermission>({
     _id: {
         type: mongoose.Types.ObjectId,
         default: new mongoose.Types.ObjectId(),
@@ -26,6 +33,6 @@ const PermissionSchema = new mongoose.Schema<Permission>({
 
 PermissionSchema.plugin(mongooseAutoPopulate);
 
-const PermissionModel = mongoose.model<Permission>('Permissions', PermissionSchema);
+const PermissionModel = mongoose.model<IPermission>('Permissions', PermissionSchema);
 
 export default PermissionModel;
