@@ -1,37 +1,49 @@
-import mongooseAutoPopulate from 'mongoose-autopopulate';
-import mongoose, { ObjectId } from 'mongoose';
+import mongooseAutoPopulate from "mongoose-autopopulate";
+import mongoose, { ObjectId } from "mongoose";
+
 
 type PermissionsType = Array<{
-	_id: ObjectId;
-	name: string;
-	code: string;
-}>;
+    _id: ObjectId,
+    name: string,
+    code: string,
+}>
 export interface Permission extends Document {
-	_id: ObjectId;
-	role: string;
-	type: string;
-	permissions: PermissionsType;
+    _id: ObjectId;
+    role: string;
+    type: string;
+    permissions: PermissionsType
 }
 
 const PermissionSchema = new mongoose.Schema<Permission>({
-	_id: {
-		type: mongoose.Types.ObjectId,
-		default: new mongoose.Types.ObjectId(),
-	},
-	role: {
-		type: String,
-		require: true,
-		trim: true,
-		//extra requirements if needed
-	},
-	type: {
-		type: String,
-		require: true,
-		trim: true,
-		//extra requirements if needed
-	},
-	// Thiếu field permissions !
-});
+    _id: {
+        type: mongoose.Types.ObjectId,
+        default: new mongoose.Types.ObjectId(),
+    },
+    role: {
+        type: String,
+        require: true,
+        trim: true,
+    },
+    type: {
+        type: String,
+        require: true,
+        trim: true,
+    },
+    permissions: [{
+        _id: {
+            type: mongoose.Types.ObjectId,
+            default: new mongoose.Types.ObjectId(),
+        },
+        name: {
+            type: String,
+            require: true,
+        },
+        code: {
+            type: String,
+            require: true,
+        },
+    }]
+})
 
 PermissionSchema.plugin(mongooseAutoPopulate);
 
