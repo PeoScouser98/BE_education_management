@@ -1,5 +1,5 @@
 definitions:
-    Teacher:
+    User:
         type: object
         properties:
             fullName:
@@ -13,28 +13,29 @@ definitions:
                     - NỮ
             email:
                 type: string
-            password:
-                type: string
+
             eduBackground:
-                type: string
+                type: { qualification: string, universityName: string, graduatedAt: Date }
             phone:
                 type: string
             dateOfBirth:
                 type: Date
-            employmentStatus:
-                type: string
-                format: uppercase
-                default: ĐANG CÔNG TÁC
-                enum:
-                    - ĐANG CÔNG TÁC
-                    - ĐÃ NGHỈ VIỆC
-                    - CHUYỂN CÔNG TÁC
+            isVerified:
+                type: boolean
         require:
             - fullName
             - email
             - eduBackground
             - phone
             - dateOfBirth
+
+    Teacher:
+        allOf:
+            - $ref: '#/definition/User'
+        properties:
+            employmentStatus:
+                type: boolean
+                default: false
 
     Response:
         type: object
@@ -177,3 +178,18 @@ paths:
                             schema:
                                 $ref: '#/definitions/Response'
                             example: { message: 'INTERNAL ERROR', statusCode: 500 }
+
+    /update-user-info:
+        patch:
+            tags:
+                - User
+            summary: Update thông tin người dùng
+            responses:
+                201:
+                    description: Updated
+                401:
+                    description: Unauthorized
+                400:
+                    description: Bad Request
+                5xx:
+                    description: Internal Server Error
