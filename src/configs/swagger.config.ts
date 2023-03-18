@@ -13,7 +13,7 @@ const swaggerOptions = swaggerJSDoc({
 			description: 'Documentation for all endpoints',
 		},
 	},
-	apis: ['documents/**/*.yaml'],
+	apis: ['docs/**/*.yaml'],
 });
 
 export default swaggerOptions;
