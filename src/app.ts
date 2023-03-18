@@ -13,6 +13,11 @@ import swaggerUI from 'swagger-ui-express';
 import swaggerOptions from './configs/swagger.config';
 // routers
 import rootRouter from './api/routes';
+import path from 'path';
+
+// resolve path
+const ROOT_FOLDER = path.join(__dirname, '..');
+const SRC_FOLDER = path.join(ROOT_FOLDER, 'src');
 
 // Initialize Express app
 const app = express();
@@ -50,7 +55,14 @@ app.use(passport.session());
 app.use('/api', rootRouter);
 
 // Swagger
-app.use('/api/document', swaggerUI.serve, swaggerUI.setup(swaggerOptions));
+app.use('/public', express.static(path.join(SRC_FOLDER, 'public')));
+app.use(
+	'/api/document',
+	swaggerUI.serve,
+	swaggerUI.setup(swaggerOptions, {
+		customCssUrl: '/public/swagger-ui.css',
+	})
+);
 
 // Default response
 app.get('/', async (req: Request, res: Response) => {
