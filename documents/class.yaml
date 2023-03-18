@@ -76,7 +76,7 @@ definitions:
                         className:
                             type: string
 paths:
-    /api/classes:
+    /classes:
         post:
             tags:
                 - Classes
@@ -216,7 +216,7 @@ paths:
                                     statusCode: 502,
                                     message: "sortProperties can only belong to ['className', 'grade','createdAt','updatedAt']",
                                 }
-    /api/classes/:_id:
+    /classes/:id:
         put:
             tags:
                 - Classes
@@ -303,7 +303,7 @@ paths:
                                 }
                 204:
                     description: không truyền id
-    /api/class/:_id:
+    /class/:id:
         get:
             tags:
                 - Classes
@@ -330,7 +330,7 @@ paths:
                             schema:
                                 $ref: '#/definitions/HttpError'
                             example: { statusCode: 404, message: Class not found }
-    /api/classes/trash:
+    /classes/trash:
         get:
             tags:
                 - Classes

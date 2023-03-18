@@ -35,7 +35,8 @@ definitions:
             - eduBackground
             - phone
             - dateOfBirth
-    HttpError:
+
+    Response:
         type: object
         properties:
             message:
@@ -43,20 +44,26 @@ definitions:
             statusCode:
                 type: number
 
+        example:
+            {
+                accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoIjoiMTgyYTExYzIyY2M1YmJiMWVkNjY5ZWRkYmRkZjBiNDZjMjYxMDA4YmIxZDRkMzllIiwiaWF0IjoxNjc4MjAyMzIzLCJleHAiOjE2NzgyMDU5MjN9.SsBcxJH5QN36QWvbaJl4epl7kTmzFCxUTkf1Rto683g',
+                refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoIjoiMTgyYTExYzIyY2M1YmJiMWVkNjY5ZWRkYmRkZjBiNDZjMjYxMDA4YmIxZDRkMzllIiwiaWF0IjoxNjc4MjAyMzIzLCJleHAiOjE2NzgyMDU5MjN9.SsBcxJH5QN36QWvbaJl4epl7kTmzFCxUTkf1Rto683g',
+                user:
+                    {
+                        _id: '5ffceda8cfc3ee8f0b3a507d',
+                        displayName: 'Test',
+                        picture: 'https://ui-avatars.com/api/?name=t',
+                        role: 'Admin',
+                    },
+            }
+
 paths:
-    /auth/signin-as-teacher:
-        post:
+    /auth/google:
+        get:
             tags:
-                - Teacher
-            summary: Đăng nhập với vai trò là Teacher.
+                - Auth
             description: Trả về access token và thông tin User, và gửi về access token theo cookie của response, lần request tiếp theo access token sẽ tự động gửi lên theo cookie của request.
-            requestBody:
-                require: true
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#definitions/SigninRequestBody'
-                        example: { email: quanghiep03198@gmail.com, password: 'cfbc30' }
+            summary: Đăng nhập với Google.
 
             responses:
                 200:
@@ -74,8 +81,8 @@ paths:
                                         example:
                                             {
                                                 _id: '5ffceda8cfc3ee8f0b3a507d',
-                                                fullName: 'Adminstrator',
-                                                photoUrl: 'https://ui-avatars.com/api/?name=a',
+                                                displayName: 'Adminstrator',
+                                                picture: 'https://ui-avatars.com/api/?name=a',
                                             }
 
                 400:
@@ -83,28 +90,46 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
-                            example: { messsage: 'BAD REQUEST', statusCode: 400 }
+                                properties:
+                                    message:
+                                        type: string
+                                        example: BAD REQUEST
+                                    statusCode:
+                                        type: number
+                                        example: 400
 
                 404:
                     description: Account does not exist
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
-                            example: { messsage: 'NOT FOUND', statusCode: 404 }
-                5xx:
-                    description: Unexpected error
+                                properties:
+                                    message:
+                                        type: string
+                                        example: NOT FOUND
+                                    statusCode:
+                                        type: number
+                                        example: 404
+
+    /auth/signout:
+        get:
+            tags:
+                - Auth
+            summary: Đăng xuất
+            description: Đăng xuất khỏi hệ thống
+            responses:
+                200:
+                    description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
-                            example: { messsage: 'INTERNAL ERROR', statusCode: 500 }
+                                $ref: '#/definition/Response'
+                            example: { message: 'Signed out!', statusCode: 200 }
 
     /create-teacher-account:
         post:
             tags:
-                - Teacher
+                - User
             summary: Tạo mới giáo viên (chỉ có User role là Headmaster mới tạo được)
             description: Trả về thông tin tài khoản giáo viên và gửi mật khẩu về mail cho giáo viên
             requestBody:
@@ -143,12 +168,12 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
+                                $ref: '#/definitions/Response'
                             example: { message: 'BAD REQUEST', statusCode: 400 }
                 5xx:
                     description: Unexpected Error
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
+                                $ref: '#/definitions/Response'
                             example: { message: 'INTERNAL ERROR', statusCode: 500 }
