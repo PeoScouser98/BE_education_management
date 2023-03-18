@@ -1,80 +1,3 @@
-definitions:
-    Class:
-        type: object
-        properties:
-            className:
-                type: string
-                require: true
-                unique: true
-                pattern: /^grade[a-zA-Z]$/
-            grade:
-                type: number
-                require: true
-                enum:
-                    - 1
-                    - 2
-                    - 3
-                    - 4
-                    - 5
-            headTeacher:
-                type: objectId
-                require: true
-    ClassResponse:
-        type: object
-        properties:
-            _id:
-                type: string
-                example: '637ec5ce577ebd6709c65124'
-            className:
-                type: string
-                example: '2D'
-            grade:
-                type: number
-                example: 2
-            headTeacher:
-                type: ObjectId
-                example: '637ec5ce577ebd6709c65124'
-            createdAt:
-                type: Date
-                example: '2023-03-14T17:02:24.526+00:00'
-            updatedAt:
-                type: Date
-                example: '2023-03-14T17:02:24.526+00:00'
-            deleted:
-                type: Boolean
-                example: false
-    ClassResponseSchema:
-        type: object
-        properties:
-            _id:
-                type: string
-            className:
-                type: string
-            grade:
-                type: number
-                example: 2
-            headTeacher:
-                type: ObjectId
-            createdAt:
-                type: Date
-            updatedAt:
-                type: Date
-            deleted:
-                type: Boolean
-    HttpError:
-        type: object
-        properties:
-            message:
-                type: string
-            statusCode:
-                type: string
-            errorData:
-                type: array
-                items:
-                    type: object
-                    properties:
-                        className:
-                            type: string
 paths:
     /classes:
         post:
@@ -87,7 +10,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/definitions/Class'
+                            $ref: '#/components/schemas/Class'
                         example:
                             { className: '2d', grade: 2, headTeacher: 637ec5ce577ebd6709c65124 }
 
@@ -97,7 +20,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/ClassResponse'
+                                $ref: '#/components/schemas/Class'
 
                 204:
                     description: Không nhận được data gửi lên
@@ -106,7 +29,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
+                                $ref: '#/components/schemas/HttpError'
                                 example:
                                     {
                                         statusCode: 409,
@@ -118,7 +41,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
+                                $ref: '#/components/schemas/HttpError'
                                 example:
                                     {
                                         statusCode: 502,
@@ -174,7 +97,7 @@ paths:
                                     classes:
                                         type: array
                                         items:
-                                            $ref: '#/definitions/ClassResponseSchema'
+                                            $ref: '#/components/schemas/Class'
                                     page:
                                         type: number
                                     sort:
@@ -203,14 +126,14 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
+                                $ref: '#/components/schemas/HttpError'
                             example: { statusCode: 400, message: Missing parameter }
                 502:
                     description: truyền sortProperties không đúng
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
+                                $ref: '#/components/schemas/HttpError'
                             example:
                                 {
                                     statusCode: 502,
@@ -227,7 +150,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/definitions/Class'
+                            $ref: '#/components/schemas/Class'
                         example:
                             { className: '2d', grade: 2, headTeacher: 637ec5ce577ebd6709c65124 }
             responses:
@@ -236,7 +159,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/ClassResponse'
+                                $ref: '#/components/schemas/Class'
                 304:
                     description: Không có sự thay đổi nào do data gửi lên rỗng hoặc dữ liệu bị trùng dữ liệu cũ
                 400:
@@ -244,7 +167,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
+                                $ref: '#/components/schemas/HttpError'
                             example:
                                 {
                                     statusCode: 400,
@@ -256,7 +179,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
+                                $ref: '#/components/schemas/HttpError'
                             example:
                                 {
                                     statusCode: 404,
@@ -267,7 +190,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
+                                $ref: '#/components/schemas/HttpError'
                             example: { statusCode: 502, message: Bad Gateway }
 
         delete:
@@ -315,20 +238,20 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/ClassResponse'
+                                $ref: '#/components/schemas/Class'
                 400:
                     description: Không truyền id hoặc id không phải là kiểu objectId
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
+                                $ref: '#/components/schemas/HttpError'
                             example: { statusCode: 400, message: Missing parameter }
                 404:
                     description: Không tìm thấy class
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
+                                $ref: '#/components/schemas/HttpError'
                             example: { statusCode: 404, message: Class not found }
     /classes/trash:
         get:
@@ -342,7 +265,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/ClassResponseSchema'
+                                $ref: '#/components/schemas/Class'
                             example:
                                 [
                                     {

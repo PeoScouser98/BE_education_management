@@ -1,0 +1,89 @@
+components:
+    schemas:
+        User:
+            type: object
+            properties:
+                _id:
+                    type: string
+                displayName:
+                    type: string
+                gender:
+                    type: string
+                    format: uppercase
+                    enum:
+                        - nam
+                        - nữ
+                email:
+                    type: string
+
+                eduBackground:
+                    type: object
+                    properties:
+                        qualification:
+                            type: string
+                        universityName:
+                            type: string
+                        graduatedAt:
+                            type: date
+                    example:
+                        {
+                            qualification: 'Cao Đẳng',
+                            universityName: 'FPT Poly',
+                            graduatedAt: '2023-03-14T17:02:24.526+00:00',
+                        }
+                phone:
+                    type: string
+                dateOfBirth:
+                    type: Date
+                isVerified:
+                    type: boolean
+            require:
+                - fullName
+                - email
+                - eduBackground
+                - phone
+                - dateOfBirth
+
+        Teacher:
+            allOf:
+                - $ref: '#/components/schemas/User'
+                - type: object
+            properties:
+                employmentStatus:
+                    type: boolean
+                    default: false
+
+        Class:
+            type: object
+            properties:
+                _id:
+                    type: string
+                    example: '637ec5ce577ebd6709c65124'
+                className:
+                    type: string
+                    example: '2D'
+                grade:
+                    type: number
+                    example: 2
+                headTeacher:
+                    type: ObjectId
+                    example: '637ec5ce577ebd6709c65124'
+                createdAt:
+                    type: Date
+                    example: '2023-03-14T17:02:24.526+00:00'
+                updatedAt:
+                    type: Date
+                    example: '2023-03-14T17:02:24.526+00:00'
+                deleted:
+                    type: Boolean
+                    example: false
+
+        HttpError:
+            type: object
+            properties:
+                message:
+                    type: string
+                statusCode:
+                    type: string
+                error:
+                    type: Error

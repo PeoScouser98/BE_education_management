@@ -1,63 +1,3 @@
-definitions:
-    User:
-        type: object
-        properties:
-            fullName:
-                type: string
-            gender:
-                type: string
-                format: uppercase
-                default: NỮ
-                enum:
-                    - NAM
-                    - NỮ
-            email:
-                type: string
-
-            eduBackground:
-                type: { qualification: string, universityName: string, graduatedAt: Date }
-            phone:
-                type: string
-            dateOfBirth:
-                type: Date
-            isVerified:
-                type: boolean
-        require:
-            - fullName
-            - email
-            - eduBackground
-            - phone
-            - dateOfBirth
-
-    Teacher:
-        allOf:
-            - $ref: '#/definition/User'
-        properties:
-            employmentStatus:
-                type: boolean
-                default: false
-
-    Response:
-        type: object
-        properties:
-            message:
-                type: string
-            statusCode:
-                type: number
-
-        example:
-            {
-                accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoIjoiMTgyYTExYzIyY2M1YmJiMWVkNjY5ZWRkYmRkZjBiNDZjMjYxMDA4YmIxZDRkMzllIiwiaWF0IjoxNjc4MjAyMzIzLCJleHAiOjE2NzgyMDU5MjN9.SsBcxJH5QN36QWvbaJl4epl7kTmzFCxUTkf1Rto683g',
-                refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoIjoiMTgyYTExYzIyY2M1YmJiMWVkNjY5ZWRkYmRkZjBiNDZjMjYxMDA4YmIxZDRkMzllIiwiaWF0IjoxNjc4MjAyMzIzLCJleHAiOjE2NzgyMDU5MjN9.SsBcxJH5QN36QWvbaJl4epl7kTmzFCxUTkf1Rto683g',
-                user:
-                    {
-                        _id: '5ffceda8cfc3ee8f0b3a507d',
-                        displayName: 'Test',
-                        picture: 'https://ui-avatars.com/api/?name=t',
-                        role: 'Admin',
-                    },
-            }
-
 paths:
     /auth/google:
         get:
@@ -136,7 +76,7 @@ paths:
             requestBody:
                 type: object
                 schema:
-                    $ref: '#/definitions/Teacher'
+                    $ref: '#/components/schemas/Teacher'
                 example:
                     {
                         email: 'quanghiep03198@gmail.com',
@@ -153,7 +93,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/Teacher'
+                                $ref: '#/components/schemas/Teacher'
                             example:
                                 {
                                     email: 'quanghiep03198@gmail.com',
@@ -169,14 +109,14 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/Response'
+                                $ref: '#/components/schemas/HttpError'
                             example: { message: 'BAD REQUEST', statusCode: 400 }
                 5xx:
                     description: Unexpected Error
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/Response'
+                                $ref: '#/components/schemas/HttpError'
                             example: { message: 'INTERNAL ERROR', statusCode: 500 }
 
     /update-user-info:
