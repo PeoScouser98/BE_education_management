@@ -4,7 +4,7 @@ import * as ClassService from '../services/class.service';
 // class feature
 import createHttpError, { isHttpError } from 'http-errors';
 import ClassModel, { Class } from '../models/class.model';
-import mongoose from 'mongoose';
+import mongoose, { SortOrder } from 'mongoose';
 
 // [POST] /api/classes (create classes)
 export const createClass = async (req: Request, res: Response) => {
@@ -92,32 +92,38 @@ export const removeClass = async (req: Request, res: Response) => {
 };
 
 // [GET] /api/classes?limit=10&page=1&sortProperties=className&sort=desc
+type Sort = {
+	[key: string]: any;
+};
 export const getClasses = async (req: Request, res: Response) => {
 	try {
 		const { limit = 10, page } = req.query;
-		const sortProperties: any = req.query.sortProperties || 'grade';
-		const sort: any = req.query.sort || 'asc';
+		const groupBy = req.query._sort?.toString() || 'grade';
+		const order: SortOrder = req.query._order === 'desc' ? 1 : -1;
+
 		if (!page) {
 			throw createHttpError.BadRequest('Missing parameter');
 		}
 
-		if (!['className', 'grade', 'createdAt', 'updatedAt'].includes(sortProperties)) {
-			throw createHttpError.BadGateway(
-				"sortProperties can only belong to ['className', 'grade','createdAt','updatedAt']"
-			);
-		}
+		// if (!['className', 'grade', 'createdAt', 'updatedAt'].includes(sortProperties as string)) {
+		// 	throw createHttpError.BadGateway(
+		// 		"sortProperties can only belong to ['className', 'grade','createdAt','updatedAt']"
+		// 	);
+		// }
 
-		let start = Number(page) === 1 ? 0 : Number(limit) * Number(page) - Number(limit);
+		let offset = Number(page) === 1 ? 0 : Number(limit) * Number(page) - Number(limit);
 
-		const result = await ClassModel.find({})
-			.sort({ [sortProperties]: sort })
-			.skip(start)
+		const result = await ClassModel.find()
+			.sort({
+				[groupBy]: order,
+			})
+			.skip(offset)
 			.limit(Number(limit));
 
 		return res.status(200).json({
 			classes: result,
 			page: Number(page),
-			sort: [sortProperties, sort],
+			// sort: [sortProperties, sort],
 		});
 	} catch (error) {
 		if (isHttpError(error)) {
