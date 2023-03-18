@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { NextFunction, Request, Response } from 'express';
 import createHttpError from 'http-errors';
 import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
-import redisClient from '../../app/redis';
+import redisClient from '../../database/redis';
 
 declare global {
 	namespace Express {

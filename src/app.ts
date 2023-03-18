@@ -6,7 +6,7 @@ import session, { MemoryStore } from 'express-session';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import passport from 'passport';
-import './app/passport';
+import './app/googlePassport';
 import 'dotenv/config';
 // swagger
 import swaggerUI from 'swagger-ui-express';

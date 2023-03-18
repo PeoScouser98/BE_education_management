@@ -3,8 +3,8 @@ import { NextFunction, Request, Response } from 'express';
 import createHttpError, { HttpError } from 'http-errors';
 import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import path from 'path';
-import '../../app/passport';
-import redisClient from '../../app/redis';
+import '../../app/googlePassport';
+import redisClient from '../../database/redis';
 import UserModel, { User } from '../models/user.model';
 import { authenticateUser } from './../services/auth.service';
 
