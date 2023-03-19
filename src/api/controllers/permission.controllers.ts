@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import createHttpError, { HttpError } from "http-errors";
 import * as PermService from "../services/permission.service";
+import { validatePermissionData } from "../validations/permission.validation";
 
 export const list = async (req: Request, res: Response) => {
     try {
@@ -40,6 +41,10 @@ export const read = async (req: Request, res: Response) => {
 export const create = async (req: Request, res: Response) => {
     try {
         const data = req.body;
+
+        const { error } = validatePermissionData(data);
+        if (error) throw createHttpError.BadRequest(error.message);
+
         const newPermission = await PermService.createPermission(data);
 
         if (!data) throw createHttpError.BadRequest('No data provided!');
@@ -75,6 +80,10 @@ export const update = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const data = req.body;
+
+        const { error } = validatePermissionData(data);
+        if (error) throw createHttpError.BadRequest(error.message);
+
         const newPermission = await PermService.updatePermission(id, data);
 
         if (!id) throw createHttpError.BadRequest('No ID provided!');
