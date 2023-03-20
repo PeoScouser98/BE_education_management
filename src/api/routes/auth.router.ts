@@ -17,5 +17,6 @@ router.get(
 router.get('/auth/signout', AuthController.signout);
 router.get('/auth/user', AuthController.getUser);
 router.get('/auth/verify-account', AuthController.verifyAccount);
+router.get('/refresh-token', AuthController.refreshToken);
 
 export default router;

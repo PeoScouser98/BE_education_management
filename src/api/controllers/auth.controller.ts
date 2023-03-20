@@ -34,20 +34,11 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 			secure: true,
 		});
 		res.cookie('credential', user._id?.toString().trim(), {
-			maxAge: 60 * 60 * 1000 * 24 * 30,
+			maxAge: 60 * 60 * 1000 * 24 * 365,
 			httpOnly: true,
 			secure: true,
 		});
-		// switch (user.role) {
-		// 	case 'HEADMASTER':
-		// 		return res.redirect(`${process.env.CLIENT_URL}/headmaster/dashboard`);
 
-		// 	case 'TEACHER':
-		// 		return res.redirect(`${process.env.CLIENT_URL}/teacher/dashboard`);
-
-		// 	case 'PARENTS':
-		// 		return res.redirect(`${process.env.CLIENT_URL}/parents/dashboard`);
-		// }
 		return res.redirect(`${process.env.CLIENT_URL}/signin/success`);
 	} catch (error) {
 		console.log((error as Error).message);
@@ -59,6 +50,10 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 };
 export const getUser = async (req: Request, res: Response) => {
 	try {
+		if (!req.user) {
+			throw createHttpError.NotFound(`Failed to get user's info`);
+		}
+
 		return res.status(200).json(req.user);
 	} catch (error) {
 		return res.status((error as HttpError).status || 500).json({
@@ -69,7 +64,9 @@ export const getUser = async (req: Request, res: Response) => {
 };
 export const refreshToken = async (req: Request, res: Response) => {
 	try {
-		const storedRefreshToken = await redisClient.get(`refresh_token__${req.params.userId}`);
+		const storedRefreshToken = await redisClient.get(
+			`refresh_token__${req.cookies.credential}`
+		);
 		if (!storedRefreshToken) {
 			throw createHttpError.BadRequest('Invalid refresh token!');
 		}
