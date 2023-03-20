@@ -1,0 +1,280 @@
+paths:
+    /classes:
+        post:
+            tags:
+                - Classes
+            description: Có thể thêm 1 hoặc nhiều class bằng cách gửi data body dạng {} || []
+            summary: Đăng nhập với vai trò là Headmaster
+            requestBody:
+                require: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Class'
+                        example:
+                            { className: '2d', grade: 2, headTeacher: 637ec5ce577ebd6709c65124 }
+
+            responses:
+                200:
+                    description: Return trả về có thể là {} || [] tùy trường hợp thêm 1 hoặc nhiều
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Class'
+
+                204:
+                    description: Không nhận được data gửi lên
+                409:
+                    description: Class đã tồn tại trên database
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                                example:
+                                    {
+                                        statusCode: 409,
+                                        message: Classes already exists,
+                                        errorData: [{ className: 2E }],
+                                    }
+                502:
+                    description: Class không thỏa mãn validate
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                                example:
+                                    {
+                                        statusCode: 502,
+                                        message: Bad Gateway,
+                                        errorData: [{ className: 2E }],
+                                    }
+        get:
+            tags:
+                - Classes
+            description: Lấy ra class và phân trang
+            summary: Cần đăng nhập
+            parameters:
+                - name: limit
+                  default: 10
+                  in: query
+                  description: Số lượng mỗi class 1 page
+                  schema:
+                      type: number
+                - name: page
+                  required: true
+                  in: query
+                  description: Số thứ tự page cần lấy
+                  schema:
+                      type: number
+                - name: sortProperties
+                  default: grade
+                  in: query
+                  description: Tên thuộc tính trong class muốn sắp xếp
+                  schema:
+                      type: string
+                      enum:
+                          - className
+                          - grade
+                          - createdAt
+                          - updatedAt
+                - name: sort
+                  in: query
+                  default: asc
+                  description: Kiểu sắp xếp
+                  schema:
+                      type: string
+                      enum:
+                          - asc
+                          - desc
+            responses:
+                200:
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    classes:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/Class'
+                                    page:
+                                        type: number
+                                    sort:
+                                        type: array
+                                        items:
+                                            type: string
+                            example:
+                                {
+                                    sort: ['className', 'desc'],
+                                    page: 1,
+                                    classes:
+                                        [
+                                            {
+                                                _id: 637ec5ce577ebd6709c65124,
+                                                className: 2D,
+                                                grade: 2,
+                                                headTeacher: 637ec5ce577ebd6709c65124,
+                                                createdAt: '2023-03-14T17:02:24.526+00:00',
+                                                updatedAt: '2023-03-14T17:02:24.526+00:00',
+                                                deleted: false,
+                                            },
+                                        ],
+                                }
+                400:
+                    description: không truyền page
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { statusCode: 400, message: Missing parameter }
+                502:
+                    description: truyền sortProperties không đúng
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    statusCode: 502,
+                                    message: "sortProperties can only belong to ['className', 'grade','createdAt','updatedAt']",
+                                }
+    /classes/:id:
+        put:
+            tags:
+                - Classes
+            description: Sửa lại 1 class
+            summary: Đăng nhập với vai trò Headmaster
+            requestBody:
+                require: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Class'
+                        example:
+                            { className: '2d', grade: 2, headTeacher: 637ec5ce577ebd6709c65124 }
+            responses:
+                200:
+                    description: 'Sửa thành công'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Class'
+                304:
+                    description: Không có sự thay đổi nào do data gửi lên rỗng hoặc dữ liệu bị trùng dữ liệu cũ
+                400:
+                    description: Tên class và grade không khớp nhau
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    statusCode: 400,
+                                    message: Invalid Class name,
+                                    classname: grade+"A|B|C|D...",
+                                }
+                404:
+                    description: Class không tồn tại
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    statusCode: 404,
+                                    message: Classes does not exist | _id of the classes is invalid,
+                                }
+                502:
+                    description: Data gửi lên không thỏa mãn validate
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { statusCode: 502, message: Bad Gateway }
+
+        delete:
+            tags:
+                - Classes
+            description: Xóa 1 class
+            summary: Đăng nhập với vai trò Headmaster
+            parameters:
+                - name: option
+                  in: query
+                  description: Xác định kiểu xóa hoặc khôi phục cho delete
+                  schema:
+                      type: string
+                      enum:
+                          - soft
+                          - force
+                          - restore
+                  default: soft
+
+            responses:
+                200:
+                    description: Xóa class thành công
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                            example:
+                                {
+                                    message: Class has been permanently deleted(force) | Class have been restored(restore) | moved the class to the trash(soft),
+                                }
+                204:
+                    description: không truyền id
+    /class/:id:
+        get:
+            tags:
+                - Classes
+            description: Lấy ra thông tin 1 class
+            summary: Cần đăng nhập
+            responses:
+                200:
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Class'
+                400:
+                    description: Không truyền id hoặc id không phải là kiểu objectId
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { statusCode: 400, message: Missing parameter }
+                404:
+                    description: Không tìm thấy class
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { statusCode: 404, message: Class not found }
+    /classes/trash:
+        get:
+            tags:
+                - Classes
+            description: Lấy ra tất cả các class đã bị xóa mềm
+            summary: Cần đăng nhập bằng quyền Headmaster
+            responses:
+                200:
+                    description: ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Class'
+                            example:
+                                [
+                                    {
+                                        _id: 637ec5ce577ebd6709c65124,
+                                        className: 2D,
+                                        grade: 2,
+                                        headTeacher: 637ec5ce577ebd6709c65124,
+                                        createdAt: '2023-03-14T17:02:24.526+00:00',
+                                        updatedAt: '2023-03-14T17:02:24.526+00:00',
+                                        deleted: true,
+                                    },
+                                ]

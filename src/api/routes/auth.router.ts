@@ -1,6 +1,6 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import passport from 'passport';
-import '../../app/passport';
+import '../../app/googlePassport';
 import * as AuthController from '../controllers/auth.controller';
 
 const router = express.Router();
@@ -9,14 +9,14 @@ router.get('/auth/google', passport.authenticate('google', { scope: ['email', 'p
 router.get(
 	'/auth/google/callback',
 	passport.authenticate('google', {
-		successRedirect: '/api/auth/signin/success',
 		failureRedirect: `${process.env.CLIENT_URL}/signin`,
-	})
+	}),
+	AuthController.signinWithGoogle
 );
 
-router.get('/auth/signin/success', AuthController.signinWithGoogle);
-router.post('/auth/signin', AuthController.signinWithPhoneOrEmail);
 router.get('/auth/signout', AuthController.signout);
+router.get('/auth/user', AuthController.getUser);
 router.get('/auth/verify-account', AuthController.verifyAccount);
+router.get('/refresh-token', AuthController.refreshToken);
 
 export default router;

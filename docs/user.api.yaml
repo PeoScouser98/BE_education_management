@@ -1,0 +1,149 @@
+paths:
+    /auth/google:
+        get:
+            tags:
+                - Auth
+            summary: Đăng nhập với Google.
+            responses:
+                200:
+                    description: Ok
+                    summary: Redirect đến page signin/success của client -> call api `{{baseUrl}}/auth/user` lấy thông tin user đăng nhập
+
+    /auth/user:
+        get:
+            tags:
+                - Auth
+            summary: Lấy thông tin User đã đăng nhập.
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    accessToken:
+                                        type: string
+                                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoIjoiMTgyYTExYzIyY2M1YmJiMWVkNjY5ZWRkYmRkZjBiNDZjMjYxMDA4YmIxZDRkMzllIiwiaWF0IjoxNjc4MjAyMzIzLCJleHAiOjE2NzgyMDU5MjN9.SsBcxJH5QN36QWvbaJl4epl7kTmzFCxUTkf1Rto683g'
+                                    user:
+                                        type: object
+                                        example:
+                                            {
+                                                _id: '5ffceda8cfc3ee8f0b3a507d',
+                                                displayName: 'Adminstrator',
+                                                picture: 'https://ui-avatars.com/api/?name=a',
+                                            }
+
+                404:
+                    description: Account does not exist
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '/#/components/schemas/HttpError'
+
+    /auth/signout:
+        get:
+            tags:
+                - Auth
+            summary: Đăng xuất
+            description: Đăng xuất khỏi hệ thống
+            responses:
+                200:
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpResponse'
+                            example: { message: 'Signed out!', statusCode: 200 }
+
+    /create-teacher-account:
+        post:
+            tags:
+                - User
+            summary: Tạo mới giáo viên (chỉ có User role là Headmaster mới tạo được)
+            description: Trả về thông tin tài khoản giáo viên và gửi mật khẩu về mail cho giáo viên
+            requestBody:
+                type: object
+                schema:
+                    $ref: '#/components/schemas/Teacher'
+                example:
+                    {
+                        email: 'quanghiep03198@gmail.com',
+                        password: '123123',
+                        fullName: 'Quang Hiep',
+                        dateOfBirth: '1/1/1980',
+                        eduBackground: 'ĐẠI HỌC',
+                        employmentStatus: 'ĐANG CÔNG TÁC',
+                        phone: '0336089988',
+                    }
+            responses:
+                201:
+                    description: Created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Teacher'
+                            example:
+                                {
+                                    email: 'quanghiep03198@gmail.com',
+                                    password: '123123',
+                                    fullName: 'Quang Hiep',
+                                    dateOfBirth: '1/1/1980',
+                                    eduBackground: 'ĐẠI HỌC',
+                                    employmentStatus: 'ĐANG CÔNG TÁC',
+                                    phone: '0336089988',
+                                }
+                400:
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { message: 'BAD REQUEST', statusCode: 400 }
+                5xx:
+                    description: Unexpected Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { message: 'INTERNAL ERROR', statusCode: 500 }
+
+    /update-user-info:
+        patch:
+            tags:
+                - User
+            summary: Update thông tin người dùng
+            responses:
+                201:
+                    description: Updated
+                401:
+                    description: Unauthorized
+                400:
+                    description: Bad Request
+                5xx:
+                    description: Internal Server Error
+
+    /refresh-token:
+        get:
+            tags:
+                - Auth
+            summary: Lấy access token mới.
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    refreshToken:
+                                        type: string
+                                    message:
+                                        type: string
+                                    statusCode:
+                                        type: number
+                            example:
+                                {
+                                    refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoIjoiMTgyYTExYzIyY2M1YmJiMWVkNjY5ZWRkYmRkZjBiNDZjMjYxMDA4YmIxZDRkMzllIiwiaWF0IjoxNjc4MjAyMzIzLCJleHAiOjE2NzgyMDU5MjN9.SsBcxJH5QN36QWvbaJl4epl7kTmzFCxUTkf1Rto683g',
+                                    message: 'ok',
+                                    statusCode: 200,
+                                }
