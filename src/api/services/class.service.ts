@@ -167,12 +167,7 @@ export const updateClasses = async (payload: Partial<Omit<Class, '_id'>>, _id: s
 
 export const softDeleteClass = async (id: string) => {
 	try {
-		await ClassModel.delete({ _id: id });
-
-		return {
-			message: 'Moved the class to the trash',
-			statusCode: 200,
-		};
+		return await ClassModel.delete({ _id: id });
 	} catch (error) {
 		throw error;
 	}
