@@ -3,9 +3,17 @@ paths:
         get:
             tags:
                 - Auth
-            description: Trả về access token và thông tin User, và gửi về access token theo cookie của response, lần request tiếp theo access token sẽ tự động gửi lên theo cookie của request.
             summary: Đăng nhập với Google.
+            responses:
+                200:
+                    description: Ok
+                    summary: Redirect đến page signin/success của client -> call api `{{baseUrl}}/auth/user` lấy thông tin user đăng nhập
 
+    /auth/user:
+        get:
+            tags:
+                - Auth
+            summary: Lấy thông tin User đã đăng nhập.
             responses:
                 200:
                     description: Ok
@@ -26,31 +34,12 @@ paths:
                                                 picture: 'https://ui-avatars.com/api/?name=a',
                                             }
 
-                400:
-                    description: Bad request due to lack of request's body or incorrect password
-                    content:
-                        application/json:
-                            schema:
-                                properties:
-                                    message:
-                                        type: string
-                                        example: BAD REQUEST
-                                    statusCode:
-                                        type: number
-                                        example: 400
-
                 404:
                     description: Account does not exist
                     content:
                         application/json:
                             schema:
-                                properties:
-                                    message:
-                                        type: string
-                                        example: NOT FOUND
-                                    statusCode:
-                                        type: number
-                                        example: 404
+                                $ref: '/#/components/schemas/HttpError'
 
     /auth/signout:
         get:
@@ -64,7 +53,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definition/Response'
+                                $ref: '#/components/schemas/HttpResponse'
                             example: { message: 'Signed out!', statusCode: 200 }
 
     /create-teacher-account:
@@ -133,3 +122,28 @@ paths:
                     description: Bad Request
                 5xx:
                     description: Internal Server Error
+
+    /refresh-token:
+        get:
+            tags:
+                - Auth
+            summary: Lấy access token mới.
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    refreshToken:
+                                        type: string
+                                    message:
+                                        type: string
+                                    statusCode:
+                                        type: number
+                            example:
+                                {
+                                    refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoIjoiMTgyYTExYzIyY2M1YmJiMWVkNjY5ZWRkYmRkZjBiNDZjMjYxMDA4YmIxZDRkMzllIiwiaWF0IjoxNjc4MjAyMzIzLCJleHAiOjE2NzgyMDU5MjN9.SsBcxJH5QN36QWvbaJl4epl7kTmzFCxUTkf1Rto683g',
+                                    message: 'ok',
+                                    statusCode: 200,
+                                }
