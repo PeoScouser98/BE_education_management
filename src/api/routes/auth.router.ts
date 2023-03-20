@@ -4,7 +4,7 @@ import '../../app/passport';
 import * as AuthController from '../controllers/auth.controller';
 
 const router = express.Router();
-router.get('/auth/google', passport.authenticate('google', { scope: ['email'] }));
+router.get('/auth/google', passport.authenticate('google', { scope: ['email', 'profile'] }));
 
 router.get(
 	'/auth/google/callback',
