@@ -1,36 +1,27 @@
 import 'dotenv/config';
 import { NextFunction, Request, Response } from 'express';
-import createHttpError from 'http-errors';
+import createHttpError, { HttpError } from 'http-errors';
 import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import redisClient from '../../database/redis';
 
-declare global {
-	namespace Express {
-		interface Request {
-			auth?: string;
-			role?: string;
-		}
-	}
-}
-
 export const checkAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		if (!req.cookies.authId) throw createHttpError.BadRequest('Invalid auth id!');
+		if (!req.cookies.credential) throw createHttpError.BadRequest('Invalid auth id!');
 
-		const storedAccessToken = await redisClient.get(`access_token__${req.cookies.authId}`);
-		if (!storedAccessToken) throw createHttpError.Unauthorized();
+		const storedAccessToken = await redisClient.get(`access_token__${req.cookies.credential}`);
+		if (!storedAccessToken) throw createHttpError.Forbidden();
 
-		const accessToken = req.cookies['access_token'];
-		if (!accessToken) throw createHttpError.Forbidden('Access token must be provided!');
+		const accessToken = req.cookies.access_token;
+		if (!accessToken) throw createHttpError.Forbidden();
 
 		const { payload } = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET!) as JwtPayload;
-		req.auth = payload.id;
+		req.user = payload;
 		req.role = payload.role;
 		next();
 	} catch (error) {
-		return res.status(401).json({
-			message: (error as JsonWebTokenError).message,
-			statusCode: 401,
+		return res.status((error as HttpError).status || 401).json({
+			message: (error as JsonWebTokenError | HttpError).message,
+			statusCode: (error as HttpError).status,
 		});
 	}
 };

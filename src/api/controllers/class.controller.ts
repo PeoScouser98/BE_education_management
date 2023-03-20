@@ -3,21 +3,22 @@ import * as ClassService from '../services/class.service';
 
 // class feature
 import createHttpError, { isHttpError } from 'http-errors';
+import mongoose, { SortOrder } from 'mongoose';
 import ClassModel, { Class } from '../models/class.model';
-import mongoose from 'mongoose';
+
+// Todo: Update lại toàn bộ status response
 
 // [POST] /api/classes (create classes)
 export const createClass = async (req: Request, res: Response) => {
 	try {
 		const { classes } = await ClassService.createClass(req.body);
 
-		return res.status(200).json(classes);
+		return res.status(201).json(classes);
 	} catch (error) {
 		if (isHttpError(error)) {
 			return res.status(error.status).json({
 				message: error.message,
 				statusCode: error.status,
-				errorData: 'errorData' in error ? error.errorData : undefined,
 			});
 		}
 		return res.json(error);
@@ -31,7 +32,7 @@ export const updateClass = async (req: Request, res: Response) => {
 		const data: Partial<Omit<Class, '_id'>> = req.body;
 
 		const { newClasses } = await ClassService.updateClasses(data, _id as string);
-
+		//! check if new class name exists in db
 		return res.status(200).json({
 			classe: newClasses,
 			message: 'Class update successful',
@@ -65,7 +66,7 @@ export const removeClass = async (req: Request, res: Response) => {
 			case 'soft':
 				result = await ClassService.softDeleteClass(id);
 				break;
-
+			//? tách tính năng restore deleted class
 			case 'restore':
 				result = await ClassService.restoreClass(id);
 				break;
@@ -78,7 +79,7 @@ export const removeClass = async (req: Request, res: Response) => {
 				throw createHttpError.InternalServerError('InternalServerError');
 		}
 
-		return res.status(result.statusCode).json(result);
+		return res.status(204).json(result);
 	} catch (error) {
 		if (isHttpError(error)) {
 			return res.status(error.statusCode).json({
@@ -94,31 +95,19 @@ export const removeClass = async (req: Request, res: Response) => {
 // [GET] /api/classes?limit=10&page=1&sortProperties=className&sort=desc
 export const getClasses = async (req: Request, res: Response) => {
 	try {
-		const { limit = 10, page } = req.query;
-		const sortProperties: any = req.query.sortProperties || 'grade';
-		const sort: any = req.query.sort || 'asc';
-		if (!page) {
-			throw createHttpError.BadRequest('Missing parameter');
-		}
+		const availableSortFields: Array<string> = ['className', 'grade', 'createdAt', 'updatedAt'];
+		const fieldToSort: string = (req.query._sort as string) || 'grade';
+		const order: SortOrder = (req.query._order as SortOrder) || 'asc';
 
-		if (!['className', 'grade', 'createdAt', 'updatedAt'].includes(sortProperties)) {
+		if (!availableSortFields.includes(fieldToSort)) {
 			throw createHttpError.BadGateway(
-				"sortProperties can only belong to ['className', 'grade','createdAt','updatedAt']"
+				"Sort params must  belong to ['className', 'grade','createdAt','updatedAt']"
 			);
 		}
 
-		let start = Number(page) === 1 ? 0 : Number(limit) * Number(page) - Number(limit);
+		const classes = await ClassModel.find().sort({ [fieldToSort]: order });
 
-		const result = await ClassModel.find({})
-			.sort({ [sortProperties]: sort })
-			.skip(start)
-			.limit(Number(limit));
-
-		return res.status(200).json({
-			classes: result,
-			page: Number(page),
-			sort: [sortProperties, sort],
-		});
+		return res.status(200).json(classes);
 	} catch (error) {
 		if (isHttpError(error)) {
 			return res.status(error.statusCode).json({
