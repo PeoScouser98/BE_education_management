@@ -41,10 +41,9 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 
 		return res.redirect(`${process.env.CLIENT_URL}/signin/success`);
 	} catch (error) {
-		console.log((error as Error).message);
-		return res.status(400).json({
-			message: 'Failed to signin!',
-			statusCode: 400,
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
 		});
 	}
 };
@@ -85,7 +84,10 @@ export const refreshToken = async (req: Request, res: Response) => {
 			message: 'ok',
 		});
 	} catch (error) {
-		// handle errors
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError | JsonWebTokenError).message,
+			statusCode: (error as HttpError).status || 500,
+		});
 	}
 };
 
@@ -123,9 +125,9 @@ export const signout = async (req: Request, res: Response) => {
 			statusCode: 202,
 		});
 	} catch (error) {
-		return res.status(400).json({
-			message: (error as Error).message,
-			statusCode: 400,
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
 		});
 	}
 };
@@ -147,7 +149,7 @@ export const verifyAccount = async (req: Request, res: Response, next: NextFunct
 
 		return res.sendFile(path.resolve(path.join(__dirname, '../views/send-mail-response.html')));
 	} catch (error) {
-		return res.status(401).json({
+		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | JsonWebTokenError | Error).message,
 			statusCode: (error as HttpError).status,
 		});
