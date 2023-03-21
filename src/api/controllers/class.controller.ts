@@ -21,7 +21,7 @@ export const createClass = async (req: Request, res: Response) => {
 				statusCode: error.status,
 			});
 		}
-		return res.json(error);
+		return res.status(500).json(error);
 	}
 };
 
