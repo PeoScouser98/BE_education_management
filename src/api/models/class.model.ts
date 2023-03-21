@@ -41,7 +41,7 @@ const ClassSchema = new mongoose.Schema<ClassDocument>(
 	}
 );
 
-ClassSchema.plugin(mongooseDelete, { overrideMethods: ['find', 'findOne'] });
+ClassSchema.plugin(mongooseDelete, { overrideMethods: ['find', 'findOne'], deletedAt: true });
 
 ClassSchema.virtual('students', {
 	localField: '_id',

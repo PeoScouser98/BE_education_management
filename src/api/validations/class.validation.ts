@@ -10,6 +10,7 @@ export const validateClassData = (data: Omit<Class, '_id'>) => {
 	});
 	return schema.validate(data);
 };
+
 export const validateArrayOfClassData = (data: Omit<Class, '_id'>) => {
 	const regexClassName = new RegExp(`^${data.grade}[a-zA-Z]$`);
 	const schema = Joi.array().items(
