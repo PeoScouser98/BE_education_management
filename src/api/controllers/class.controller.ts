@@ -17,7 +17,7 @@ export const createClass = async (req: Request, res: Response) => {
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status,
+			statusCode: (error as HttpError).status || 500,
 		});
 	}
 };
@@ -34,17 +34,10 @@ export const updateClass = async (req: Request, res: Response) => {
 			message: 'Class update successful',
 		});
 	} catch (error) {
-		if ((error as any)?.code === 11000) {
-			return res.status(500).json({
-				statusCode: 11000,
-				message: `Class name ${(error as any).keyValue?.className} already exists`,
-			});
-		} else if (isHttpError(error)) {
-			return res.status(error.status).json({
-				message: error.message,
-				statusCode: error.status,
-			});
-		}
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+		});
 	}
 };
 
@@ -74,7 +67,7 @@ export const removeClass = async (req: Request, res: Response) => {
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status,
+			statusCode: (error as HttpError).status || 500,
 		});
 	}
 };
@@ -94,7 +87,7 @@ export const restoreClass = async (req: Request, res: Response) => {
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status,
+			statusCode: (error as HttpError).status || 500,
 		});
 	}
 };
@@ -123,7 +116,7 @@ export const getClasses = async (req: Request, res: Response) => {
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status,
+			statusCode: (error as HttpError).status || 500,
 		});
 	}
 };
@@ -146,7 +139,7 @@ export const getClassOne = async (req: Request, res: Response) => {
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status,
+			statusCode: (error as HttpError).status || 500,
 		});
 	}
 };
@@ -162,7 +155,7 @@ export const getClassTrash = async (req: Request, res: Response) => {
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status,
+			statusCode: (error as HttpError).status || 500,
 		});
 	}
 };
