@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import createHttpError, { HttpError } from "http-errors";
 import * as PermService from "../services/permission.service";
 import { validatePermissionData } from "../validations/permission.validation";
+import { isValidObjectId } from "mongoose";
 
 export const list = async (req: Request, res: Response) => {
     try {
@@ -26,10 +27,11 @@ export const read = async (req: Request, res: Response) => {
 
         if (!id) throw createHttpError.BadRequest('No ID provided!');
         if (!permissions) throw createHttpError.NotFound("Permission not found!");
+        if (!isValidObjectId(id)) throw createHttpError.BadRequest('Invalid ID!');
 
         return res.status(200).json(permissions);
     } catch (error) {
-
+        console.log(error);
         return res.status((error as HttpError).status || 500).json({
             message: (error as HttpError | Error).message,
             status: (error as HttpError).status || 500,
@@ -41,7 +43,7 @@ export const read = async (req: Request, res: Response) => {
 export const create = async (req: Request, res: Response) => {
     try {
         const data = req.body;
-
+        console.log(req.body);
         const { error } = validatePermissionData(data);
         if (error) throw createHttpError.BadRequest(error.message);
 
@@ -65,8 +67,9 @@ export const remove = async (req: Request, res: Response) => {
         const newPermission = await PermService.deletePermission(id);
 
         if (!newPermission) throw createHttpError.BadRequest('Cannot delete subject!');
+        if (!isValidObjectId(id)) throw createHttpError.BadRequest('Invalid ID!');
 
-        return res.status(201).json(newPermission);
+        return res.status(200).json(newPermission);
     } catch (error) {
         return res.status((error as HttpError).status || 500).json({
             message: (error as HttpError | Error).message,
@@ -88,9 +91,10 @@ export const update = async (req: Request, res: Response) => {
 
         if (!id) throw createHttpError.BadRequest('No ID provided!');
         if (!data) throw createHttpError.BadRequest('No data provided!');
-        if (!newPermission) throw createHttpError.BadRequest('Cannot delete subject!');
+        if (!newPermission) throw createHttpError.BadRequest('Cannot update subject!');
+        if (!isValidObjectId(id)) throw createHttpError.BadRequest('Invalid ID!');
 
-        return res.status(201).json(newPermission);
+        return res.status(200).json(newPermission);
     } catch (error) {
         return res.status((error as HttpError).status || 500).json({
             message: (error as HttpError | Error).message,
