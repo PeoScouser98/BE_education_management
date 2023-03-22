@@ -1,10 +1,10 @@
 import 'dotenv/config';
 import passport from 'passport';
 import { Strategy as GoogleStrategy, VerifyFunctionWithRequest } from 'passport-google-oauth2';
-import UserModel, { User } from '../api/models/user.model';
+import UserModel from '../api/models/user.model';
+
 /**
  * @param options @interface StrategyOptionsWithRequest
- * @param done @type {trategyOptionsWithRequest}
  */
 passport.use(
 	new GoogleStrategy(
@@ -30,21 +30,6 @@ passport.use(
 		} as VerifyFunctionWithRequest
 	)
 );
-
-// passport.use(
-// 	new LocalStrategy(
-// 		{
-// 			usernameField: 'phone',
-// 			passwordField: 'password',
-// 			passReqToCallback: true,
-// 		},
-// 		async (req, phone, password, done) => {
-// 			console.log(phone);
-// 			const user = await authenticateParents(phone);
-// 			return user ? done(null, user) : done(null, false);
-// 		}
-// 	)
-// );
 
 passport.serializeUser((user, done) => done(null, user));
 

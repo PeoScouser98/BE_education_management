@@ -76,6 +76,7 @@ const UserSchema = new mongoose.Schema<User>(
 		role: {
 			type: String,
 			uppercase: true,
+			trim: true,
 			enum: ['ADMIN', 'HEADMASTER', 'TEACHER', 'PARENTS'],
 		},
 		isVerified: {

@@ -1,20 +1,20 @@
 import express from 'express';
 import { checkAuthenticated, checkIsHeadmaster } from '../middlewares/authGuard.middleware';
-import * as userController from '../controllers/user.controller';
+import * as UserController from '../controllers/user.controller';
 const router = express.Router();
 
 router.post(
 	'/create-teacher-account',
 	checkAuthenticated,
 	checkIsHeadmaster,
-	userController.createTeacherAccount
+	UserController.createTeacherAccount
 );
 router.post(
 	'/create-parents-account',
 	checkAuthenticated,
 	checkIsHeadmaster,
-	userController.createTeacherAccount
+	UserController.createTeacherAccount
 );
 
-router.patch('/update-user', checkAuthenticated, userController.updateUserInfo);
+router.patch('/update-user', checkAuthenticated, UserController.updateUserInfo);
 export default router;
