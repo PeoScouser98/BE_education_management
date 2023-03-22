@@ -19,10 +19,12 @@ export const getPermissions = async () => {
 	}
 };
 
-export const getPermissionByID = async (permissionID: string) => {
-	try {
-		const result = await PermissionModel.findOne({ _id: permissionID }).exec();
+export const getPermissionByRole = async (role: string) => {
 
+	try {
+		const result = await PermissionModel.aggregate([
+			{ $match: { role: role } }
+		]).exec();
 		return result;
 	} catch (error) {
 		return error as MongooseError;

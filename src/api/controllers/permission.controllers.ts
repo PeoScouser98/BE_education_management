@@ -21,13 +21,17 @@ export const list = async (req: Request, res: Response) => {
 };
 
 export const read = async (req: Request, res: Response) => {
-    try {
-        const { id } = req.params;
-        const permissions = await PermService.getPermissionByID(id);
+    const Role = [
+        'ADMIN', 'HEADMASTER', 'TEACHER', 'PARENTS'
+    ]
 
-        if (!id) throw createHttpError.BadRequest('No ID provided!');
-        if (!permissions) throw createHttpError.NotFound("Permission not found!");
-        if (!isValidObjectId(id)) throw createHttpError.BadRequest('Invalid ID!');
+    try {
+        const { role } = req.params;
+        const permissions = await PermService.getPermissionByRole(role);
+
+        if (!role) throw createHttpError.BadRequest('No Role provided!');
+        if (!Role.includes(role)) throw createHttpError.BadRequest('The specified role does not exist!')
+        if (!permissions) throw createHttpError.NotFound('Cannot get permissions!');
 
         return res.status(200).json(permissions);
     } catch (error) {

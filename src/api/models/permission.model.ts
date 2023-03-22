@@ -23,6 +23,8 @@ const PermissionSchema = new mongoose.Schema<Permission>({
         type: String,
         require: true,
         trim: true,
+        uppercase: true,
+        enum: ['ADMIN', 'HEADMASTER', 'TEACHER', 'PARENTS'],
     },
     type: {
         type: String,
@@ -40,6 +42,7 @@ const PermissionSchema = new mongoose.Schema<Permission>({
         },
         code: {
             type: String,
+            unique: true,
             require: true,
         },
     }]

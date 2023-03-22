@@ -33,13 +33,12 @@ export const createTeacherAccount = async (req: Request, res: Response) => {
 				<p>
 					Dear ${req.body.gender === 'nam' ? 'Mr' : 'Ms/Mrs'} ${req.body.username}!
 					<p>
-						Giáo viên nhận được mail này vui lòng click vào <a href='${
-							req.protocol +
-							'://' +
-							req.get('host') +
-							req.originalUrl +
-							paramsStringify({ user_type: 'teacher', token: token })
-						}'>link</a> này để xác thực tài khoản.
+						Giáo viên nhận được mail này vui lòng click vào <a href='${req.protocol +
+					'://' +
+					req.get('host') +
+					req.originalUrl +
+					paramsStringify({ user_type: 'teacher', token: token })
+					}'>link</a> này để xác thực tài khoản.
 					</p>
 				</p>
 				<hr>
