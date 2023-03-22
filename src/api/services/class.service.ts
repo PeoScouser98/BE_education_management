@@ -9,80 +9,23 @@ interface ErrorPayloadCreates {
 	message?: string;
 }
 
-export const createClass = async (payload: Omit<Class, '_id'> | Omit<Class, '_id'>[]) => {
+export const createClass = async (payload: Omit<Class, '_id'>) => {
 	try {
-		// trường hợp thêm nhiều class
-		if (Array.isArray(payload)) {
-			// không có data gửi lên
-			if (payload.length === 0) {
-				throw createHttpError(204);
-			}
+		const validateCheck = validateClassData(payload);
 
-			// check validate data
-			const errorValidateData: ErrorPayloadCreates[] = [];
-			const suitableValidateData: Omit<Class, '_id'>[] = payload.filter((item) => {
-				let { error } = validateClassData(item);
-				if (error) {
-					errorValidateData.push({
-						className: item.className,
-						message: error.message,
-					});
-				}
-				return !Boolean(error);
-			});
-
-			if (errorValidateData.length > 0) {
-				throw createHttpError(400, 'Bad Request', { error: errorValidateData });
-			}
-
-			const classNameData = getPropertieOfArray(suitableValidateData, 'className');
-
-			// kiểm tra tồn tại của className trong db
-			const checkClassName: Pick<Class, 'className'>[] = await ClassModel.find({
-				className: { $in: classNameData },
-			}).select(['className']);
-
-			const errorExistData: ErrorPayloadCreates[] = [];
-			const suitableData: Omit<Class, '_id'>[] = suitableValidateData.filter((item) => {
-				let check = checkClassName.find(
-					(itemClassName) => item.className === itemClassName.className
-				);
-				if (check) {
-					errorExistData.push({
-						className: check.className,
-					});
-				}
-
-				return !Boolean(check);
-			});
-
-			if (errorExistData.length > 0) {
-				throw createHttpError(409, 'Classes already exists', { error: errorExistData });
-			}
-
-			const classesResult: Class[] = await ClassModel.insertMany(suitableData);
-
-			return {
-				classes: classesResult,
-			};
-		} else {
-			// thêm 1
-			const validateCheck = validateClassData(payload);
-
-			if (validateCheck.error) {
-				throw createHttpError(502, validateCheck.error.message);
-			}
-			const { exists } = await checkClassesExists('', { className: payload.className });
-
-			if (exists) {
-				throw createHttpError(409, `Class ${payload.className} already exists`);
-			}
-
-			const classResult: Class = await new ClassModel(payload).save();
-			return {
-				classes: classResult,
-			};
+		if (validateCheck.error) {
+			throw createHttpError(502, validateCheck.error.message);
 		}
+		const { exists } = await checkClassesExists('', { className: payload.className });
+
+		if (exists) {
+			throw createHttpError(409, `Class ${payload.className} already exists`);
+		}
+
+		const classResult: Class = await new ClassModel(payload).save();
+		return {
+			classes: classResult,
+		};
 	} catch (error) {
 		throw error;
 	}
@@ -94,7 +37,7 @@ export const checkClassesExists = async (_id: string, condition: Partial<Class> 
 		if (_id) {
 			// kiểm tra xem _id gửi lên đúng kiểu objectId
 			if (!mongoose.Types.ObjectId.isValid(_id)) {
-				throw createHttpError.NotFound('_id of the classes is invalid');
+				throw createHttpError.BadRequest('_id of the classes is invalid');
 			}
 
 			conditionCurr = {
