@@ -1,0 +1,36 @@
+version: '3.4'
+
+services:
+    server:
+        container_name: node_server
+        image: server
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        environment:
+            NODE_ENV: development
+            LOCAL_DB_URI: mongodb://mongo/DATN
+        env_file: .env
+        ports:
+            - 3001:3001
+
+    mongo:
+        image: mongo
+        ports:
+            - 27017:27017
+        networks:
+            - common
+
+    redis:
+        container_name: redis_db
+        image: redis
+        ports:
+            - 6379:6379
+        networks:
+            - common
+
+networks:
+    common:
+        driver: local
+    volumes:
+        driver: local

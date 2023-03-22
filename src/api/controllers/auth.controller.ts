@@ -31,12 +31,12 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 		res.cookie('access_token', accessToken, {
 			maxAge: 60 * 60 * 1000,
 			httpOnly: true,
-			secure: true,
+			secure: false,
 		});
 		res.cookie('credential', user._id?.toString().trim(), {
 			maxAge: 60 * 60 * 1000 * 24 * 365,
 			httpOnly: true,
-			secure: true,
+			secure: false,
 		});
 
 		return res.redirect(`${process.env.CLIENT_URL}/signin/success`);
