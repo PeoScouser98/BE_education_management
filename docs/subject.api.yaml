@@ -1,0 +1,206 @@
+paths:
+    /subjects:
+        post:
+            tags:
+                - Subjects
+            description: Thêm 1 subject
+            summary: Đăng nhập với vai trò Headmaster
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                subjectName:
+                                    type: string
+                        example: { subjectName: Tiếng Việt }
+
+            responses:
+                201:
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SubjectResponse'
+                204:
+                    description: Không nhận được request body
+                400:
+                    description: Không thỏa mãn validate
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    statusCode: 400,
+                                    message: '\"subjectName\" length must be at least 3 characters long',
+                                }
+                409:
+                    description: Subject đã tồn tại
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { statusCode: 409, message: 'Subject already exists' }
+        get:
+            tags:
+                - Subjects
+            description: Lấy ra tất cả các subject
+            summary: Đăng nhập
+            responses:
+                200:
+                    description: ok
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Subject'
+                            example:
+                                [
+                                    {
+                                        _id: '637ec5ce577ebd6709c65124',
+                                        subjectName: 'Tiếng Việt',
+                                        slug: 'tieng-viet',
+                                        createdAt: '2023-03-14T17:02:24.526+00:00',
+                                        updatedAt: '2023-03-14T17:02:24.526+00:00',
+                                        deleted: false,
+                                    },
+                                ]
+
+    /subjects/trash:
+        get:
+            tags:
+                - Subjects
+            description: Lấy ra các subject đã bị xóa mềm (trong thùng rác)
+            summary: Đăng nhập với vai trò Headmaster
+            responses:
+                200:
+                    description: ok
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Subject'
+                            example:
+                                [
+                                    {
+                                        _id: '637ec5ce577ebd6709c65124',
+                                        subjectName: 'Tiếng Việt',
+                                        slug: 'tieng-viet',
+                                        createdAt: '2023-03-14T17:02:24.526+00:00',
+                                        updatedAt: '2023-03-14T17:02:24.526+00:00',
+                                        deleted: true,
+                                    },
+                                ]
+
+    /subject/:id:
+        put:
+            tags:
+                - Subjects
+            description: Update lại 1 subject
+            summary: Đăng nhập với vai trò Headmaster
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                subjectName:
+                                    type: string
+                        example: { subjectName: 'Tiếng Việt' }
+
+            responses:
+                201:
+                    description: Sửa thành công
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SubjectResponse'
+                204:
+                    description: Không nhận được data (req body)
+                400:
+                    description: Không truyền id hoặc không thỏa mãn validate
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    statusCode: 400,
+                                    message: 'Missing parameter | "subjectName" length must be at least 3 characters long',
+                                }
+                404:
+                    description: Subject không tồn tại
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { statusCode: 404, message: Subject does not exist }
+        delete:
+            tags:
+                - Subjects
+            description: Xóa mềm hoặc xóa vĩnh viễn 1 subject
+            summary: Đăng nhập với vai trò Headmaster
+            parameters:
+                - name: option
+                  in: query
+                  description: Xác định kiểu xóa
+                  schema:
+                      type: string
+                      enum:
+                          - soft
+                          - force
+                  default: soft
+
+            responses:
+                200:
+                    description: Xóa thành công
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                            example:
+                                {
+                                    message: Subject has been permanently deleted(force) | moved the subject to the trash(soft),
+                                }
+                400:
+                    description: id không đúng type objectId
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { statusCode: 400, message: '_id of the subject is invalid' }
+    /subject/restore/:id:
+        put:
+            tags:
+                - Subjects
+            description: Khôi phục 1 subject đã xóa mềm
+            summary: Đăng nhập với vai trò Headmaster
+            responses:
+                201:
+                    description: Khôi phục thành công
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                            example:
+                                {
+                                    message: Subject has been permanently deleted(force) | moved the subject to the trash(soft),
+                                }
+                400:
+                    description: id không đúng type objectId
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { statusCode: 400, message: '_id of the subject is invalid' }

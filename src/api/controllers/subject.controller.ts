@@ -84,7 +84,7 @@ export const restore = async (req: Request, res: Response) => {
 
 		const result = await SubjectServices.restore(id);
 
-		return res.status(201).json(result);
+		return res.status(result.statusCode).json(result);
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | MongooseError).message,

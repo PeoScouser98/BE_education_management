@@ -78,6 +78,44 @@ components:
                     type: Boolean
                     example: false
 
+        Subject:
+            type: object
+            properties:
+                _id:
+                    type: ObjectId
+                subjectName:
+                    type: string
+                slug:
+                    type: string
+                createdAt:
+                    type: Date
+                updatedAt:
+                    type: Date
+                deleted:
+                    type: Boolean
+
+        SubjectResponse:
+            type: object
+            properties:
+                _id:
+                    type: ObjectId
+                    example: '637ec5ce577ebd6709c65124'
+                subjectName:
+                    type: string
+                    example: 'Tiếng Việt'
+                slug:
+                    type: string
+                    example: 'tieng-viet'
+                createdAt:
+                    type: Date
+                    example: '2023-03-14T17:02:24.526+00:00'
+                updatedAt:
+                    type: Date
+                    example: '2023-03-14T17:02:24.526+00:00'
+                deleted:
+                    type: Boolean
+                    example: false
+
         HttpError:
             type: object
             properties:
@@ -85,8 +123,6 @@ components:
                     type: string
                 statusCode:
                     type: string
-                error:
-                    type: Error
 
         HttpResponse:
             type: object

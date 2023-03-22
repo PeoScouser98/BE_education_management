@@ -10,11 +10,11 @@ import {
 } from '../controllers/subject.controller';
 const router = express.Router();
 
-router.put('/subject/restore/:id', restore);
-router.post('/subjects', create);
-router.put('/subject/:id', update);
-router.delete('/subject/:id', deleted);
-router.get('/subjects/trash', getTrash);
-router.get('/subjects', list);
+router.put('/subject/restore/:id', checkAuthenticated, checkIsHeadmaster, restore);
+router.post('/subjects', checkAuthenticated, checkIsHeadmaster, create);
+router.put('/subject/:id', checkAuthenticated, checkIsHeadmaster, update);
+router.delete('/subject/:id', checkAuthenticated, checkIsHeadmaster, deleted);
+router.get('/subjects/trash', checkAuthenticated, checkIsHeadmaster, getTrash);
+router.get('/subjects', checkIsHeadmaster, list);
 
 export default router;

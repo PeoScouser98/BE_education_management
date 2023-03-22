@@ -3,7 +3,7 @@ paths:
         post:
             tags:
                 - Classes
-            description: Có thể thêm 1 hoặc nhiều class bằng cách gửi data body dạng {} || []
+            description: Thêm 1 class
             summary: Đăng nhập với vai trò là Headmaster
             requestBody:
                 require: true
@@ -30,24 +30,14 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/HttpError'
-                                example:
-                                    {
-                                        statusCode: 409,
-                                        message: Classes already exists,
-                                        errorData: [{ className: 2E }],
-                                    }
+                                example: { statusCode: 409, message: Classes already exists }
                 400:
                     description: Class không thỏa mãn validate
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/HttpError'
-                                example:
-                                    {
-                                        statusCode: 400,
-                                        message: Bad Request,
-                                        errorData: [{ className: 2E }],
-                                    }
+                                example: { statusCode: 400, message: Bad Request }
         get:
             tags:
                 - Classes
@@ -207,7 +197,7 @@ paths:
             parameters:
                 - name: option
                   in: query
-                  description: Xác định kiểu xóa hoặc khôi phục cho delete
+                  description: Xác định kiểu xóa
                   schema:
                       type: string
                       enum:

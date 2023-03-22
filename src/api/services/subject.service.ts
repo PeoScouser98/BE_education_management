@@ -78,7 +78,7 @@ export const updateSubject = async (id: string, subject: Partial<Omit<Subject, '
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(id)) {
-			throw createHttpError.NotFound('_id of the subject is invalid');
+			throw createHttpError.BadRequest('_id of the subject is invalid');
 		}
 
 		// check tồn tại
@@ -105,7 +105,7 @@ export const updateSubject = async (id: string, subject: Partial<Omit<Subject, '
 export const deleteSoft = async (id: string) => {
 	try {
 		if (!mongoose.Types.ObjectId.isValid(id)) {
-			throw createHttpError.NotFound('_id of the subject is invalid');
+			throw createHttpError.BadRequest('_id of the subject is invalid');
 		}
 		await SubjectModel.delete({ _id: id });
 
@@ -122,7 +122,7 @@ export const deleteSoft = async (id: string) => {
 export const deleteForce = async (id: string) => {
 	try {
 		if (!mongoose.Types.ObjectId.isValid(id)) {
-			throw createHttpError.NotFound('_id of the subject is invalid');
+			throw createHttpError.BadRequest('_id of the subject is invalid');
 		}
 		await SubjectModel.deleteOne({ _id: id });
 		return {
@@ -147,12 +147,12 @@ export const getTrash = async () => {
 export const restore = async (id: string) => {
 	try {
 		if (!mongoose.Types.ObjectId.isValid(id)) {
-			throw createHttpError.NotFound('_id of the subject is invalid');
+			throw createHttpError.BadRequest('_id of the subject is invalid');
 		}
 		await SubjectModel.restore({ _id: id });
 		return {
 			message: 'Subject have been restored',
-			statusCode: 200,
+			statusCode: 201,
 		};
 	} catch (error) {
 		throw error;

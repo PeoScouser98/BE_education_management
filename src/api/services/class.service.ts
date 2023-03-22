@@ -37,7 +37,7 @@ export const checkClassesExists = async (_id: string, condition: Partial<Class> 
 		if (_id) {
 			// kiểm tra xem _id gửi lên đúng kiểu objectId
 			if (!mongoose.Types.ObjectId.isValid(_id)) {
-				throw createHttpError.NotFound('_id of the classes is invalid');
+				throw createHttpError.BadRequest('_id of the classes is invalid');
 			}
 
 			conditionCurr = {
