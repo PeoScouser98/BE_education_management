@@ -1,0 +1,36 @@
+paths:
+    /permissions:
+        get:
+            tags:
+                - Permission
+            summary: Lấy tất cả user permission
+            responses:
+                200:
+                    description: ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Permissions'
+                            example:
+                                [
+                                    {
+                                        _id: '637ec5ce577ebd6709c65124',
+                                        role: 'HEADMASTER',
+                                        type: 'class',
+                                        permissions:
+                                            [
+                                                {
+                                                    _id: '637ec5ce572ebd6759c65124',
+                                                    name: 'Lớp học',
+                                                    code: 'class.list_all',
+                                                },
+                                            ],
+                                    },
+                                ]
+                404:
+                    description: Not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { message: 'Not Found', statusCode: 404 }

@@ -94,27 +94,36 @@ components:
                 deleted:
                     type: Boolean
 
-        SubjectResponse:
+        Permissions:
             type: object
             properties:
                 _id:
-                    type: ObjectId
-                    example: '637ec5ce577ebd6709c65124'
-                subjectName:
                     type: string
-                    example: 'Tiếng Việt'
-                slug:
+                    require: true
+                role:
                     type: string
-                    example: 'tieng-viet'
-                createdAt:
-                    type: Date
-                    example: '2023-03-14T17:02:24.526+00:00'
-                updatedAt:
-                    type: Date
-                    example: '2023-03-14T17:02:24.526+00:00'
-                deleted:
-                    type: Boolean
-                    example: false
+                    enum:
+                        - HEADMASTER
+                        - Teacher
+                        - PARENTS
+                    require: true
+                type:
+                    type: string
+                    require: true
+
+                permissions:
+                    type: array
+                    items:
+                        properties:
+                            _id:
+                                type: string
+                            name:
+                                type: string
+                            code:
+                                type: string
+                        require:
+                            - name
+                            - code
 
         HttpError:
             type: object
