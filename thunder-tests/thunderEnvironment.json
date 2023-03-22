@@ -1,0 +1,13 @@
+[
+  {
+    "_id": "72cb51be-c3c3-4c93-a8e2-945c8779cf57",
+    "name": "(Global Env)",
+    "default": false,
+    "global": true,
+    "sortNum": -2,
+    "created": "2023-03-20T05:49:24.109Z",
+    "modified": "2023-03-20T05:49:24.109Z",
+    "data": [],
+    "envFile": "..\\.env"
+  }
+]

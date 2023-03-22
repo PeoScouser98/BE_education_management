@@ -1,3 +1,6 @@
 node_modules
 .vercel
 dump.rdb
+thunder-tests
+.vscode
+

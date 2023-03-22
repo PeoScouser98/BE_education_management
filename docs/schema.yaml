@@ -87,3 +87,11 @@ components:
                     type: string
                 error:
                     type: Error
+
+        HttpResponse:
+            type: object
+            properties:
+                mesage:
+                    type: string
+                statusCode:
+                    type: number

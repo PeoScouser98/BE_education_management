@@ -32,7 +32,7 @@ export const createClass = async (payload: Omit<Class, '_id'> | Omit<Class, '_id
 			});
 
 			if (errorValidateData.length > 0) {
-				throw createHttpError(502, 'Bad Gateway', { errorData: errorValidateData });
+				throw createHttpError(400, 'Bad Request', { error: errorValidateData });
 			}
 
 			const classNameData = getPropertieOfArray(suitableValidateData, 'className');
@@ -57,7 +57,7 @@ export const createClass = async (payload: Omit<Class, '_id'> | Omit<Class, '_id
 			});
 
 			if (errorExistData.length > 0) {
-				throw createHttpError(409, 'Classes already exists', { errorData: errorExistData });
+				throw createHttpError(409, 'Classes already exists', { error: errorExistData });
 			}
 
 			const classesResult: Class[] = await ClassModel.insertMany(suitableData);
@@ -141,7 +141,7 @@ export const updateClasses = async (payload: Partial<Omit<Class, '_id'>>, _id: s
 		// check validate data gửi lên
 		const { error } = validateClassEditData(payload);
 		if (error) {
-			throw createHttpError.BadGateway(error.message);
+			throw createHttpError.BadRequest(error.message);
 		}
 
 		// check xem dữ liệu sửa có giống với dữ liệu cũ hay không
