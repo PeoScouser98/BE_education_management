@@ -1,9 +1,8 @@
-import express from "express";
-import { list, create } from "../controllers/student.controller";
+import express from 'express';
+import { createStudent } from '../controllers/student.controller';
 
 const router = express.Router();
 
-router.get("/students/:classId", list);
-router.post("/students", create);
+router.post('/students', createStudent);
 
 export default router;

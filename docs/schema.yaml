@@ -125,6 +125,60 @@ components:
                             - name
                             - code
 
+        Student:
+            type: object
+            properties:
+                _id:
+                    type: ObjectId
+                code:
+                    type: string
+                fullName:
+                    type: string
+                    required: true
+                gender:
+                    type: boolean
+                    required: true
+                dateOfBirth:
+                    type: Date
+                    required: true
+                class:
+                    type: ObjectId
+                    required: true
+                parentsPhoneNumber:
+                    type: string
+                    required: true
+                isPolicyBeneficiary:
+                    type: boolean
+                isGraduated:
+                    type: boolean
+                absentDays:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            _id:
+                                type: ObjectId
+                            date:
+                                type: Date
+                            hasPermision:
+                                type: boolean
+                            reason:
+                                type: string
+
+        Attendance:
+            type: array
+            items:
+                type: object
+                properties:
+                    _id:
+                        type: ObjectId
+                    date:
+                        type: Date
+                    hasPermision:
+                        type: boolean
+                    reason:
+                        type: string
+
         HttpError:
             type: object
             properties:
