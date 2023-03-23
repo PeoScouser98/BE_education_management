@@ -1,0 +1,116 @@
+paths:
+    /students:
+        post:
+            tags:
+                - Students
+            summary: Đăng nhập với tư cách giáo viên chủ nhiệm lớp hoặc hiệu trưởng
+            description: Tạo mới 1 hoặc nhiểu student bằng cách gửi { } hoặc [ ]
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                class:
+                                    type: string
+                                    required: true
+                                fullName:
+                                    type: string
+                                    required: true
+                                    minLength: 6
+                                    maxLength: 100
+                                gender:
+                                    type: string
+                                    required: true
+                                dateOfBirth:
+                                    type: date
+                                    required: true
+                                parentsPhoneNumber:
+                                    type: string
+                                    required: true
+                                isPolicyBeneficiary:
+                                    type: boolean
+                                isGraduated:
+                                    type: boolean
+                        example:
+                            {
+                                class: '6410a8a01e0ac1f41b6ddc00',
+                                fullName: 'Lê Ngọc Đức 5',
+                                gender: true,
+                                dateOfBirth: '10-13-2001',
+                                parentsPhoneNumber: '032856808888',
+                            }
+            responses:
+                200:
+                    description: Student created successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Attendance'
+                            example:
+                                {
+                                    'class': '6410a8a01e0ac1f41b6ddc00',
+                                    'fullName': 'Lê Ngọc Đức 5',
+                                    'gender': true,
+                                    'dateOfBirth': '2001-10-12T17:00:00.000Z',
+                                    'parentsPhoneNumber': '032856808888',
+                                    'isPolicyBeneficiary': false,
+                                    'isGraduated': false,
+                                    '_id': '641c986f5bc01247c99c3723',
+                                    'deleted': false,
+                                    'absentDays': [],
+                                    'createdAt': '2023-03-23T18:20:31.120Z',
+                                    'updatedAt': '2023-03-23T18:20:31.120Z',
+                                    'code': '5lndBX8888',
+                                    '__v': 0,
+                                }
+                204:
+                    description: Không nhận được request body
+                400:
+                    description: Không thỏa mã validate
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpResponse'
+                            example:
+                                {
+                                    statusCode: 400,
+                                    message: The student does not satisfy the validation requirements,
+                                    error:
+                                        [
+                                            {
+                                                'fullName': 'Lê Ngọc Đức 5',
+                                                'parentPhone': '032856808888',
+                                                'message': '"gender" must be a boolean',
+                                            },
+                                        ],
+                                }
+                413:
+                    description: Thêm trên 50 học sinh cùng lúc
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpResponse'
+                            example:
+                                {
+                                    statusCode: 413,
+                                    message: You are only allowed to add 50 students at a time,
+                                }
+                409:
+                    description: Học sinh đã tồn tại
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpResponse'
+                            example:
+                                {
+                                    statusCode: 409,
+                                    message: Student already exists,
+                                    error:
+                                        [
+                                            {
+                                                'fullName': 'Lê Ngọc Đức 5',
+                                                'parentPhone': '032856808888',
+                                            },
+                                        ],
+                                }
