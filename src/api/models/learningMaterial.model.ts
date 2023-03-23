@@ -1,6 +1,6 @@
-import mongooseDelete from 'mongoose-delete';
+import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
-import mongoose from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { Subject } from './subject.model';
 
 export interface LearningMaterial extends Document {
@@ -10,6 +10,8 @@ export interface LearningMaterial extends Document {
 	fileId: string;
 	downloadUrl: string;
 }
+
+
 
 const LearningMaterialSchema = new mongoose.Schema<LearningMaterial>({
 	subject: {
@@ -33,7 +35,8 @@ const LearningMaterialSchema = new mongoose.Schema<LearningMaterial>({
 	},
 });
 
-LearningMaterialSchema.plugin(mongooseAutoPopulate, mongooseDelete);
+LearningMaterialSchema.plugin(mongooseAutoPopulate);
+LearningMaterialSchema.plugin(mongooseDelete);
 
 const LearningMaterialModel = mongoose.model<LearningMaterial>(
 	'learning_materials',

@@ -4,6 +4,7 @@ import http from 'http';
 import connectSocketIO from './app/socket';
 import connectMongoDB from './database/mongodb';
 import './database/redis';
+import './core/global';
 
 const server = http.createServer(app);
 
