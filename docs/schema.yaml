@@ -151,6 +151,10 @@ components:
                     type: boolean
                 isGraduated:
                     type: boolean
+                dropoutDate:
+                    type: Date | null
+                transferSchool:
+                    type: Date | null
                 absentDays:
                     type: array
                     items:
@@ -178,6 +182,32 @@ components:
                         type: boolean
                     reason:
                         type: string
+
+        StudentResponse:
+            type: object
+            properties:
+                docs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Student'
+                totalDocs:
+                    type: number
+                limit:
+                    type: number
+                totalPages:
+                    type: number
+                page:
+                    type: number
+                pagingCounter:
+                    type: number
+                hasPrevPage:
+                    type: boolean
+                hasNextPage:
+                    type: boolean
+                prevPage:
+                    type: boolean
+                nextPage:
+                    type: boolean
 
         HttpError:
             type: object

@@ -1,6 +1,7 @@
 import mongooseAutoPopulate from 'mongoose-autopopulate';
-import mongoose, { Model, ObjectId } from 'mongoose';
+import mongoose, { Model, ObjectId, PaginateModel } from 'mongoose';
 import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
+import mongoosePaginate from 'mongoose-paginate-v2';
 import { generateStudentID } from '../../helpers/toolkit';
 
 export interface Student extends Document {
@@ -13,6 +14,8 @@ export interface Student extends Document {
 	parentsPhoneNumber: string;
 	isPolicyBeneficiary?: boolean;
 	isGraduated?: boolean;
+	transferSchool?: Date;
+	dropoutDate?: Date;
 	absentDays?: IAttendance[];
 }
 
@@ -25,9 +28,11 @@ export interface IAttendance extends Document {
 
 interface StudentDocument extends Omit<SoftDeleteDocument, '_id'>, Student {}
 
-interface ClassModel extends Model<StudentDocument> {}
+interface IStudentModel extends Model<StudentDocument> {}
 
-interface SoftDeleteStudentModel extends SoftDeleteModel<StudentDocument, ClassModel> {}
+interface SoftDeleteStudentModel extends SoftDeleteModel<StudentDocument, IStudentModel> {}
+
+interface IPaginatedStudentModel extends PaginateModel<StudentDocument> {}
 
 const StudentSchema = new mongoose.Schema<StudentDocument>(
 	{
@@ -65,6 +70,14 @@ const StudentSchema = new mongoose.Schema<StudentDocument>(
 			type: Boolean,
 			default: false,
 		},
+		transferSchool: {
+			type: Date,
+			default: null,
+		},
+		dropoutDate: {
+			type: Date,
+			default: null,
+		},
 		absentDays: [
 			{
 				date: {
@@ -92,6 +105,7 @@ const StudentSchema = new mongoose.Schema<StudentDocument>(
 	}
 );
 
+StudentSchema.plugin(mongoosePaginate);
 StudentSchema.plugin(mongooseDelete, { overrideMethods: ['find', 'findOne'], deletedAt: true });
 StudentSchema.plugin(mongooseAutoPopulate);
 
@@ -110,9 +124,9 @@ StudentSchema.pre('insertMany', function (next, docs) {
 	next();
 });
 
-const StudentModel: SoftDeleteStudentModel = mongoose.model<
+const StudentModel: SoftDeleteStudentModel & IPaginatedStudentModel = mongoose.model<
 	StudentDocument,
-	SoftDeleteStudentModel
+	SoftDeleteStudentModel & IPaginatedStudentModel
 >('Students', StudentSchema);
 
 export default StudentModel;
