@@ -215,18 +215,29 @@ paths:
                 200:
                     description: Xoá thành công
                     content:
-                    application/json:
-                        schema:
-                            type: object
-                            properties:
-                                message:
-                                    type: string
-                        example:
-                            {
-                                message: The permission has been successfully deleted permanently (force) | The permission has been successfully moved to the trash (soft),
-                            }
-                204:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpResponse'
+                            example:
+                                {
+                                    message: The permission has been successfully deleted permanently (force) | The permission has been successfully moved to the trash (soft),
+                                    statusCode: 200,
+                                }
+                400:
                     description: Không truyền ID
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { message: 'No ID provided!', statusCode: 400 }
+                404:
+                    description: Không tìm thấy permission
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { message: 'Permission not found', statusCode: 404 }
+
     /permission/restore/:id:
         put:
             tags:
