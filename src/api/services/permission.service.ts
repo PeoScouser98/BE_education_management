@@ -25,13 +25,45 @@ export const getPermissionByRole = async (role: string) => {
 	}
 };
 
-export const deletePermission = async (permissionID: string) => {
+export const softDeletePermission = async (permissionID: string) => {
 	try {
-		return await PermissionModel.findOneAndDelete({ _id: permissionID }).exec();
+		await PermissionModel.delete({ _id: permissionID })
+
+		return {
+			message: 'The permission has been successfully moved to the trash',
+			statusCode: 200,
+		};
 	} catch (error) {
 		throw error as MongooseError;
 	}
 };
+
+export const forceDeletePermission = async (permissionID: string) => {
+	try {
+		await PermissionModel.deleteOne({ _id: permissionID })
+
+		return {
+			message: 'The permission has been successfully deleted permanently',
+			statusCode: 200,
+		}
+	} catch (error) {
+		throw error as MongooseError;
+	}
+};
+
+export const restoreDeletedPermission = async (permissionID: string) => {
+	try {
+		await PermissionModel.restore({ _id: permissionID });
+
+		return {
+			message: 'The permission has been successfully restored',
+			statusCode: 200,
+		}
+	}
+	catch (error) {
+		throw error as MongooseError;
+	}
+}
 
 export const updatePermission = async (
 	permissionID: string,
