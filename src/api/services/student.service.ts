@@ -1,6 +1,6 @@
 import createHttpError from 'http-errors';
 import mongoose, { SortOrder } from 'mongoose';
-import { compareObject, generateStudentID } from '../../helpers/toolkit';
+import { compareObject } from '../../helpers/toolkit';
 import StudentModel, { Student } from '../models/student.model';
 import {
 	validateReqBodyStudent,
@@ -31,9 +31,8 @@ export const createStudent = async (data: Omit<Student, '_id'> | Omit<Student, '
 			throw createHttpError.BadRequest(error.message);
 		}
 
-		const studentId = generateStudentID(data.fullName, data.parentsPhoneNumber);
 		const check: Student | null = await StudentModel.findOne({
-			code: studentId,
+			code: data.code,
 		});
 
 		if (check) {
@@ -76,9 +75,7 @@ const createStudentList = async (data: Omit<Student, '_id'>[]) => {
 
 		// check exist
 		const studentExists: IStudentErrorRes[] = [];
-		const studentCodes: string[] = data.map((item) =>
-			generateStudentID(item.fullName, item.parentsPhoneNumber)
-		);
+		const studentCodes: string[] = data.map((item) => item.code);
 
 		const studentExistDb = await StudentModel.find({
 			code: { $in: studentCodes },
@@ -86,10 +83,7 @@ const createStudentList = async (data: Omit<Student, '_id'>[]) => {
 
 		let check: any = null;
 		studentExistDb.forEach((item) => {
-			check = data.find(
-				(itemData) =>
-					generateStudentID(itemData.fullName, itemData.parentsPhoneNumber) === item.code
-			);
+			check = data.find((itemData) => itemData.code === item.code);
 
 			if (check) {
 				studentExists.push({
@@ -147,33 +141,7 @@ export const updateStudent = async (id: string, data: Partial<Omit<Student, '_id
 			throw createHttpError(304);
 		}
 
-		const newCode = updateCodeStudent(data, student);
-		let dataUpdate: Partial<Omit<Student, '_id'>> = { ...data };
-
-		if (newCode && typeof newCode === 'string') {
-			dataUpdate.code = newCode;
-		}
-
-		return await StudentModel.findOneAndUpdate({ _id: id }, dataUpdate, { new: true });
-	} catch (error) {
-		throw error;
-	}
-};
-
-// update code
-const updateCodeStudent = (
-	dataUpdate: Partial<Omit<Student, '_id'>>,
-	dataOld: Student
-): string | undefined => {
-	try {
-		if (dataUpdate.fullName && !dataUpdate.parentsPhoneNumber) {
-			return generateStudentID(dataUpdate.fullName, dataOld.parentsPhoneNumber);
-		} else if (!dataUpdate.fullName && dataUpdate.parentsPhoneNumber) {
-			return generateStudentID(dataOld.fullName, dataUpdate.parentsPhoneNumber);
-		} else if (dataUpdate.fullName && dataUpdate.parentsPhoneNumber) {
-			return generateStudentID(dataUpdate.fullName, dataUpdate.parentsPhoneNumber);
-		}
-		return undefined;
+		return await StudentModel.findOneAndUpdate({ _id: id }, data, { new: true });
 	} catch (error) {
 		throw error;
 	}

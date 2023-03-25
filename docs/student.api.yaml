@@ -14,6 +14,9 @@ paths:
                                 class:
                                     type: string
                                     required: true
+                                code:
+                                    type: string
+                                    require: true
                                 fullName:
                                     type: string
                                     required: true
@@ -396,6 +399,9 @@ paths:
                             properties:
                                 class:
                                     type: ObjectId
+                                    required: true
+                                code:
+                                    type: string
                                     required: true
                                 fullName:
                                     type: string

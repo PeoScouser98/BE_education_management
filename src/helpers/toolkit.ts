@@ -57,34 +57,3 @@ export function createSlug(str: string): string {
 
 	return str;
 }
-
-// tạo ra 1 mã học sinh của trường
-export function generateStudentID(name: string, phoneNumber: string): string {
-	// Tách các từ trong tên học sinh thành mảng các chuỗi con
-	const nameParts = createSlug(name).split('-');
-
-	// Lấy chữ cái đầu tiên của họ và tên đệm
-	const lastNameInitial = nameParts[0].charAt(0);
-	const middleNameInitial = nameParts
-		.map((item, index) => {
-			if (index === 0 || index === nameParts.length - 1) {
-				return undefined;
-			}
-			return item.charAt(0);
-		})
-		.join('')
-		.toLowerCase();
-
-	// Lấy 4 ký tự cuối của số điện thoại phụ huynh
-	const phoneNumberSuffix = phoneNumber.slice(-4);
-
-	// Ghép các phần tử lại để tạo ra mã số học sinh
-	const studentID =
-		nameParts[nameParts.length - 1].toLowerCase() +
-		lastNameInitial +
-		middleNameInitial +
-		'BX' +
-		phoneNumberSuffix;
-
-	return studentID;
-}
