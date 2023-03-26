@@ -37,7 +37,7 @@ components:
                     type: Date
                 isVerified:
                     type: boolean
-            require:
+            required:
                 - fullName
                 - email
                 - eduBackground
@@ -96,34 +96,39 @@ components:
 
         Permissions:
             type: object
+            required:
+                - role
+                - type
             properties:
                 _id:
                     type: string
-                    require: true
+                    example: '637ec5ce577ebd6709c65124'
+                    format: uuid
                 role:
                     type: string
-                    enum:
-                        - HEADMASTER
-                        - Teacher
-                        - PARENTS
-                    require: true
+                    enum: ['ADMIN', 'HEADMASTER', 'TEACHER', 'PARENTS']
+                    example: 'ADMIN'
                 type:
                     type: string
-                    require: true
-
+                    example: 'class'
                 permissions:
                     type: array
                     items:
+                        type: object
+                        required:
+                            - code
+                            - name
                         properties:
                             _id:
                                 type: string
+                                format: uuid
                             name:
                                 type: string
+                                example: 'Lớp học'
                             code:
                                 type: string
-                        require:
-                            - name
-                            - code
+                                example: 'class.list_all'
+                                uniqueItems: true
 
         Student:
             type: object
@@ -215,7 +220,7 @@ components:
                 message:
                     type: string
                 statusCode:
-                    type: string
+                    type: number
 
         HttpResponse:
             type: object
