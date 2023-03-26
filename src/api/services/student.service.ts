@@ -1,8 +1,9 @@
 import createHttpError from 'http-errors';
 import mongoose, { SortOrder } from 'mongoose';
-import { compareObject } from '../../helpers/toolkit';
-import StudentModel, { Student } from '../models/student.model';
+import { compareDates, compareObject, getPropertieOfArray } from '../../helpers/toolkit';
+import StudentModel, { IAttendance, Student } from '../models/student.model';
 import {
+	validateAttendanceStudent,
 	validateReqBodyStudent,
 	validateUpdateReqBodyStudent,
 } from '../validations/student.validation';
@@ -11,6 +12,11 @@ interface IStudentErrorRes {
 	fullName: string;
 	parentPhone: string;
 	message?: string;
+}
+
+interface IAbsentStudent {
+	idStudent: string;
+	absent: Omit<IAttendance, '_id'>;
 }
 
 // create new student using form
@@ -310,6 +316,198 @@ export const getStudentDropout = async (year: 'all' | number, page: number, limi
 		}
 
 		return await StudentModel.paginate(condition, { page: page, limit: limit });
+	} catch (error) {
+		throw error;
+	}
+};
+
+// điểm danh
+export const markAttendanceStudent = async (idClass: string, absentStudents: IAbsentStudent[]) => {
+	try {
+		if (!absentStudents) {
+			throw createHttpError(204);
+		}
+
+		if (!Array.isArray(absentStudents)) {
+			throw createHttpError(400, 'The list of absent students is not an array type');
+		}
+
+		if (absentStudents.length === 0) {
+			return {
+				message: 'Attendance has been saved!',
+			};
+		}
+
+		// nếu data gửi lên là 1 học sinh đã điểm danh trong ngày rồi
+
+		// validate học sinh nghỉ gửi lên
+		const errorValidates: { id: string; message: string }[] = [];
+
+		let message: string = '';
+		absentStudents.forEach((item) => {
+			if (!item.idStudent || !mongoose.Types.ObjectId.isValid(item.idStudent)) {
+				message = 'idStudent of the student is invalid';
+			}
+
+			let { error } = validateAttendanceStudent(item.absent);
+			if (error) {
+				message += ' && ' + error.message;
+			}
+
+			if (message.length > 0) {
+				errorValidates.push({ id: item.idStudent, message: message });
+			}
+		});
+
+		if (errorValidates.length > 0) {
+			throw createHttpError(400, 'The body data does not satisfy the validation', {
+				error: errorValidates,
+			});
+		}
+
+		// Lấy ra các id học sinh nghỉ
+		const absentStudentIdList: string[] = getPropertieOfArray(absentStudents, 'idStudent');
+
+		// Kiểm tra xem học sinh vắng có đúng học sinh của lớp không
+		const checkExist: Student[] = await StudentModel.find({
+			_id: { $in: absentStudentIdList },
+			class: idClass,
+		});
+
+		const studentNotExist: string[] = [];
+		if (checkExist.length !== absentStudentIdList.length) {
+			absentStudentIdList.forEach((id) => {
+				let check = checkExist.find((item) => item._id.toString() === id);
+
+				if (!check) {
+					studentNotExist.push(id);
+				}
+			});
+		}
+
+		if (studentNotExist.length > 0) {
+			throw createHttpError(404, 'This student does not exist in the class', {
+				error: studentNotExist,
+			});
+		}
+
+		// kiểm tra xem học sinh vắng gửi lên đã tồn tại điểm danh trong ngày chưa ( nếu đã tồn tại thì bắn lỗi học sinh đã điểm danh về )
+		const attendedStudents: { id: string; name: string }[] = [];
+
+		checkExist.forEach((student) => {
+			let check = student.absentDays?.find((item) => {
+				let checkDate = compareDates(new Date(), item?.date);
+
+				return checkDate === 0 ? true : false;
+			});
+
+			if (Boolean(check)) {
+				attendedStudents.push({
+					id: student._id.toString(),
+					name: student.fullName,
+				});
+			}
+		});
+
+		if (attendedStudents.length > 0) {
+			throw createHttpError(409, "Today's attendance for the student already exists", {
+				error: attendedStudents,
+			});
+		}
+
+		// Thời gian điểm danh sẽ được server  tự động lấy là thời gian hiện tại
+		const bulkUpdateAbsentStudents: any = absentStudents.map((item) => {
+			return {
+				updateOne: {
+					filter: { _id: item.idStudent },
+					update: { $push: { absentDays: { ...item.absent, date: new Date() } } },
+				},
+			};
+		});
+
+		await StudentModel.bulkWrite(bulkUpdateAbsentStudents);
+
+		return {
+			message: 'Attendance has been saved!',
+		};
+	} catch (error) {
+		throw error;
+	}
+};
+
+// lấy ra tình trạng điểm danh của 1 lớp theo ngày
+export const dailyAttendanceList = async (idClass: string, date: Date) => {
+	try {
+		if (!idClass || !mongoose.Types.ObjectId.isValid(idClass)) {
+			throw createHttpError.BadRequest('The provided idClass is invalid');
+		}
+
+		// lấy ra các học sinh vắng mặt
+		const nextDay = new Date(date);
+		nextDay.setDate(nextDay.getDate() + 1);
+
+		const studentAbsents: Student[] = await StudentModel.find({
+			absentDays: {
+				$elemMatch: {
+					date: {
+						$gte: date,
+						$lt: nextDay,
+					},
+				},
+			},
+			class: idClass,
+		}).lean();
+
+		// lấy ra các học sinh toàn bộ lớp
+		const studentOfClass = await StudentModel.find({
+			class: idClass,
+		})
+			.select('-absentDays')
+			.lean();
+
+		// xác định trạng thái điểm danh của học sinh bằng cách xem học sinh đó có tồn tại trong danh sách học sinh nghỉ học không
+		const result = studentOfClass.map((item) => {
+			let attendanceStatus = true;
+			if (studentAbsents.length > 0) {
+				let check = studentAbsents.find(
+					(itemAb) => itemAb._id.toString() === item._id.toString()
+				);
+
+				attendanceStatus = check ? false : true;
+			}
+			return {
+				...item,
+				attendanceStatus: attendanceStatus,
+			};
+		});
+
+		return {
+			absent: studentAbsents.length,
+			students: result,
+		};
+	} catch (error) {
+		throw error;
+	}
+};
+
+// Lấy ra tình trạng điểm danh của 1 học sinh trong 1 tháng (sẽ trả về ngày vắng mặt trong tháng đấy)
+export const attendanceOfStudentByMonth = async (id: string, month: number, year: number) => {
+	try {
+		const { absentDays } = await getDetailStudent(id);
+
+		const result: IAttendance[] = [];
+
+		absentDays?.forEach((item) => {
+			let date = new Date(item.date);
+			let monthItem = date.getMonth() + 1;
+			let yearItem = date.getFullYear();
+
+			if (monthItem === month && yearItem === year) {
+				result.push(item);
+			}
+		});
+
+		return result;
 	} catch (error) {
 		throw error;
 	}

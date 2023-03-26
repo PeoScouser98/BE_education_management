@@ -21,8 +21,8 @@ export interface Student extends Document {
 export interface IAttendance extends Document {
 	_id: ObjectId;
 	date: Date;
-	hasPermision: boolean;
-	reason: string;
+	hasPermision?: boolean;
+	reason?: string;
 }
 
 interface StudentDocument extends Omit<SoftDeleteDocument, '_id'>, Student {}
