@@ -1,5 +1,6 @@
 import mongooseAutoPopulate from 'mongoose-autopopulate';
-import mongoose, { ObjectId } from 'mongoose';
+import mongoose, { Model, ObjectId } from 'mongoose';
+import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 
 type PermissionsType = Array<{
 	_id: ObjectId;
@@ -12,6 +13,12 @@ export interface Permission extends Document {
 	type: string;
 	permissions: PermissionsType;
 }
+
+interface PermissionDocument extends Omit<SoftDeleteDocument, '_id'>, Permission { }
+
+interface PermissionModel extends Model<PermissionDocument> { }
+
+interface SoftDeletePermissionModel extends SoftDeleteModel<PermissionDocument, PermissionModel> { }
 
 const PermissionSchema = new mongoose.Schema<Permission>({
 	_id: {
@@ -50,7 +57,8 @@ const PermissionSchema = new mongoose.Schema<Permission>({
 });
 
 PermissionSchema.plugin(mongooseAutoPopulate);
+PermissionSchema.plugin(mongooseDelete, { deletedAt: true, overrideMethods: true })
 
-const PermissionModel = mongoose.model<Permission>('Permissions', PermissionSchema);
+const PermissionModel: SoftDeletePermissionModel = mongoose.model<Permission, SoftDeletePermissionModel>('Permissions', PermissionSchema);
 
 export default PermissionModel;
