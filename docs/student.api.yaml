@@ -14,6 +14,9 @@ paths:
                                 class:
                                     type: string
                                     required: true
+                                code:
+                                    type: string
+                                    require: true
                                 fullName:
                                     type: string
                                     required: true
@@ -310,6 +313,242 @@ paths:
                                     message: "_sort can only belong to ['code','fullName','gender','dateOfBirth','class','parentsPhoneNumber','isPolicyBeneficiary','isGraduated'] | _id of the class is invalid",
                                 }
 
+    /students/attendance/:classId:
+        put:
+            tags:
+                - Students
+            summary: Đăng nhập với vai trò là giáo viên
+            description: Api điểm danh lớp hằng ngày
+            requestBody:
+                description: Chỉ truyền lên các học sinh nghỉ học
+                content:
+                    application/json:
+                        schema:
+                            type: array
+                            items:
+                                type: object
+                                properties:
+                                    idStudent:
+                                        type: string
+                                        required: true
+                                    absent:
+                                        type: object
+                                        properties:
+                                            hasPermision:
+                                                type: boolean
+                                            reason:
+                                                type: string
+                        example:
+                            [
+                                {
+                                    'idStudent': '641c92fd17e975b09d28d965',
+                                    'absent': { 'schoolYear': '641c92fd17e975b09d28d965' },
+                                },
+                                {
+                                    'idStudent': '641c92fd17e975b09d28d966',
+                                    'absent': { 'schoolYear': '641c92fd17e975b09d28d965' },
+                                },
+                            ]
+
+            responses:
+                201:
+                    description: Điểm danh thành công
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                            example: { message: 'Attendance has been saved!' }
+
+                204:
+                    description: Không nhận được body data hoặc rỗng
+
+                400:
+                    description: Không thỏa mãn validate hoặc body data không phải array
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    'message': 'The body data does not satisfy the validation',
+                                    'statusCode': 400,
+                                    'error':
+                                        [
+                                            { 'message': 'idStudent of the student is invalid' },
+                                            {
+                                                'id': '641c92fd17e975b09d28d966',
+                                                'message': 'idStudent of the student is invalid',
+                                            },
+                                        ],
+                                }
+
+                404:
+                    description: Student nghỉ gửi lên không nằm trong lớp cần điểm danh
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    'message': 'This student does not exist in the class',
+                                    'statusCode': 404,
+                                    'error': "['6420265eb862c25f87f321c2']",
+                                }
+
+                409:
+                    description: Học sinh vắng gửi lên đã được điểm danh trong ngày hôm nay
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    'message': "Today's attendance for the student already exists",
+                                    'statusCode': 409,
+                                    'error':
+                                        [
+                                            { 'message': 'idStudent of the student is invalid' },
+                                            {
+                                                'id': '641c92fd17e975b09d28d966',
+                                                'name': 'Lê Ngọc Đức 123',
+                                            },
+                                        ],
+                                }
+
+        get:
+            tags:
+                - Students
+            description: Api lấy ra tình trạng điểm danh của 1 lớp theo ngày
+            summary: Đăng nhập với vai trò là giáo viên
+            parameters:
+                - in: query
+                  name: date
+                  description: ngày cần lấy điểm danh
+                  schema:
+                      type: MM-DD-YYYY
+                  default: ngày hiện tại
+
+            responses:
+                200:
+                    description: Lấy thành công
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    absent:
+                                        type: number
+                                    students:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                _id:
+                                                    type: ObjectId
+                                                code:
+                                                    type: string
+                                                fullName:
+                                                    type: string
+                                                    required: true
+                                                gender:
+                                                    type: boolean
+                                                    required: true
+                                                dateOfBirth:
+                                                    type: Date
+                                                    required: true
+                                                class:
+                                                    type: ObjectId
+                                                    required: true
+                                                parentsPhoneNumber:
+                                                    type: string
+                                                    required: true
+                                                isPolicyBeneficiary:
+                                                    type: boolean
+                                                isGraduated:
+                                                    type: boolean
+                                                dropoutDate:
+                                                    type: Date | null
+                                                transferSchool:
+                                                    type: Date | null
+                                                attendanceStatus:
+                                                    type: boolean
+                            example:
+                                {
+                                    'absent': 2,
+                                    'students':
+                                        [
+                                            {
+                                                '_id': '641c92fd17e975b09d28d965',
+                                                'code': '26lndBX8088',
+                                                'class': '6410a8a01e0ac1f41b6ddc00',
+                                                'fullName': 'Lê Ngọc Đức 26',
+                                                'gender': true,
+                                                'dateOfBirth': '2001-10-12T17:00:00.000Z',
+                                                'parentsPhoneNumber': '0328568088',
+                                                'isPolicyBeneficiary': false,
+                                                'isGraduated': false,
+                                                'deleted': false,
+                                                '__v': 0,
+                                                'createdAt': '2023-03-23T17:57:17.057Z',
+                                                'updatedAt': '2023-03-26T12:36:37.118Z',
+                                                'transferSchool': '2023-03-23T17:00:00.000Z',
+                                                'attendanceStatus': false,
+                                            },
+                                        ],
+                                }
+
+                400:
+                    description: idClass không tồn tại hoặc không đúng định dạng objectId
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { statusCode: 400, message: The provided idClass is invalid }
+
+    /student/attendance/:id:
+        get:
+            tags:
+                - Students
+            description: Lấy ra tình trạng điểm danh của 1 học sinh cụ thể
+            summary: Đăng nhập với vai trò phụ huynh học sinh hoặc giáo viên
+            parameters:
+                - in: query
+                  name: month
+                  description: tháng cần lấy
+                  schema:
+                      type: number
+                  default: tháng hiện tại
+                - in: query
+                  name: year
+                  description: năm cần lấy
+                  schema:
+                      type: number
+                  default: năm hiện tại
+
+            responses:
+                200:
+                    description: Trả về tình trạng điểm danh của những ngày nghỉ, rỗng là không nghỉ buổi nào
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Attendance'
+                            example:
+                                [
+                                    {
+                                        'date': '2023-03-26T12:35:26.763Z',
+                                        'schoolYear': null,
+                                        'hasPermision': false,
+                                        'reason': 'Không có lý do',
+                                        '_id': '64203c0e3c9f823f7b3658b0',
+                                    },
+                                ]
+
+                xxx:
+                    description: Các lỗi có thể xảy ra trong api get student detail
+
     /student/services/:id:
         put:
             tags:
@@ -396,6 +635,9 @@ paths:
                             properties:
                                 class:
                                     type: ObjectId
+                                    required: true
+                                code:
+                                    type: string
                                     required: true
                                 fullName:
                                     type: string

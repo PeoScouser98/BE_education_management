@@ -58,33 +58,41 @@ export function createSlug(str: string): string {
 	return str;
 }
 
-// tạo ra 1 mã học sinh của trường
-export function generateStudentID(name: string, phoneNumber: string): string {
-	// Tách các từ trong tên học sinh thành mảng các chuỗi con
-	const nameParts = createSlug(name).split('-');
+// so sánh 2 ngày với nhau
+export const compareDates = (date1: Date, date2: Date): number => {
+	try {
+		const d1 = new Date(formatDate(date1));
+		const d2 = new Date(formatDate(date2));
 
-	// Lấy chữ cái đầu tiên của họ và tên đệm
-	const lastNameInitial = nameParts[0].charAt(0);
-	const middleNameInitial = nameParts
-		.map((item, index) => {
-			if (index === 0 || index === nameParts.length - 1) {
-				return undefined;
-			}
-			return item.charAt(0);
-		})
-		.join('')
-		.toLowerCase();
+		if (d1.getTime() === d2.getTime()) {
+			return 0;
+		} else if (d1.getTime() > d2.getTime()) {
+			return 1;
+		} else {
+			return -1;
+		}
+	} catch (error) {
+		throw error;
+	}
+};
 
-	// Lấy 4 ký tự cuối của số điện thoại phụ huynh
-	const phoneNumberSuffix = phoneNumber.slice(-4);
+// format date MM-DD-YYYY
+export const formatDate = (date: Date): string => {
+	try {
+		let month = '' + (date.getMonth() + 1);
+		let day = '' + date.getDate();
+		const year = date.getFullYear();
 
-	// Ghép các phần tử lại để tạo ra mã số học sinh
-	const studentID =
-		nameParts[nameParts.length - 1].toLowerCase() +
-		lastNameInitial +
-		middleNameInitial +
-		'BX' +
-		phoneNumberSuffix;
+		if (month.length < 2) {
+			month = '0' + month;
+		}
 
-	return studentID;
-}
+		if (day.length < 2) {
+			day = '0' + day;
+		}
+
+		return [month, day, year].join('-');
+	} catch (error) {
+		throw error;
+	}
+};

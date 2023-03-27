@@ -5,6 +5,7 @@ import { IAttendance, Student } from '../models/student.model';
 export const validateReqBodyStudent = (data: Omit<Student, '_id'>) => {
 	const schema = Joi.object({
 		class: Joi.string().required(),
+		code: Joi.string().required(),
 		fullName: Joi.string().required().min(6).max(100),
 		gender: Joi.bool().required(),
 		dateOfBirth: Joi.date().required(),
@@ -19,6 +20,7 @@ export const validateReqBodyStudent = (data: Omit<Student, '_id'>) => {
 
 export const validateAttendanceStudent = (data: Omit<IAttendance, '_id' | 'date'>) => {
 	const schema = Joi.object({
+		schoolYear: Joi.string().required(),
 		hasPermision: Joi.bool().optional(),
 		reason: Joi.string().min(8).max(256).optional(),
 	});
@@ -29,6 +31,7 @@ export const validateAttendanceStudent = (data: Omit<IAttendance, '_id' | 'date'
 export const validateUpdateReqBodyStudent = (data: Partial<Omit<Student, '_id'>>) => {
 	const schema = Joi.object({
 		class: Joi.string().required().optional(),
+		code: Joi.string().required().optional(),
 		fullName: Joi.string().required().min(6).max(100).optional(),
 		gender: Joi.bool().required().optional(),
 		dateOfBirth: Joi.date().required().optional(),

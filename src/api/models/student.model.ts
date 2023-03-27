@@ -2,7 +2,6 @@ import mongooseAutoPopulate from 'mongoose-autopopulate';
 import mongoose, { Model, ObjectId, PaginateModel } from 'mongoose';
 import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 import mongoosePaginate from 'mongoose-paginate-v2';
-import { generateStudentID } from '../../helpers/toolkit';
 
 export interface Student extends Document {
 	_id: ObjectId;
@@ -22,8 +21,8 @@ export interface Student extends Document {
 export interface IAttendance extends Document {
 	_id: ObjectId;
 	date: Date;
-	hasPermision: boolean;
-	reason: string;
+	hasPermision?: boolean;
+	reason?: string;
 }
 
 interface StudentDocument extends Omit<SoftDeleteDocument, '_id'>, Student {}
@@ -108,21 +107,6 @@ const StudentSchema = new mongoose.Schema<StudentDocument>(
 StudentSchema.plugin(mongoosePaginate);
 StudentSchema.plugin(mongooseDelete, { overrideMethods: ['find', 'findOne'], deletedAt: true });
 StudentSchema.plugin(mongooseAutoPopulate);
-
-StudentSchema.pre('save', function (next) {
-	this.code = generateStudentID(this.fullName, this.parentsPhoneNumber);
-
-	next();
-});
-
-StudentSchema.pre('insertMany', function (next, docs) {
-	docs.forEach((item: any, index: number) => {
-		let code = generateStudentID(item.fullName, item.parentsPhoneNumber);
-		docs[index].code = code;
-	});
-
-	next();
-});
 
 const StudentModel: SoftDeleteStudentModel & IPaginatedStudentModel = mongoose.model<
 	StudentDocument,
