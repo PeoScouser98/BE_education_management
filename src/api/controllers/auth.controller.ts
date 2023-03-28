@@ -2,83 +2,22 @@ import 'dotenv/config';
 import { NextFunction, Request, Response } from 'express';
 import createHttpError, { HttpError } from 'http-errors';
 import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
-import '../../app/passport';
-import redisClient from '../../app/redis';
+import { MongooseError } from 'mongoose';
+import path from 'path';
+import '../../app/googlePassport';
+import redisClient from '../../database/redis';
 import UserModel, { User } from '../models/user.model';
-import { authenticateUser } from './../services/auth.service';
-
-/**
- * @description sign in as head master role using email & password
- * @returns {Partial<User>}
- */
-
-export const signinWithPhoneOrEmail = async (req: Request, res: Response) => {
-	try {
-		const verifyData = req.body.phone || req.body.email;
-		const user = await authenticateUser(verifyData as string);
-		console.log(user);
-		const accessToken = jwt.sign(
-			{ payload: { id: user._id, role: user.role } },
-			process.env.ACCESS_TOKEN_SECRET!,
-			{
-				expiresIn: '30m',
-			}
-		);
-		const refreshToken = jwt.sign(
-			{ payload: { id: user._id, role: user.role } },
-			process.env.REFRESH_TOKEN_SECRET!,
-			{
-				expiresIn: '30d',
-			}
-		);
-
-		await Promise.all([
-			redisClient.set(`access_token__${user._id}`, accessToken, {
-				EX: 60 * 60,
-			}),
-			redisClient.set(`refresh_token__${user._id}`, refreshToken, {
-				EX: 60 * 60 * 24 * 30,
-			}),
-		]);
-		res.cookie('access_token', accessToken, {
-			maxAge: 60 * 60 * 1000,
-			httpOnly: true,
-		});
-		res.cookie('authId', user.toObject()._id, {
-			maxAge: 60 * 60 * 1000 * 24 * 30,
-		});
-		const { _id: _, ...rest } = user;
-		res.cookie('user', rest, {
-			maxAge: 60 * 60 * 1000,
-		});
-		res.status(200).json({ user, accessToken, refreshToken });
-	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | Error).message,
-			statusCode: (error as HttpError).status || 500,
-		});
-	}
-};
 
 export const signinWithGoogle = async (req: Request, res: Response) => {
 	try {
 		const user = req.user as Partial<User>;
+		const accessToken = jwt.sign({ payload: req.user }, process.env.ACCESS_TOKEN_SECRET!, {
+			expiresIn: '1h',
+		});
 
-		const accessToken = jwt.sign(
-			{ payload: { id: user._id, role: user.role } },
-			process.env.ACCESS_TOKEN_SECRET!,
-			{
-				expiresIn: '1h',
-			}
-		);
-
-		const refreshToken = jwt.sign(
-			{ payload: { id: user._id, role: user.role } },
-			process.env.REFRESH_TOKEN_SECRET!,
-			{
-				expiresIn: '30d',
-			}
-		);
+		const refreshToken = jwt.sign({ payload: req.user }, process.env.REFRESH_TOKEN_SECRET!, {
+			expiresIn: '30d',
+		});
 
 		await Promise.all([
 			redisClient.set(`access_token__${user._id}`, accessToken, {
@@ -88,42 +27,45 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 				EX: 60 * 60 * 24 * 30,
 			}),
 		]);
+
 		res.cookie('access_token', accessToken, {
 			maxAge: 60 * 60 * 1000,
 			httpOnly: true,
-			secure: true,
+			secure: false,
 		});
-		res.cookie('authId', user._id!, {
+		res.cookie('credential', user._id?.toString().trim(), {
+			maxAge: 60 * 60 * 1000 * 24 * 365,
 			httpOnly: true,
-			secure: true,
+			secure: false,
 		});
 
-		const { _id: _, ...rest } = user;
-		res.cookie('user', JSON.stringify(rest));
-
-		switch (user.role) {
-			case 'HEADMASTER':
-				res.redirect(`${process.env.CLIENT_URL}/headmaster/dashboard`);
-				break;
-			case 'TEACHER':
-				res.redirect(`${process.env.CLIENT_URL}/teacher/dashboard`);
-				break;
-			case 'PARENTS':
-				res.redirect(`${process.env.CLIENT_URL}/parents/dashboard`);
-				break;
-		}
+		return res.redirect(`${process.env.CLIENT_URL}/signin/success`);
 	} catch (error) {
-		console.log((error as Error).message);
-		return res.status(400).json({
-			message: 'Failed to signin!',
-			statusCode: 400,
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
 		});
 	}
 };
+export const getUser = async (req: Request, res: Response) => {
+	try {
+		if (!req.user) {
+			throw createHttpError.NotFound(`Failed to get user's info`);
+		}
 
+		return res.status(200).json(req.user);
+	} catch (error) {
+		return res.status((error as HttpError).status || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status,
+		});
+	}
+};
 export const refreshToken = async (req: Request, res: Response) => {
 	try {
-		const storedRefreshToken = await redisClient.get(`refresh_token__${req.params.userId}`);
+		const storedRefreshToken = await redisClient.get(
+			`refresh_token__${req.cookies.credential}`
+		);
 		if (!storedRefreshToken) {
 			throw createHttpError.BadRequest('Invalid refresh token!');
 		}
@@ -142,20 +84,23 @@ export const refreshToken = async (req: Request, res: Response) => {
 			message: 'ok',
 		});
 	} catch (error) {
-		// handle errors
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError | JsonWebTokenError).message,
+			statusCode: (error as HttpError).status || 500,
+		});
 	}
 };
 
 export const signout = async (req: Request, res: Response) => {
 	try {
-		console.log(req.cookies.authId);
+		console.log(req.cookies.credential);
 		const existedUser = await UserModel.findOne({
-			_id: req.cookies.authId,
+			_id: req.cookies.credential,
 		}).exec();
 		if (!existedUser) {
 			throw createHttpError.NotFound("User doesn't exist");
 		}
-		const accessToken = await redisClient.get(`access_token__${req.cookies.authId}`);
+		const accessToken = await redisClient.get(`access_token__${req.cookies.credential}`);
 
 		if (!accessToken)
 			return res.status(400).json({
@@ -164,15 +109,15 @@ export const signout = async (req: Request, res: Response) => {
 			});
 		// Delete user's access & refresh token in Redis
 		await Promise.all([
-			redisClient.del(`access_token__${req.cookies.authId}`),
-			redisClient.del(`refresh_token__${req.cookies.authId}`),
+			redisClient.del(`access_token__${req.cookies.credential}`),
+			redisClient.del(`refresh_token__${req.cookies.credential}`),
 		]);
 		// Reset all client's cookies
 		req.logout((err) => {
 			if (err) throw err;
 		});
 		res.cookie('access_token', '');
-		res.cookie('authId', '');
+		res.cookie('credential', '');
 		res.cookie('user', '');
 
 		return res.status(202).json({
@@ -180,9 +125,9 @@ export const signout = async (req: Request, res: Response) => {
 			statusCode: 202,
 		});
 	} catch (error) {
-		return res.status(400).json({
-			message: (error as Error).message,
-			statusCode: 400,
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
 		});
 	}
 };
@@ -201,9 +146,10 @@ export const verifyAccount = async (req: Request, res: Response, next: NextFunct
 		await UserModel.findOneAndUpdate({ email: auth }, updateUserData, {
 			new: true,
 		});
-		return res.send('kích hoạt tài khoản thành công!');
+
+		return res.sendFile(path.resolve(path.join(__dirname, '../views/send-mail-response.html')));
 	} catch (error) {
-		return res.status(401).json({
+		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | JsonWebTokenError | Error).message,
 			statusCode: (error as HttpError).status,
 		});

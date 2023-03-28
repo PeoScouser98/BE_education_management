@@ -1,63 +1,19 @@
-definitions:
-    Teacher:
-        type: object
-        properties:
-            fullName:
-                type: string
-            gender:
-                type: string
-                format: uppercase
-                default: NỮ
-                enum:
-                    - NAM
-                    - NỮ
-            email:
-                type: string
-            password:
-                type: string
-            eduBackground:
-                type: string
-            phone:
-                type: string
-            dateOfBirth:
-                type: Date
-            employmentStatus:
-                type: string
-                format: uppercase
-                default: ĐANG CÔNG TÁC
-                enum:
-                    - ĐANG CÔNG TÁC
-                    - ĐÃ NGHỈ VIỆC
-                    - CHUYỂN CÔNG TÁC
-        require:
-            - fullName
-            - email
-            - eduBackground
-            - phone
-            - dateOfBirth
-    HttpError:
-        type: object
-        properties:
-            message:
-                type: string
-            statusCode:
-                type: number
-
 paths:
-    /auth/signin-as-teacher:
-        post:
+    /auth/google:
+        get:
             tags:
-                - Teacher
-            summary: Đăng nhập với vai trò là Teacher.
-            description: Trả về access token và thông tin User, và gửi về access token theo cookie của response, lần request tiếp theo access token sẽ tự động gửi lên theo cookie của request.
-            requestBody:
-                require: true
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#definitions/SigninRequestBody'
-                        example: { email: quanghiep03198@gmail.com, password: 'cfbc30' }
+                - Auth
+            summary: Đăng nhập với Google.
+            responses:
+                200:
+                    description: Ok
+                    summary: Redirect đến page signin/success của client -> call api `{{baseUrl}}/auth/user` lấy thông tin user đăng nhập
 
+    /auth/user:
+        get:
+            tags:
+                - Auth
+            summary: Lấy thông tin User đã đăng nhập.
             responses:
                 200:
                     description: Ok
@@ -74,43 +30,42 @@ paths:
                                         example:
                                             {
                                                 _id: '5ffceda8cfc3ee8f0b3a507d',
-                                                fullName: 'Adminstrator',
-                                                photoUrl: 'https://ui-avatars.com/api/?name=a',
+                                                displayName: 'Adminstrator',
+                                                picture: 'https://ui-avatars.com/api/?name=a',
                                             }
-
-                400:
-                    description: Bad request due to lack of request's body or incorrect password
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/definitions/HttpError'
-                            example: { messsage: 'BAD REQUEST', statusCode: 400 }
 
                 404:
                     description: Account does not exist
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
-                            example: { messsage: 'NOT FOUND', statusCode: 404 }
-                5xx:
-                    description: Unexpected error
+                                $ref: '/#/components/schemas/HttpError'
+
+    /auth/signout:
+        get:
+            tags:
+                - Auth
+            summary: Đăng xuất
+            description: Đăng xuất khỏi hệ thống
+            responses:
+                200:
+                    description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
-                            example: { messsage: 'INTERNAL ERROR', statusCode: 500 }
+                                $ref: '#/components/schemas/HttpResponse'
+                            example: { message: 'Signed out!', statusCode: 200 }
 
     /create-teacher-account:
         post:
             tags:
-                - Teacher
+                - User
             summary: Tạo mới giáo viên (chỉ có User role là Headmaster mới tạo được)
             description: Trả về thông tin tài khoản giáo viên và gửi mật khẩu về mail cho giáo viên
             requestBody:
                 type: object
                 schema:
-                    $ref: '#/definitions/Teacher'
+                    $ref: '#/components/schemas/Teacher'
                 example:
                     {
                         email: 'quanghiep03198@gmail.com',
@@ -127,7 +82,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/Teacher'
+                                $ref: '#/components/schemas/Teacher'
                             example:
                                 {
                                     email: 'quanghiep03198@gmail.com',
@@ -143,12 +98,52 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
+                                $ref: '#/components/schemas/HttpError'
                             example: { message: 'BAD REQUEST', statusCode: 400 }
                 5xx:
                     description: Unexpected Error
                     content:
                         application/json:
                             schema:
-                                $ref: '#/definitions/HttpError'
+                                $ref: '#/components/schemas/HttpError'
                             example: { message: 'INTERNAL ERROR', statusCode: 500 }
+
+    /update-user-info:
+        patch:
+            tags:
+                - User
+            summary: Update thông tin người dùng
+            responses:
+                201:
+                    description: Updated
+                401:
+                    description: Unauthorized
+                400:
+                    description: Bad Request
+                5xx:
+                    description: Internal Server Error
+
+    /refresh-token:
+        get:
+            tags:
+                - Auth
+            summary: Lấy access token mới.
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    refreshToken:
+                                        type: string
+                                    message:
+                                        type: string
+                                    statusCode:
+                                        type: number
+                            example:
+                                {
+                                    refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoIjoiMTgyYTExYzIyY2M1YmJiMWVkNjY5ZWRkYmRkZjBiNDZjMjYxMDA4YmIxZDRkMzllIiwiaWF0IjoxNjc4MjAyMzIzLCJleHAiOjE2NzgyMDU5MjN9.SsBcxJH5QN36QWvbaJl4epl7kTmzFCxUTkf1Rto683g',
+                                    message: 'ok',
+                                    statusCode: 200,
+                                }

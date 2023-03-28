@@ -2,8 +2,8 @@ import app from './app';
 import 'dotenv/config';
 import http from 'http';
 import connectSocketIO from './app/socket';
-import connectMongoDB from './configs/db.config';
-import './app/redis';
+import connectMongoDB from './database/mongodb';
+import './database/redis';
 
 const server = http.createServer(app);
 

@@ -1,12 +1,6 @@
 node_modules
-<<<<<<< HEAD
 .vercel
-=======
-.vercel
-dist
-database
-mocks
+dump.rdb
+thunder-tests
 .vscode
-./package-lock.json
-./note.txt
->>>>>>> class_features
+data

@@ -3,6 +3,7 @@ import 'dotenv/config';
 const connectMongoDB = async () => {
 	try {
 		mongoose.set('strictQuery', false);
+		console.log(process.env.NODE_ENV);
 		const isProductionEnv = process.env.NODE_ENV?.includes('production');
 		isProductionEnv
 			? console.log('[INFO] ::: Production Mode!')

@@ -64,7 +64,7 @@ const setFilePublic = async (fileId: string) => {
 		});
 		return drive.files.get({
 			fileId,
-			fields: 'webViewLink,webContentLink',
+			fields: 'webViewLink, webContentLink',
 		});
 	} catch (error) {
 		console.log(error);

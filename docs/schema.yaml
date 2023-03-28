@@ -1,0 +1,231 @@
+components:
+    schemas:
+        User:
+            type: object
+            properties:
+                _id:
+                    type: string
+                displayName:
+                    type: string
+                gender:
+                    type: string
+                    format: uppercase
+                    enum:
+                        - nam
+                        - nữ
+                email:
+                    type: string
+
+                eduBackground:
+                    type: object
+                    properties:
+                        qualification:
+                            type: string
+                        universityName:
+                            type: string
+                        graduatedAt:
+                            type: date
+                    example:
+                        {
+                            qualification: 'Cao Đẳng',
+                            universityName: 'FPT Poly',
+                            graduatedAt: '2023-03-14T17:02:24.526+00:00',
+                        }
+                phone:
+                    type: string
+                dateOfBirth:
+                    type: Date
+                isVerified:
+                    type: boolean
+            required:
+                - fullName
+                - email
+                - eduBackground
+                - phone
+                - dateOfBirth
+
+        Teacher:
+            allOf:
+                - $ref: '#/components/schemas/User'
+                - type: object
+            properties:
+                employmentStatus:
+                    type: boolean
+                    default: false
+
+        Class:
+            type: object
+            properties:
+                _id:
+                    type: string
+                    example: '637ec5ce577ebd6709c65124'
+                className:
+                    type: string
+                    example: '2D'
+                grade:
+                    type: number
+                    example: 2
+                headTeacher:
+                    type: ObjectId
+                    example: '637ec5ce577ebd6709c65124'
+                createdAt:
+                    type: Date
+                    example: '2023-03-14T17:02:24.526+00:00'
+                updatedAt:
+                    type: Date
+                    example: '2023-03-14T17:02:24.526+00:00'
+                deleted:
+                    type: Boolean
+                    example: false
+
+        Subject:
+            type: object
+            properties:
+                _id:
+                    type: ObjectId
+                subjectName:
+                    type: string
+                slug:
+                    type: string
+                createdAt:
+                    type: Date
+                updatedAt:
+                    type: Date
+                deleted:
+                    type: Boolean
+
+        Permissions:
+            type: object
+            required:
+                - role
+                - type
+            properties:
+                _id:
+                    type: string
+                    example: '637ec5ce577ebd6709c65124'
+                    format: uuid
+                role:
+                    type: string
+                    enum: ['ADMIN', 'HEADMASTER', 'TEACHER', 'PARENTS']
+                    example: 'ADMIN'
+                type:
+                    type: string
+                    example: 'class'
+                permissions:
+                    type: array
+                    items:
+                        type: object
+                        required:
+                            - code
+                            - name
+                        properties:
+                            _id:
+                                type: string
+                                format: uuid
+                            name:
+                                type: string
+                                example: 'Lớp học'
+                            code:
+                                type: string
+                                example: 'class.list_all'
+                                uniqueItems: true
+
+        Student:
+            type: object
+            properties:
+                _id:
+                    type: ObjectId
+                code:
+                    type: string
+                fullName:
+                    type: string
+                    required: true
+                gender:
+                    type: boolean
+                    required: true
+                dateOfBirth:
+                    type: Date
+                    required: true
+                class:
+                    type: ObjectId
+                    required: true
+                parentsPhoneNumber:
+                    type: string
+                    required: true
+                isPolicyBeneficiary:
+                    type: boolean
+                isGraduated:
+                    type: boolean
+                dropoutDate:
+                    type: Date | null
+                transferSchool:
+                    type: Date | null
+                absentDays:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            _id:
+                                type: ObjectId
+                            date:
+                                type: Date
+                            hasPermision:
+                                type: boolean
+                            reason:
+                                type: string
+
+        Attendance:
+            type: array
+            items:
+                type: object
+                properties:
+                    _id:
+                        type: ObjectId
+                    date:
+                        type: Date
+                    hasPermision:
+                        type: boolean
+                    reason:
+                        type: string
+
+        StudentResponse:
+            type: object
+            properties:
+                docs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Student'
+                totalDocs:
+                    type: number
+                limit:
+                    type: number
+                totalPages:
+                    type: number
+                page:
+                    type: number
+                pagingCounter:
+                    type: number
+                hasPrevPage:
+                    type: boolean
+                hasNextPage:
+                    type: boolean
+                prevPage:
+                    type: boolean
+                nextPage:
+                    type: boolean
+
+        HttpError:
+            type: object
+            properties:
+                message:
+                    type: string
+                statusCode:
+                    type: number
+
+        HttpResponse:
+            type: object
+            properties:
+                mesage:
+                    type: string
+                statusCode:
+                    type: number
