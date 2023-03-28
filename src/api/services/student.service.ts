@@ -1,6 +1,7 @@
 import createHttpError from 'http-errors';
 import mongoose, { SortOrder } from 'mongoose';
 import { compareDates, compareObject, getPropertieOfArray } from '../../helpers/toolkit';
+import ClassModel from '../models/class.model';
 import StudentModel, { IAttendance, Student } from '../models/student.model';
 import {
 	validateAttendanceStudent,
@@ -508,6 +509,53 @@ export const attendanceOfStudentByMonth = async (id: string, month: number, year
 		});
 
 		return result;
+	} catch (error) {
+		throw error;
+	}
+};
+
+// Lấy ra các học sinh chính sách
+export const getPolicyBeneficiary = async (page: number, limit: number) => {
+	return await StudentModel.paginate(
+		{ dropoutDate: null, transferSchool: null, isPolicyBeneficiary: true },
+		{ page: page, limit: limit, select: '-absentDays', sort: { class: 'desc' } }
+	);
+};
+
+// Lấy ra tất cả các học sinh vắng mặt điểm danh
+export const getAttendanceAllClass = async (page: number, limit: number, date: Date) => {
+	try {
+		const nextDay = new Date(date);
+		nextDay.setDate(date.getDate() + 1);
+
+		// học sinh vắng mặt của toàn trường trong ngày
+		const studentAbsentDays = await StudentModel.paginate(
+			{
+				absentDays: {
+					$elemMatch: {
+						date: {
+							$gte: date,
+							$lt: nextDay,
+						},
+					},
+				},
+			},
+			{
+				lean: true,
+				page: page,
+				limit: limit,
+				sort: { class: 'desc' },
+				populate: { path: 'class', select: 'className' },
+			}
+		);
+
+		// lấy ra tất cả các class hiện tại của trường
+		const classes = await ClassModel.find({}).sort({ grade: 'asc' }).lean().select('className');
+
+		return {
+			...studentAbsentDays,
+			classes,
+		};
 	} catch (error) {
 		throw error;
 	}
