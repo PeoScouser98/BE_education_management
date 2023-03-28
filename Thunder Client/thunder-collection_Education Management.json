@@ -1,7 +1,7 @@
 {
     "client": "Thunder Client",
     "collectionName": "Education Management",
-    "dateExported": "2023-03-26T15:44:20.502Z",
+    "dateExported": "2023-03-28T17:13:24.062Z",
     "version": "1.1",
     "folders": [
         {
@@ -165,12 +165,12 @@
             "method": "PUT",
             "sortNum": 70000,
             "created": "2023-03-25T17:41:41.514Z",
-            "modified": "2023-03-26T15:44:14.647Z",
+            "modified": "2023-03-26T17:08:59.983Z",
             "headers": [],
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "[\n  {\n    \"idStudent\": \"641c92fd17e975b09d28d965\",\n    \"absent\": {\n      \"schoolYear\": \"641c92fd17e975b09d28d965\"\n    }\n  },\n  {\n    \"idStudent\": \"641c92fd17e975b09d28d966\",\n    \"absent\": {\n      \"schoolYear\": \"641c92fd17e975b09d28d965\"\n    }\n  }\n]",
+                "raw": "[\n  {\n    \"idStudent\": \"6420265eb862c25f87f321c2\",\n    \"absent\": {\n      \"schoolYear\": \"641c92fd17e975b09d28d965\"\n    }\n  }\n]",
                 "form": []
             },
             "tests": []
@@ -204,9 +204,62 @@
             "method": "GET",
             "sortNum": 100000,
             "created": "2023-03-26T15:37:47.986Z",
-            "modified": "2023-03-26T15:38:40.970Z",
+            "modified": "2023-03-26T17:31:15.505Z",
             "headers": [],
             "params": [],
+            "tests": []
+        },
+        {
+            "_id": "54d1c70d-cea2-49f0-a285-ac91ca1cb021",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "26343666-5468-444f-8adf-e37c64e9ef83",
+            "name": "PolicyBeneficiary student",
+            "url": "/students/policyBeneficiary",
+            "method": "GET",
+            "sortNum": 110000,
+            "created": "2023-03-28T16:33:11.913Z",
+            "modified": "2023-03-28T16:33:32.207Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "9969cf37-b3cf-42ff-9659-a462d8b78dc2",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "26343666-5468-444f-8adf-e37c64e9ef83",
+            "name": "update",
+            "url": "/student/641c92fd17e975b09d28d966",
+            "method": "PUT",
+            "sortNum": 120000,
+            "created": "2023-03-28T16:34:28.858Z",
+            "modified": "2023-03-28T16:38:21.858Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"isPolicyBeneficiary\":true\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "23485e07-eb11-44d5-9124-f121255dedff",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "26343666-5468-444f-8adf-e37c64e9ef83",
+            "name": "selectAttendance all class",
+            "url": "/students/attendance?date=03-26-2023",
+            "method": "GET",
+            "sortNum": 130000,
+            "created": "2023-03-28T16:40:30.602Z",
+            "modified": "2023-03-28T16:40:55.704Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "date",
+                    "value": "03-26-2023",
+                    "isPath": false
+                }
+            ],
             "tests": []
         }
     ],
