@@ -313,6 +313,192 @@ paths:
                                     message: "_sort can only belong to ['code','fullName','gender','dateOfBirth','class','parentsPhoneNumber','isPolicyBeneficiary','isGraduated'] | _id of the class is invalid",
                                 }
 
+    /students/attendance:
+        get:
+            tags:
+                - Students
+            summary: Đăng nhập với vai trò HEADMASTER
+            description: Xem tình trạng diểm danh của toàn bộ trường học
+            parameters:
+                - in: query
+                  name: page
+                  default: 1
+                  schema:
+                      type: number
+                - in: query
+                  name: limit
+                  default: 10
+                  schema:
+                      type: number
+                - in: query
+                  name: date
+                  default: ngày hôm nay
+                  schema:
+                      type: MM-DD-YYYY
+
+            responses:
+                200:
+                    description: ok
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    docs:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/Student'
+                                    totalDocs:
+                                        type: number
+                                    limit:
+                                        type: number
+                                    totalPages:
+                                        type: number
+                                    page:
+                                        type: number
+                                    pagingCounter:
+                                        type: number
+                                    hasPrevPage:
+                                        type: boolean
+                                    hasNextPage:
+                                        type: boolean
+                                    prevPage:
+                                        type: boolean
+                                    nextPage:
+                                        type: boolean
+                                    classes:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                _id:
+                                                    type: objectId
+                                                className:
+                                                    type: string
+
+                            example:
+                                {
+                                    'docs':
+                                        [
+                                            {
+                                                '_id': '641c92fd17e975b09d28d965',
+                                                'code': '26lndBX8088',
+                                                'class':
+                                                    {
+                                                        '_id': '6410a8a01e0ac1f41b6ddc00',
+                                                        'className': '2D',
+                                                    },
+                                                'fullName': 'Lê Ngọc Đức 26',
+                                                'gender': true,
+                                                'dateOfBirth': '2001-10-12T17:00:00.000Z',
+                                                'parentsPhoneNumber': '0328568088',
+                                                'isPolicyBeneficiary': true,
+                                                'isGraduated': false,
+                                                'deleted': false,
+                                                'absentDays':
+                                                    [
+                                                        {
+                                                            'date': '2023-03-26T12:35:26.763Z',
+                                                            'schoolYear': '641c92fd17e975b09d28d965',
+                                                            'hasPermision': false,
+                                                            'reason': 'Không có lý do',
+                                                            '_id': '64203c0e3c9f823f7b3658b0',
+                                                        },
+                                                    ],
+                                            },
+                                        ],
+                                    'totalDocs': 2,
+                                    'limit': 10,
+                                    'totalPages': 1,
+                                    'page': 1,
+                                    'pagingCounter': 1,
+                                    'hasPrevPage': false,
+                                    'hasNextPage': false,
+                                    'prevPage': null,
+                                    'nextPage': null,
+                                    'classes':
+                                        [
+                                            {
+                                                '_id': '6411c69762b26008cc29f38c',
+                                                'className': '1E',
+                                            },
+                                            {
+                                                '_id': '6410a8a01e0ac1f41b6ddc00',
+                                                'className': '2D',
+                                            },
+                                            {
+                                                '_id': '6411d40ac5b33ec866d3d5b5',
+                                                'className': '2E',
+                                            },
+                                            {
+                                                '_id': '6411c3529494c67a3a5ac6bf',
+                                                'className': '3D',
+                                            },
+                                            {
+                                                '_id': '6411c3529494c67a3a5ac6c0',
+                                                'className': '5C',
+                                            },
+                                        ],
+                                }
+
+    /students/policyBeneficiary:
+        get:
+            tags:
+                - Students
+            summary: đăng nhập với vai trò giáo viên
+            description: Lấy ra thông tin các học sinh thuộc diện chính sách (toàn trường)
+            parameters:
+                - in: query
+                  name: page
+                  default: 1
+                  schema:
+                      type: number
+                - in: query
+                  name: limit
+                  default: 10
+                  schema:
+                      type: number
+
+            responses:
+                200:
+                    description: ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StudentResponse'
+                            example:
+                                {
+                                    'docs':
+                                        [
+                                            {
+                                                'transferSchool': null,
+                                                'dropoutDate': null,
+                                                '_id': '641c92fd17e975b09d28d965',
+                                                'code': '26lndBX8088',
+                                                'class': '6410a8a01e0ac1f41b6ddc00',
+                                                'fullName': 'Lê Ngọc Đức 26',
+                                                'gender': true,
+                                                'dateOfBirth': '2001-10-12T17:00:00.000Z',
+                                                'parentsPhoneNumber': '0328568088',
+                                                'isPolicyBeneficiary': true,
+                                                'isGraduated': false,
+                                                'deleted': false,
+                                                '__v': 0,
+                                                'createdAt': '2023-03-23T17:57:17.057Z',
+                                                'updatedAt': '2023-03-28T16:35:40.838Z',
+                                            },
+                                        ],
+                                    'totalDocs': 2,
+                                    'limit': 10,
+                                    'totalPages': 1,
+                                    'page': 1,
+                                    'pagingCounter': 1,
+                                    'hasPrevPage': false,
+                                    'hasNextPage': false,
+                                    'prevPage': null,
+                                    'nextPage': null,
+                                }
+
     /students/attendance/:classId:
         put:
             tags:
