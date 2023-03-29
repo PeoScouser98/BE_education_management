@@ -1,0 +1,84 @@
+paths:
+    /schoolYears:
+        get:
+            tags:
+                - SchoolYears
+            description: Lấy ra tất cả các năm học
+            summary: Đăng nhập
+            parameters:
+                - in: query
+                  name: page
+                  default: 1
+                  schema:
+                      type: number
+                - in: query
+                  name: limit
+                  default: 10
+                  schema:
+                      type: number
+
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SchoolYearResponse'
+                            example:
+                                {
+                                    'docs':
+                                        [
+                                            {
+                                                '_id': '642471567d7e6e1b3dbed288',
+                                                'startAt': 2023,
+                                                'createdAt': '2023-03-29T17:11:50.562Z',
+                                                'updatedAt': '2023-03-29T17:11:50.562Z',
+                                                'endAt': 2024,
+                                                '__v': 0,
+                                            },
+                                        ],
+                                    'totalDocs': 1,
+                                    'limit': 10,
+                                    'totalPages': 1,
+                                    'page': 1,
+                                    'pagingCounter': 1,
+                                    'hasPrevPage': false,
+                                    'hasNextPage': false,
+                                    'prevPage': null,
+                                    'nextPage': null,
+                                }
+
+    /schoolYear:
+        post:
+            tags:
+                - SchoolYears
+            summary: Đăng nhập với vai trò HEADMASTER
+            description: Tạo mới 1 năm học
+            responses:
+                201:
+                    description: Tạo mới năm học thành công
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SchoolYear'
+                            example:
+                                {
+                                    'startAt': 2023,
+                                    '_id': '6424754208ab607d1323fa73',
+                                    'createdAt': '2023-03-29T17:28:34.575Z',
+                                    'updatedAt': '2023-03-29T17:28:34.575Z',
+                                    'endAt': 2024,
+                                    '__v': 0,
+                                }
+
+                409:
+                    description: Năm học năm nay đã tồn tại trong db
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    'message': 'The academic year 2023-2024 already exists',
+                                    'statusCode': 409,
+                                }

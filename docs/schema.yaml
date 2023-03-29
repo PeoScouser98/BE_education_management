@@ -61,12 +61,15 @@ components:
                     example: '637ec5ce577ebd6709c65124'
                 className:
                     type: string
+                    description: 'Tên lớp học'
                     example: '2D'
                 grade:
                     type: number
+                    description: 'Khối của lớp học'
                     example: 2
                 headTeacher:
                     type: ObjectId
+                    description: 'id giáo viên chủ nhiệm'
                     example: '637ec5ce577ebd6709c65124'
                 createdAt:
                     type: Date
@@ -85,8 +88,11 @@ components:
                     type: ObjectId
                 subjectName:
                     type: string
+                    description: 'Tên môn học'
                 slug:
                     type: string
+                    unique: true
+                    description: 'slug của môn học (server tự tạo)'
                 createdAt:
                     type: Date
                 updatedAt:
@@ -137,42 +143,42 @@ components:
                     type: ObjectId
                 code:
                     type: string
+                    description: 'mã định danh của bộ giáo dục'
+                    required: true
                 fullName:
                     type: string
                     required: true
+                    description: 'Họ tên đầy đủ'
                 gender:
                     type: boolean
                     required: true
+                    description: 'Giới tính'
                 dateOfBirth:
                     type: Date
                     required: true
+                    description: 'Ngày sinh'
                 class:
                     type: ObjectId
                     required: true
+                    description: 'id lớp học hiện tại'
                 parentsPhoneNumber:
                     type: string
                     required: true
+                    description: 'Số điện thoại phụ huynh'
                 isPolicyBeneficiary:
                     type: boolean
+                    description: 'Có phải gia định thuộc diện chính sách không'
                 isGraduated:
                     type: boolean
+                    description: 'Đã tốt nghiệp chưa'
                 dropoutDate:
                     type: Date | null
+                    description: 'Ngày bỏ học (không đi học nữa hoặc bị đuổi)'
                 transferSchool:
                     type: Date | null
+                    description: 'Ngày chuyển trường'
                 absentDays:
-                    type: array
-                    items:
-                        type: object
-                        properties:
-                            _id:
-                                type: ObjectId
-                            date:
-                                type: Date
-                            hasPermision:
-                                type: boolean
-                            reason:
-                                type: string
+                    $ref: '#/components/schemas/Attendance'
 
         Attendance:
             type: array
@@ -183,10 +189,15 @@ components:
                         type: ObjectId
                     date:
                         type: Date
+                        description: 'Ngày vắng mặt'
                     hasPermision:
                         type: boolean
+                        description: 'Có phép không'
+                        default: false
                     reason:
                         type: string
+                        description: 'Lý do nghỉ'
+                        default: 'Không lý do'
 
         StudentResponse:
             type: object
@@ -195,6 +206,48 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/Student'
+                totalDocs:
+                    type: number
+                limit:
+                    type: number
+                totalPages:
+                    type: number
+                page:
+                    type: number
+                pagingCounter:
+                    type: number
+                hasPrevPage:
+                    type: boolean
+                hasNextPage:
+                    type: boolean
+                prevPage:
+                    type: boolean
+                nextPage:
+                    type: boolean
+
+        SchoolYear:
+            type: object
+            properties:
+                _id:
+                    type: objectId
+                startAt:
+                    type: number
+                    default: năm hiện tại
+                endAt:
+                    type: number
+                    default: năm hiện tại + 1
+                createdAt:
+                    type: Date
+                updatedAt:
+                    type: Date
+
+        SchoolYearResponse:
+            type: object
+            properties:
+                docs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/SchoolYear'
                 totalDocs:
                     type: number
                 limit:
