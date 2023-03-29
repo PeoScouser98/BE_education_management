@@ -1,24 +1,40 @@
 import SchoolYearModel, { SchoolYear } from '../models/schoolYear.model';
+import createHttpError from 'http-errors';
 
-export const getAll = async (limit: number, currPage: number) => {
-	const schoolYears = await SchoolYearModel.find()
-		.limit(limit)
-		.skip(limit * currPage - limit)
-		.exec();
-
-	const countDocumentSchoolYear = await SchoolYearModel.countDocuments();
-	return {
-		schoolYears,
-		pages: Math.ceil(countDocumentSchoolYear / limit),
-	};
+// lấy ra toàn bộ các năm học
+export const getAllSchoolYear = async (limit: number, page: number) => {
+	try {
+		return await SchoolYearModel.paginate(
+			{},
+			{
+				limit: limit,
+				page: page,
+				sort: { startAt: 'asc' },
+			}
+		);
+	} catch (error) {
+		throw error;
+	}
 };
 
-export const create = async (data: SchoolYear) => {
-	const newSchoolYear = new SchoolYearModel(data);
-	await newSchoolYear.save();
-	return newSchoolYear;
+// tạo mới 1 năm học
+export const createSchoolYear = async () => {
+	try {
+		const schoolYearExist: SchoolYear | null = await SchoolYearModel.findOne({
+			startAt: new Date().getFullYear(),
+			endAt: new Date().getFullYear() + 1,
+		});
+
+		// schoolyear đã tồn tại
+		if (schoolYearExist) {
+			throw createHttpError(
+				409,
+				`The academic year ${schoolYearExist.startAt}-${schoolYearExist.endAt} already exists`
+			);
+		}
+
+		return await new SchoolYearModel({}).save();
+	} catch (error) {
+		throw error;
+	}
 };
-
-export const update = async (data: SchoolYear, schoolYearId: string) => await SchoolYearModel.findByIdAndUpdate(schoolYearId, data, { new: true });
-
-export const remove = async (schoolYearId: string) => await SchoolYearModel.findByIdAndDelete(schoolYearId);

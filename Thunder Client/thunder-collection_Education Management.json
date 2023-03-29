@@ -1,7 +1,7 @@
 {
     "client": "Thunder Client",
     "collectionName": "Education Management",
-    "dateExported": "2023-03-28T17:13:24.062Z",
+    "dateExported": "2023-03-29T17:43:46.119Z",
     "version": "1.1",
     "folders": [
         {
@@ -31,6 +31,13 @@
             "containerId": "",
             "created": "2023-03-25T17:41:27.795Z",
             "sortNum": 40000
+        },
+        {
+            "_id": "c7b77429-a552-4681-8175-e17ac1bb8818",
+            "name": "SchoolYears",
+            "containerId": "",
+            "created": "2023-03-29T16:29:28.079Z",
+            "sortNum": 50000
         }
     ],
     "requests": [
@@ -260,6 +267,34 @@
                     "isPath": false
                 }
             ],
+            "tests": []
+        },
+        {
+            "_id": "ff767718-7102-4d06-a13b-96370faf9dad",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "c7b77429-a552-4681-8175-e17ac1bb8818",
+            "name": "get list",
+            "url": "/schoolYears",
+            "method": "GET",
+            "sortNum": 140000,
+            "created": "2023-03-29T16:29:37.278Z",
+            "modified": "2023-03-29T16:38:45.937Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "049e7f50-16f9-412e-a2ed-17341f28af62",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "c7b77429-a552-4681-8175-e17ac1bb8818",
+            "name": "create",
+            "url": "/schoolYear",
+            "method": "POST",
+            "sortNum": 150000,
+            "created": "2023-03-29T17:10:05.073Z",
+            "modified": "2023-03-29T17:10:45.813Z",
+            "headers": [],
+            "params": [],
             "tests": []
         }
     ],
