@@ -70,3 +70,73 @@ paths:
                                     'message': 'Subject does not exist or has been deleted!',
                                     'statusCode': 404,
                                 }
+
+    /transcript/:studentId/:subjectId:
+        post:
+            tags:
+                - Transcript
+            summary: Đăng nhập giới vai trò là giáo viên bộ môn của học sinh
+            description: Api nhập điểm của 1 học sinh
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SubjectTranscriptUpdateOne'
+                        example: { 'secondSemester': { 'midtermTest': 9, 'finalTest': 2 } }
+
+            responses:
+                201:
+                    description: Nhập điểm thành công
+                    content:
+                        application/json:
+                            example:
+                                {
+                                    'firstSemester': { 'midtermTest': 0, 'finalTest': 0 },
+                                    'secondSemester': { 'midtermTest': 9, 'finalTest': 2 },
+                                    '_id': '6425c217a908fb2bf9da973f',
+                                    'student':
+                                        {
+                                            '_id': '641c92fd17e975b09d28d967',
+                                            'class': '6410a8a01e0ac1f41b6ddc00',
+                                            'fullName': 'Lê Ngọc Đức 26',
+                                            'absentDays': [],
+                                        },
+                                    'schoolYear':
+                                        {
+                                            '_id': '6424754208ab607d1323fa73',
+                                            'startAt': 2023,
+                                            'createdAt': '2023-03-29T17:28:34.575Z',
+                                            'updatedAt': '2023-03-29T17:28:34.575Z',
+                                            'endAt': 2024,
+                                            '__v': 0,
+                                        },
+                                    'subject': '641af3f5346143e3ee6e0977',
+                                    'deleted': false,
+                                    '__v': 0,
+                                }
+
+                304:
+                    description: Body data gửi lên rỗng
+                400:
+                    description: studentId hoặc subjectId không phải kiểu objectId , không thỏa mãn validate
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    'message': '"secondSemester.finalTest" must be less than or equal to 10',
+                                    'statusCode': 400,
+                                }
+
+                404:
+                    description: student hoặc subject không tồn tại hoặc schoolYear năm nay chưa được tạo
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    'message': 'Subject does not exist or has been deleted!',
+                                    'statusCode': 404,
+                                }

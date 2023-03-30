@@ -17,3 +17,19 @@ export const validateSubjectTranscript = (
 	});
 	return schema.validate(data);
 };
+
+export const validateSubjectTranscriptOne = (
+	data: Omit<SubjectTranscript, '_id' | 'subject' | 'schoolYear' | 'student'>
+) => {
+	const schema = Joi.object({
+		firstSemester: Joi.object({
+			midtermTest: Joi.number().required().min(0).max(10),
+			finalTest: Joi.number().required().min(0).max(10),
+		}).optional(),
+		secondSemester: Joi.object({
+			midtermTest: Joi.number().required().min(0).max(10),
+			finalTest: Joi.number().required().min(0).max(10),
+		}).optional(),
+	});
+	return schema.validate(data);
+};

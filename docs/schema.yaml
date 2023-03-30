@@ -307,6 +307,41 @@ components:
                             max: 10
                             description: Điểm cuối kỳ 2
 
+        SubjectTranscriptUpdateOne:
+            type: object
+            properties:
+                firstSemester:
+                    type: object
+                    description: điểm học kỳ 1 (không bắt buộc)
+                    properties:
+                        midtermTest:
+                            type: number
+                            required: true
+                            min: 0
+                            max: 10
+                            description: Điểm giữa kỳ 1
+                        finalTest:
+                            type: number
+                            required: true
+                            min: 0
+                            max: 10
+                            description: Điểm cuối kỳ 1
+                secondSemester:
+                    type: object
+                    description: điểm học kỳ 2 (không bắt buộc)
+                    properties:
+                        midtermTest:
+                            type: number
+                            required: true
+                            min: 0
+                            max: 10
+                            description: Điểm giữa kỳ 2
+                        finalTest:
+                            type: number
+                            required: true
+                            min: 0
+                            max: 10
+                            description: Điểm cuối kỳ 2
         HttpError:
             type: object
             properties:

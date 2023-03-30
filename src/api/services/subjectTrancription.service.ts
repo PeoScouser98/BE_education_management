@@ -4,7 +4,10 @@ import ClassModel from '../models/class.model';
 import SubjectModel from '../models/subject.model';
 import SubjectTranscriptionModel, { SubjectTranscript } from '../models/subjectTrancription.model';
 import { getPropertieOfArray } from '../../helpers/toolkit';
-import { validateSubjectTranscript } from '../validations/subjectTrancription.validation';
+import {
+	validateSubjectTranscript,
+	validateSubjectTranscriptOne,
+} from '../validations/subjectTrancription.validation';
 import StudentModel, { Student } from '../models/student.model';
 import SchoolYearModel from '../models/schoolYear.model';
 
@@ -49,12 +52,15 @@ export const newScoreList = async (
 		}
 
 		// check xem môn học và class có tồn tại hay không
-		const classExistQuery = ClassModel.findOne({ _id: classId });
+		const studentExistQuery = ClassModel.findOne({ _id: classId });
 		const subjectExistQuery = SubjectModel.findOne({ _id: subjectId });
 
-		const [classExist, subjectExist] = await Promise.all([classExistQuery, subjectExistQuery]);
+		const [studentExist, subjectExist] = await Promise.all([
+			studentExistQuery,
+			subjectExistQuery,
+		]);
 
-		if (!classExist)
+		if (!studentExist)
 			throw createHttpError.NotFound('Class does not exist or has been deleted!');
 		if (!subjectExist)
 			throw createHttpError.NotFound('Subject does not exist or has been deleted!');
@@ -181,7 +187,7 @@ export const newScoreList = async (
 		}
 
 		return {
-			message: `Successfully inputted scores for subject ${subjectExist.subjectName} in class ${classExist.className}`,
+			message: `Successfully inputted scores for subject ${subjectExist.subjectName} in class ${studentExist.className}`,
 		};
 	} catch (error) {
 		throw error;
@@ -189,3 +195,89 @@ export const newScoreList = async (
 };
 
 // nhập điểm 1 học sinh / môn / lớp
+export const newScore = async (
+	subjectId: string,
+	studentId: string,
+	data: Omit<SubjectTranscript, '_id' | 'subject' | 'schoolYear' | 'student'>
+) => {
+	try {
+		// check xem studentId và subjectId đã đúng type chưa
+		if (
+			!mongoose.Types.ObjectId.isValid(studentId) ||
+			!mongoose.Types.ObjectId.isValid(subjectId)
+		) {
+			throw createHttpError.BadRequest(
+				'studentId or subjectId is not in the correct ObjectId format'
+			);
+		}
+
+		if (!data || Object.keys(data).length === 0) {
+			throw createHttpError(304);
+		}
+
+		// lấy ra schoolYear của hiện tại
+		const schoolYear = await SchoolYearModel.findOne({
+			$and: [
+				{ startAt: { $lte: new Date().getFullYear() } },
+				{ endAt: { $gte: new Date().getFullYear() } },
+			],
+		});
+
+		if (!schoolYear) {
+			throw createHttpError(
+				404,
+				'The new academic year has not started yet, please come back later'
+			);
+		}
+
+		// check xem môn học và student có tồn tại hay không
+		const studentExistQuery = StudentModel.findOne({ _id: studentId });
+		const subjectExistQuery = SubjectModel.findOne({ _id: subjectId });
+
+		const [studentExist, subjectExist] = await Promise.all([
+			studentExistQuery,
+			subjectExistQuery,
+		]);
+
+		if (!studentExist)
+			throw createHttpError.NotFound('Student does not exist or has been deleted!');
+		if (!subjectExist)
+			throw createHttpError.NotFound('Subject does not exist or has been deleted!');
+
+		// validate
+		const { error } = validateSubjectTranscriptOne(data);
+		if (error) {
+			throw createHttpError.BadRequest(error.message);
+		}
+
+		// check xem student đã có bảng điểm chưa
+		const transcriptExists = await SubjectTranscriptionModel.findOne({
+			student: studentId,
+			subject: subjectId,
+			schoolYear: schoolYear._id,
+		});
+
+		if (transcriptExists) {
+			// đã tồn tại (update lại)
+			return await SubjectTranscriptionModel.findOneAndUpdate(
+				{
+					_id: transcriptExists._id,
+				},
+				data,
+				{
+					new: true,
+				}
+			);
+		} else {
+			// chưa tồn tại (tạo bảng điểm)
+			return await new SubjectTranscriptionModel({
+				...data,
+				student: studentId,
+				subject: subjectId,
+				schoolYear: schoolYear._id,
+			}).save();
+		}
+	} catch (error) {
+		throw error;
+	}
+};
