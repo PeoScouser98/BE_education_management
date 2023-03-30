@@ -1,7 +1,7 @@
 {
     "client": "Thunder Client",
     "collectionName": "Education Management",
-    "dateExported": "2023-03-29T17:43:46.119Z",
+    "dateExported": "2023-03-30T17:37:35.855Z",
     "version": "1.1",
     "folders": [
         {
@@ -38,6 +38,13 @@
             "containerId": "",
             "created": "2023-03-29T16:29:28.079Z",
             "sortNum": 50000
+        },
+        {
+            "_id": "4339d569-3f06-4acf-8494-a19a708a1f03",
+            "name": "SubjectTranscript",
+            "containerId": "",
+            "created": "2023-03-30T15:05:41.576Z",
+            "sortNum": 60000
         }
     ],
     "requests": [
@@ -295,6 +302,44 @@
             "modified": "2023-03-29T17:10:45.813Z",
             "headers": [],
             "params": [],
+            "tests": []
+        },
+        {
+            "_id": "8adf13b8-b6c1-4bc4-908e-34ff9ea93d4d",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "4339d569-3f06-4acf-8494-a19a708a1f03",
+            "name": "newScoreList",
+            "url": "/transcripts/6410a8a01e0ac1f41b6ddc00/641af3f5346143e3ee6e0977",
+            "method": "POST",
+            "sortNum": 160000,
+            "created": "2023-03-30T15:06:01.914Z",
+            "modified": "2023-03-30T16:35:26.667Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "[\n  {\n    \"student\": \"641c92fd17e975b09d28d965\",\n    \"secondSemester\": {\n      \"midtermTest\": 9,\n      \"finalTest\": 0\n    }\n  },\n  {\n    \"student\": \"641c92fd17e975b09d28d966\",\n    \"secondSemester\": {\n      \"midtermTest\": 9,\n      \"finalTest\": 10\n    }\n  }\n]",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "5a20b34a-9eaa-4fd5-9bec-c3808a65a2d5",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "4339d569-3f06-4acf-8494-a19a708a1f03",
+            "name": "inputOne",
+            "url": "/transcript/641c92fd17e975b09d28d967/641af3f5346143e3ee6e0979",
+            "method": "POST",
+            "sortNum": 170000,
+            "created": "2023-03-30T17:00:59.936Z",
+            "modified": "2023-03-30T17:27:18.635Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": " {\n    \"secondSemester\": {\n      \"midtermTest\": 9,\n      \"finalTest\": 2000\n    }\n  }",
+                "form": []
+            },
             "tests": []
         }
     ],
