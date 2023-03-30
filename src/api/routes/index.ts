@@ -4,9 +4,8 @@ import studentRouter from './student.route';
 import schoolYearRouter from './schoolYear.route';
 import authRouter from './auth.router';
 import classRouter from './class.route';
-
 import subjectRouter from './subject.route';
-
+import learningMaterialRouter from './learningMaterial.route';
 import permissionRouter from './permission.route';
 
 const rootRouters: Array<Router> = [
@@ -17,6 +16,7 @@ const rootRouters: Array<Router> = [
 	subjectRouter,
 	schoolYearRouter,
 	permissionRouter,
+	learningMaterialRouter,
 ];
 const router = express.Router();
 

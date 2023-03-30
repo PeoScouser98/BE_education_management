@@ -1,19 +1,23 @@
-import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
+import mongoose, { Document, Model, ObjectId } from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
-import mongoose, { Model } from 'mongoose';
+import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 import { Subject } from './subject.model';
 
-export interface LearningMaterial extends Document {
+export interface ILearningMaterial extends SoftDeleteDocument {
 	_id: string;
-	subject: Subject;
+	subject: string | ObjectId;
 	grade: number;
 	fileId: string;
+	fileName: string;
+	mimeType: string;
 	downloadUrl: string;
 }
+// interface ILearningMaterialDocument extends SoftDeleteDocument {}
+interface ILearningMaterialModel extends Model<ILearningMaterial> {}
+interface SoftDeleteLearningMaterialModel
+	extends SoftDeleteModel<ILearningMaterial, ILearningMaterialModel> {}
 
-
-
-const LearningMaterialSchema = new mongoose.Schema<LearningMaterial>({
+const LearningMaterialSchema = new mongoose.Schema<ILearningMaterial>({
 	subject: {
 		type: mongoose.Types.ObjectId,
 		ref: 'Subjects',
@@ -28,6 +32,16 @@ const LearningMaterialSchema = new mongoose.Schema<LearningMaterial>({
 	fileId: {
 		type: String,
 		require: true,
+		trim: true,
+	},
+	fileName: {
+		type: String,
+		required: true,
+		trim: true,
+	},
+	mimeType: {
+		type: String,
+		required: true,
 	},
 	downloadUrl: {
 		type: String,
@@ -35,10 +49,16 @@ const LearningMaterialSchema = new mongoose.Schema<LearningMaterial>({
 	},
 });
 
+LearningMaterialSchema.plugin(mongooseDelete, {
+	overrideMethods: ['find', 'findOne'],
+	deletedAt: true,
+});
 LearningMaterialSchema.plugin(mongooseAutoPopulate);
-LearningMaterialSchema.plugin(mongooseDelete);
+LearningMaterialSchema.pre('save', function () {
+	this.downloadUrl = 'https://drive.google.com/uc?export=download&id=' + this.fileId;
+});
 
-const LearningMaterialModel = mongoose.model<LearningMaterial>(
+const LearningMaterialModel = mongoose.model<ILearningMaterial, SoftDeleteLearningMaterialModel>(
 	'learning_materials',
 	LearningMaterialSchema
 );

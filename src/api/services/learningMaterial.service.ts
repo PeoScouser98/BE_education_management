@@ -1,6 +1,6 @@
-import { MongooseError } from 'mongoose';
+import mongoose, { MongooseError } from 'mongoose';
 import LearningMaterialModel from '../models/learningMaterial.model';
-import { LearningMaterial } from './../models/learningMaterial.model';
+import { ILearningMaterial } from './../models/learningMaterial.model';
 
 export const getBySubject = async (subjectId: string) => {
 	try {
@@ -12,15 +12,19 @@ export const getBySubject = async (subjectId: string) => {
 	}
 };
 
-export const add = async (payload: Omit<LearningMaterial, '_id'>) => {
+export const saveFile = async (payload: Partial<ILearningMaterial>) => {
 	try {
-		return await new LearningMaterialModel(payload).save();
+		console.log(payload);
+		return await new LearningMaterialModel({
+			...payload,
+			subject: new mongoose.Types.ObjectId(payload.subject!.toString()),
+		}).save();
 	} catch (error) {
 		throw error as MongooseError;
 	}
 };
 
-export const update = async (materialId: string, payload: Partial<LearningMaterial>) => {
+export const update = async (materialId: string, payload: Partial<ILearningMaterial>) => {
 	try {
 		return await LearningMaterialModel.findOneAndUpdate(
 			{
@@ -34,4 +38,8 @@ export const update = async (materialId: string, payload: Partial<LearningMateri
 	}
 };
 
-export const hardDelete = async (id: string) => {};
+export const softDeleteLearningMaterial = async (fileId: string) => {
+	try {
+		return await LearningMaterialModel.delete({ fileId });
+	} catch (error) {}
+};
