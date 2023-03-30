@@ -1,0 +1,72 @@
+paths:
+    /transcript/:classId/:subjectId:
+        post:
+            tags:
+                - Transcript
+            description: Api nhập điểm học sinh 1 lớp
+            summary: Đăng nhập với vai trò giáo viên bộ môn của lớp
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SubjectTranscript'
+                        example:
+                            [
+                                {
+                                    'student': '641c92fd17e975b09d28d965',
+                                    'secondSemester': { 'midtermTest': 9, 'finalTest': 0 },
+                                },
+                                {
+                                    'student': '641c92fd17e975b09d28d966',
+                                    'secondSemester': { 'midtermTest': 9, 'finalTest': 10 },
+                                },
+                            ]
+
+            responses:
+                201:
+                    description: Nhập điểm thành công
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                            example:
+                                {
+                                    message: 'Successfully inputted scores for subject Tiếng Anh in class 2D',
+                                }
+
+                304:
+                    description: Data gửi lên rỗng
+
+                400:
+                    description: 'Có thể do các nguyên nhân sau: id class hoặc subject không đúng type objectId, k thỏa mãn validate (cụ thể đọc ở message trả về)'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    'message': 'Transcript students fails to meet validation criteria!',
+                                    'statusCode': 400,
+                                    'error':
+                                        [
+                                            {
+                                                'id': '641c92fd17e975b09d28d966',
+                                                'message': '"secondSemester.finalTest" must be a number',
+                                            },
+                                        ],
+                                }
+
+                404:
+                    description: Chưa tạo schoolYear năm nay hoặc student không tồn tại trong lớp học, class || subject không tồn tại
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    'message': 'Subject does not exist or has been deleted!',
+                                    'statusCode': 404,
+                                }
