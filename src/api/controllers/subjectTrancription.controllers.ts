@@ -40,3 +40,38 @@ export const scoreTableInputOne = async (req: Request, res: Response) => {
 		});
 	}
 };
+
+// [GET] /api/transcript/class/:classId/:subjectId
+export const getTranscriptByClass = async (req: Request, res: Response) => {
+	try {
+		const subjectId = req.params.subjectId;
+		const classId = req.params.classId;
+
+		const result = await TransactionService.selectSubjectTranscriptByClass(classId, subjectId);
+
+		return res.status(200).json(result);
+	} catch (error) {
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
+		});
+	}
+};
+
+// [GET] /api/transcript/student/:id
+export const getTranscriptByStudent = async (req: Request, res: Response) => {
+	try {
+		const id = req.params.id;
+
+		const result = await TransactionService.selectTranscriptStudent(id);
+
+		return res.status(200).json(result);
+	} catch (error) {
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
+		});
+	}
+};

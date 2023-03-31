@@ -57,6 +57,7 @@ const SubjectTranscriptSchema = new mongoose.Schema<SubjectTranscriptDocument>(
 		subject: {
 			type: mongoose.Types.ObjectId,
 			require: true,
+			ref: 'Subjects',
 			autopopulate: { select: 'subjectName' },
 		},
 		firstSemester: {

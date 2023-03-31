@@ -9,7 +9,7 @@ import {
 	validateSubjectTranscriptOne,
 } from '../validations/subjectTrancription.validation';
 import StudentModel, { Student } from '../models/student.model';
-import SchoolYearModel from '../models/schoolYear.model';
+import { selectSchoolYearCurr } from './schoolYear.service';
 
 // Nhập điểm nhiều học sinh 1 lúc / môn / lớp
 export const newScoreList = async (
@@ -37,19 +37,7 @@ export const newScoreList = async (
 		}
 
 		// lấy ra schoolYear của hiện tại
-		const schoolYear = await SchoolYearModel.findOne({
-			$and: [
-				{ startAt: { $lte: new Date().getFullYear() } },
-				{ endAt: { $gte: new Date().getFullYear() } },
-			],
-		});
-
-		if (!schoolYear) {
-			throw createHttpError(
-				404,
-				'The new academic year has not started yet, please come back later'
-			);
-		}
+		const schoolYear = await selectSchoolYearCurr();
 
 		// check xem môn học và class có tồn tại hay không
 		const studentExistQuery = ClassModel.findOne({ _id: classId });
@@ -216,19 +204,7 @@ export const newScore = async (
 		}
 
 		// lấy ra schoolYear của hiện tại
-		const schoolYear = await SchoolYearModel.findOne({
-			$and: [
-				{ startAt: { $lte: new Date().getFullYear() } },
-				{ endAt: { $gte: new Date().getFullYear() } },
-			],
-		});
-
-		if (!schoolYear) {
-			throw createHttpError(
-				404,
-				'The new academic year has not started yet, please come back later'
-			);
-		}
+		const schoolYear = await selectSchoolYearCurr();
 
 		// check xem môn học và student có tồn tại hay không
 		const studentExistQuery = StudentModel.findOne({ _id: studentId });
@@ -277,6 +253,77 @@ export const newScore = async (
 				schoolYear: schoolYear._id,
 			}).save();
 		}
+	} catch (error) {
+		throw error;
+	}
+};
+
+// lấy bảng điểm học sinh / lớp / môn
+export const selectSubjectTranscriptByClass = async (classId: string, subjectId: string) => {
+	try {
+		if (
+			!classId ||
+			!subjectId ||
+			!mongoose.Types.ObjectId.isValid(classId) ||
+			!mongoose.Types.ObjectId.isValid(subjectId)
+		) {
+			throw createHttpError.BadRequest(
+				'classId or subjectId is not in the correct ObjectId format'
+			);
+		}
+
+		// lấy ra schoolYear hiện tại
+		const schoolYear = await selectSchoolYearCurr();
+
+		// lấy ra list học sinh của lớp
+		const listStudent: Student[] = await StudentModel.find({
+			class: classId,
+			dropoutDate: null,
+			transferSchool: null,
+		})
+			.select('_id')
+			.lean();
+
+		const idStudentList = getPropertieOfArray(listStudent, '_id');
+		// lấy ra bảng điểm của những học sinh đó
+		const transcriptStudentList = await SubjectTranscriptionModel.find({
+			student: { $in: idStudentList },
+			schoolYear: schoolYear._id,
+			subject: subjectId,
+		});
+
+		return transcriptStudentList;
+	} catch (error) {
+		throw error;
+	}
+};
+
+// lấy ra bảng điểm học sinh / tất cả môn
+export const selectTranscriptStudent = async (id: string) => {
+	try {
+		if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+			throw createHttpError.BadRequest('id student is not in the correct ObjectId format');
+		}
+
+		// check sự tồn tại của học sinh
+		const student: Student | null = await StudentModel.findOne({
+			_id: id,
+			dropoutDate: null,
+			transferSchool: null,
+		});
+
+		if (!student) {
+			throw createHttpError.NotFound('Student does not exist');
+		}
+
+		const schoolYear = await selectSchoolYearCurr();
+
+		const transcriptStudent = await SubjectTranscriptionModel.find({
+			student: id,
+			schoolYear: schoolYear._id,
+		}).select('-student');
+
+		return transcriptStudent;
 	} catch (error) {
 		throw error;
 	}

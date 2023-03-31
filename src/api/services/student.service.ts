@@ -8,6 +8,8 @@ import {
 	validateReqBodyStudent,
 	validateUpdateReqBodyStudent,
 } from '../validations/student.validation';
+import { selectTranscriptStudent } from './subjectTrancription.service';
+import { SubjectTranscript } from '../models/subjectTrancription.model';
 
 interface IStudentErrorRes {
 	fullName: string;
@@ -208,11 +210,16 @@ export const getDetailStudent = async (id: string) => {
 			select: 'className headTeacher',
 		});
 
+		const transcriptStudent: SubjectTranscript[] = await selectTranscriptStudent(id);
+
 		if (!student) {
 			throw createHttpError.NotFound('Student does not exist!');
 		}
 
-		return student;
+		return {
+			info: student,
+			transcript: transcriptStudent,
+		};
 	} catch (error) {
 		throw error;
 	}
@@ -494,7 +501,9 @@ export const dailyAttendanceList = async (idClass: string, date: Date) => {
 // Lấy ra tình trạng điểm danh của 1 học sinh trong 1 tháng (sẽ trả về ngày vắng mặt trong tháng đấy)
 export const attendanceOfStudentByMonth = async (id: string, month: number, year: number) => {
 	try {
-		const { absentDays } = await getDetailStudent(id);
+		const {
+			info: { absentDays },
+		} = await getDetailStudent(id);
 
 		const result: IAttendance[] = [];
 

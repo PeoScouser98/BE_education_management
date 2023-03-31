@@ -38,3 +38,26 @@ export const createSchoolYear = async () => {
 		throw error;
 	}
 };
+
+// lấy ra schoolYear hiện tại
+export const selectSchoolYearCurr = async () => {
+	try {
+		const schoolYear = await SchoolYearModel.findOne({
+			$and: [
+				{ startAt: { $lte: new Date().getFullYear() } },
+				{ endAt: { $gte: new Date().getFullYear() } },
+			],
+		});
+
+		if (!schoolYear) {
+			throw createHttpError(
+				404,
+				'The new academic year has not started yet, please come back later'
+			);
+		}
+
+		return schoolYear;
+	} catch (error) {
+		throw error;
+	}
+};
