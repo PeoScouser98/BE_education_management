@@ -913,30 +913,74 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/Student'
+                                type: object
+                                properties:
+                                    info:
+                                        $ref: '#/components/schemas/Student'
+                                    transcript:
+                                        $ref: '#/components/schemas/SubjectTranscript'
+
                             example:
                                 {
-                                    'dropoutDate': null,
-                                    '_id': '641c92fd17e975b09d28d965',
-                                    'code': '26lndBX8088',
-                                    'class':
+                                    'info':
                                         {
-                                            '_id': '6410a8a01e0ac1f41b6ddc00',
-                                            'className': '2D',
-                                            'headTeacher': '637ec5ce577ebd6709c65124',
+                                            'transferSchool': null,
+                                            'dropoutDate': null,
+                                            '_id': '641c92fd17e975b09d28d965',
+                                            'code': '26lndBX8088',
+                                            'class':
+                                                {
+                                                    '_id': '6410a8a01e0ac1f41b6ddc00',
+                                                    'className': '2D',
+                                                    'headTeacher': '637ec5ce577ebd6709c65124',
+                                                },
+                                            'fullName': 'Lê Ngọc Đức 26',
+                                            'gender': true,
+                                            'dateOfBirth': '2001-10-12T17:00:00.000Z',
+                                            'parentsPhoneNumber': '0328568088',
+                                            'isPolicyBeneficiary': true,
+                                            'isGraduated': false,
+                                            'deleted': false,
+                                            'absentDays':
+                                                [
+                                                    {
+                                                        'date': '2023-03-26T12:35:26.763Z',
+                                                        'schoolYear': null,
+                                                        'hasPermision': false,
+                                                        'reason': 'Không có lý do',
+                                                        '_id': '64203c0e3c9f823f7b3658b0',
+                                                    },
+                                                ],
+                                            '__v': 0,
+                                            'createdAt': '2023-03-23T17:57:17.057Z',
+                                            'updatedAt': '2023-03-28T16:35:40.838Z',
                                         },
-                                    'fullName': 'Lê Ngọc Đức 26',
-                                    'gender': true,
-                                    'dateOfBirth': '2001-10-12T17:00:00.000Z',
-                                    'parentsPhoneNumber': '0328568088',
-                                    'isPolicyBeneficiary': false,
-                                    'isGraduated': false,
-                                    'deleted': false,
-                                    'absentDays': [],
-                                    '__v': 0,
-                                    'createdAt': '2023-03-23T17:57:17.057Z',
-                                    'updatedAt': '2023-03-24T16:48:20.678Z',
-                                    'transferSchool': '2023-03-23T17:00:00.000Z',
+                                    'transcript':
+                                        [
+                                            {
+                                                'firstSemester':
+                                                    { 'midtermTest': 9, 'finalTest': 0 },
+                                                'secondSemester':
+                                                    { 'midtermTest': 9, 'finalTest': 2 },
+                                                '_id': '6425abc25a7e35876c4e48eb',
+                                                'schoolYear':
+                                                    {
+                                                        '_id': '6424754208ab607d1323fa73',
+                                                        'startAt': 2023,
+                                                        'createdAt': '2023-03-29T17:28:34.575Z',
+                                                        'updatedAt': '2023-03-29T17:28:34.575Z',
+                                                        'endAt': 2024,
+                                                        '__v': 0,
+                                                    },
+                                                'subject':
+                                                    {
+                                                        '_id': '641af3f5346143e3ee6e0977',
+                                                        'subjectName': 'Tiếng Anh',
+                                                    },
+                                                'deleted': false,
+                                                '__v': 0,
+                                            },
+                                        ],
                                 }
 
                 400:
