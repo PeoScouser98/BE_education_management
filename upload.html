@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<body>
+		<form enctype="multipart/form-data">
+			<input type="file" name="file" id="" />
+			<input type="text" name="subject" id="" value="6425d6af256a42ce8c36f5e3" />
+			<input type="number" name="grade" id="" value="1" />
+			<button type="submit">Upload</button>
+		</form>
+
+		<script>
+			const useForm = (form) => {
+				const data = {};
+				[...form.elements].forEach((item) => {
+					if (item.name.length) {
+						data[item.name] = item.files || item.value;
+					}
+				});
+				return data;
+			};
+			const form = document.querySelector('form');
+			form.onsubmit = async (e) => {
+				// formData.append('file', )
+				e.preventDefault();
+
+				const data = useForm(form);
+				const formData = new FormData(form);
+				// console.log(data);
+				const uploadResponse = await (
+					await fetch('http://localhost:3001/api/learning-material/upload', {
+						method: 'post',
+						body: formData,
+					})
+				).json();
+
+				console.log(uploadResponse);
+			};
+		</script>
+	</body>
+</html>
