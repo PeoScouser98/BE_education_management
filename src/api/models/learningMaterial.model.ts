@@ -1,23 +1,14 @@
-import mongoose, { Document, Model, ObjectId } from 'mongoose';
+import mongoose from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
-import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
-import { Subject } from './subject.model';
+import mongooseDelete from 'mongoose-delete';
+import mongoosePaginate from 'mongoose-paginate-v2';
+import {
+	ILearningMaterialDocument,
+	IPaginateModel,
+	ISoftDeleteModel,
+} from '../../types/learningMaterial.type';
 
-export interface ILearningMaterial extends SoftDeleteDocument {
-	_id: string;
-	subject: string | ObjectId;
-	grade: number;
-	fileId: string;
-	fileName: string;
-	mimeType: string;
-	downloadUrl: string;
-}
-// interface ILearningMaterialDocument extends SoftDeleteDocument {}
-interface ILearningMaterialModel extends Model<ILearningMaterial> {}
-interface SoftDeleteLearningMaterialModel
-	extends SoftDeleteModel<ILearningMaterial, ILearningMaterialModel> {}
-
-const LearningMaterialSchema = new mongoose.Schema<ILearningMaterial>({
+const LearningMaterialSchema = new mongoose.Schema<ILearningMaterialDocument>({
 	subject: {
 		type: mongoose.Types.ObjectId,
 		ref: 'Subjects',
@@ -49,18 +40,22 @@ const LearningMaterialSchema = new mongoose.Schema<ILearningMaterial>({
 	},
 });
 
+// Plugins
+LearningMaterialSchema.plugin(mongooseAutoPopulate);
+LearningMaterialSchema.plugin(mongoosePaginate);
 LearningMaterialSchema.plugin(mongooseDelete, {
 	overrideMethods: ['find', 'findOne'],
 	deletedAt: true,
 });
-LearningMaterialSchema.plugin(mongooseAutoPopulate);
+
+// Middleware
 LearningMaterialSchema.pre('save', function () {
 	this.downloadUrl = 'https://drive.google.com/uc?export=download&id=' + this.fileId;
 });
 
-const LearningMaterialModel = mongoose.model<ILearningMaterial, SoftDeleteLearningMaterialModel>(
-	'learning_materials',
-	LearningMaterialSchema
-);
+const LearningMaterialModel = mongoose.model<
+	ILearningMaterialDocument,
+	ISoftDeleteModel & IPaginateModel
+>('learning_materials', LearningMaterialSchema);
 
 export default LearningMaterialModel;

@@ -1,45 +1,67 @@
-import mongoose, { MongooseError } from 'mongoose';
+import mongoose, { FilterQuery, MongooseError, PaginateOptions } from 'mongoose';
 import LearningMaterialModel from '../models/learningMaterial.model';
-import { ILearningMaterial } from './../models/learningMaterial.model';
+import { deleteFile } from './googleDrive.service';
+import { ILearningMaterial } from '../../types/learningMaterial.type';
 
-export const getBySubject = async (subjectId: string) => {
+// Get files
+export const getFiles = async (
+	filterQuery: FilterQuery<ILearningMaterial> | undefined,
+	query: PaginateOptions
+) => {
 	try {
-		return await LearningMaterialModel.find({ subject: subjectId }).exec((error, result) => {
-			if (error) console.log(error.message);
-		});
+		return await LearningMaterialModel.paginate(filterQuery, query);
 	} catch (error) {
 		throw error as MongooseError;
 	}
 };
 
-export const saveFile = async (payload: Partial<ILearningMaterial>) => {
+// Save file to database
+export const saveFile = async (
+	payload: Pick<ILearningMaterial, 'fileName' & 'mimeType' & 'subject' & 'grade'>
+) => {
 	try {
 		console.log(payload);
-		return await new LearningMaterialModel({
-			...payload,
-			subject: new mongoose.Types.ObjectId(payload.subject!.toString()),
-		}).save();
+		return await new LearningMaterialModel(payload).save();
 	} catch (error) {
 		throw error as MongooseError;
 	}
 };
 
-export const update = async (materialId: string, payload: Partial<ILearningMaterial>) => {
+// Update file information
+export const updateFile = async (fileId: string, payload: Partial<ILearningMaterial>) => {
 	try {
-		return await LearningMaterialModel.findOneAndUpdate(
-			{
-				_id: materialId,
-			},
-			payload,
-			{ new: true }
-		);
+		return await LearningMaterialModel.findOneAndUpdate({ fileId }, payload, { new: true });
 	} catch (error) {
 		throw error as MongooseError;
 	}
 };
 
-export const softDeleteLearningMaterial = async (fileId: string) => {
+// Temporarily delete file
+export const softDeleteFile = async (fileId: string) => {
 	try {
 		return await LearningMaterialModel.delete({ fileId });
-	} catch (error) {}
+	} catch (error) {
+		throw error as MongooseError;
+	}
+};
+
+// Hard delete in both google drive store and database
+export const hardDeleteFile = async (fileId: string) => {
+	try {
+		return await Promise.all([
+			LearningMaterialModel.findOneAndDelete({ fileId }),
+			deleteFile(fileId),
+		]);
+	} catch (error) {
+		throw error as MongooseError;
+	}
+};
+
+// Restore deleted file
+export const restoreDeletedFile = async (fileId: string) => {
+	try {
+		return await LearningMaterialModel.restore({ fileId });
+	} catch (error) {
+		throw error as MongooseError;
+	}
 };
