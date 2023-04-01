@@ -1,11 +1,15 @@
 import express from 'express';
 import * as SchoolYearController from '../controllers/schoolYear.controller';
+import { checkAuthenticated, checkIsHeadmaster } from '../middlewares/authGuard.middleware';
 
 const router = express.Router();
 
-router.get('/school-year/', SchoolYearController.list);
-router.post('/school-year/', SchoolYearController.create);
-router.put('/school-year/:id', SchoolYearController.update);
-router.delete('/school-year/:id', SchoolYearController.remove);
+router.get('/schoolYears', checkAuthenticated, SchoolYearController.schoolYearList);
+router.post(
+	'/schoolYear',
+	checkAuthenticated,
+	checkIsHeadmaster,
+	SchoolYearController.createSchoolYear
+);
 
 export default router;

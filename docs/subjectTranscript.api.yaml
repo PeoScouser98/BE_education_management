@@ -1,0 +1,267 @@
+paths:
+    /transcript/:classId/:subjectId:
+        post:
+            tags:
+                - Transcript
+            description: Api nhập điểm học sinh 1 lớp
+            summary: Đăng nhập với vai trò giáo viên bộ môn của lớp
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SubjectTranscript'
+                        example:
+                            [
+                                {
+                                    'student': '641c92fd17e975b09d28d965',
+                                    'secondSemester': { 'midtermTest': 9, 'finalTest': 0 },
+                                },
+                                {
+                                    'student': '641c92fd17e975b09d28d966',
+                                    'secondSemester': { 'midtermTest': 9, 'finalTest': 10 },
+                                },
+                            ]
+
+            responses:
+                201:
+                    description: Nhập điểm thành công
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                            example:
+                                {
+                                    message: 'Successfully inputted scores for subject Tiếng Anh in class 2D',
+                                }
+
+                304:
+                    description: Data gửi lên rỗng
+
+                400:
+                    description: 'Có thể do các nguyên nhân sau: id class hoặc subject không đúng type objectId, k thỏa mãn validate (cụ thể đọc ở message trả về)'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    'message': 'Transcript students fails to meet validation criteria!',
+                                    'statusCode': 400,
+                                    'error':
+                                        [
+                                            {
+                                                'id': '641c92fd17e975b09d28d966',
+                                                'message': '"secondSemester.finalTest" must be a number',
+                                            },
+                                        ],
+                                }
+
+                404:
+                    description: Chưa tạo schoolYear năm nay hoặc student không tồn tại trong lớp học, class || subject không tồn tại
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    'message': 'Subject does not exist or has been deleted!',
+                                    'statusCode': 404,
+                                }
+
+    /transcript/:studentId/:subjectId:
+        post:
+            tags:
+                - Transcript
+            summary: Đăng nhập giới vai trò là giáo viên bộ môn của học sinh
+            description: Api nhập điểm của 1 học sinh
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SubjectTranscriptUpdateOne'
+                        example: { 'secondSemester': { 'midtermTest': 9, 'finalTest': 2 } }
+
+            responses:
+                201:
+                    description: Nhập điểm thành công
+                    content:
+                        application/json:
+                            example:
+                                {
+                                    'firstSemester': { 'midtermTest': 0, 'finalTest': 0 },
+                                    'secondSemester': { 'midtermTest': 9, 'finalTest': 2 },
+                                    '_id': '6425c217a908fb2bf9da973f',
+                                    'student':
+                                        {
+                                            '_id': '641c92fd17e975b09d28d967',
+                                            'class': '6410a8a01e0ac1f41b6ddc00',
+                                            'fullName': 'Lê Ngọc Đức 26',
+                                            'absentDays': [],
+                                        },
+                                    'schoolYear':
+                                        {
+                                            '_id': '6424754208ab607d1323fa73',
+                                            'startAt': 2023,
+                                            'createdAt': '2023-03-29T17:28:34.575Z',
+                                            'updatedAt': '2023-03-29T17:28:34.575Z',
+                                            'endAt': 2024,
+                                            '__v': 0,
+                                        },
+                                    'subject': '641af3f5346143e3ee6e0977',
+                                    'deleted': false,
+                                    '__v': 0,
+                                }
+
+                304:
+                    description: Body data gửi lên rỗng
+                400:
+                    description: studentId hoặc subjectId không phải kiểu objectId , không thỏa mãn validate
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    'message': '"secondSemester.finalTest" must be less than or equal to 10',
+                                    'statusCode': 400,
+                                }
+
+                404:
+                    description: student hoặc subject không tồn tại hoặc schoolYear năm nay chưa được tạo
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    'message': 'Subject does not exist or has been deleted!',
+                                    'statusCode': 404,
+                                }
+
+    /transcript/class/:classId/:subjectId:
+        get:
+            tags:
+                - Transcript
+            summary: Đăng nhập với vai trò giáo viên bộ môn của lớp
+            description: Api lấy ra bảng điểm của tất cả các học sinh của 1 môn học trong lớp
+
+            responses:
+                200:
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/SubjectTranscript'
+
+                            example:
+                                [
+                                    {
+                                        'firstSemester': { 'midtermTest': 9, 'finalTest': 0 },
+                                        'secondSemester': { 'midtermTest': 9, 'finalTest': 2 },
+                                        '_id': '6425abc25a7e35876c4e48eb',
+                                        'student':
+                                            {
+                                                '_id': '641c92fd17e975b09d28d965',
+                                                'class': '6410a8a01e0ac1f41b6ddc00',
+                                                'fullName': 'Lê Ngọc Đức 26',
+                                                'absentDays': [{ 'schoolYear': null }],
+                                            },
+                                        'schoolYear':
+                                            {
+                                                '_id': '6424754208ab607d1323fa73',
+                                                'startAt': 2023,
+                                                'createdAt': '2023-03-29T17:28:34.575Z',
+                                                'updatedAt': '2023-03-29T17:28:34.575Z',
+                                                'endAt': 2024,
+                                                '__v': 0,
+                                            },
+                                        'subject':
+                                            {
+                                                '_id': '641af3f5346143e3ee6e0977',
+                                                'subjectName': 'Tiếng Anh',
+                                            },
+                                        'deleted': false,
+                                        '__v': 0,
+                                    },
+                                ]
+
+                400:
+                    description: Các param truyền lên không đúng kiểu objectId
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+
+                            example:
+                                {
+                                    'message': 'classId or subjectId is not in the correct ObjectId format',
+                                    'statusCode': 400,
+                                }
+
+    /transcript/student/:id:
+        get:
+            tags:
+                - Transcript
+            description: Lấy ra bảng điểm tất cả các môn của  1 học sinh
+            summary: Đăng nhập với vai trò giáo viên chủ nhiệm hoặc phụ huynh học sinh
+            responses:
+                200:
+                    description: Lấy ra thành công
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/SubjectTranscript'
+
+                            example:
+                                [
+                                    {
+                                        'firstSemester': { 'midtermTest': 9, 'finalTest': 0 },
+                                        'secondSemester': { 'midtermTest': 9, 'finalTest': 2 },
+                                        '_id': '6425abc25a7e35876c4e48eb',
+                                        'schoolYear':
+                                            {
+                                                '_id': '6424754208ab607d1323fa73',
+                                                'startAt': 2023,
+                                                'createdAt': '2023-03-29T17:28:34.575Z',
+                                                'updatedAt': '2023-03-29T17:28:34.575Z',
+                                                'endAt': 2024,
+                                                '__v': 0,
+                                            },
+                                        'subject':
+                                            {
+                                                '_id': '641af3f5346143e3ee6e0977',
+                                                'subjectName': 'Tiếng Anh',
+                                            },
+                                        'deleted': false,
+                                        '__v': 0,
+                                    },
+                                ]
+
+                400:
+                    description: Các param truyền lên không đúng kiểu objectId
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+
+                            example:
+                                {
+                                    'message': 'id student is not in the correct ObjectId format',
+                                    'statusCode': 400,
+                                }
+
+                404:
+                    description: Học sinh không tồn tại
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+
+                            example: { 'message': 'Student does not exist', 'statusCode': 404 }

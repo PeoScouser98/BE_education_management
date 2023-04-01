@@ -1,0 +1,403 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "Education Management",
+    "dateExported": "2023-03-31T13:13:46.548Z",
+    "version": "1.1",
+    "folders": [
+        {
+            "_id": "acd750d7-d190-4af9-bd45-2d488478afb5",
+            "name": "Auth",
+            "containerId": "",
+            "created": "2023-03-25T08:19:44.274Z",
+            "sortNum": 10000
+        },
+        {
+            "_id": "c4b8aeec-79a9-4762-8905-28bf899d71c3",
+            "name": "Class",
+            "containerId": "",
+            "created": "2023-03-25T08:19:44.275Z",
+            "sortNum": 20000
+        },
+        {
+            "_id": "60e6ab3f-a29b-49b9-9428-f5c8d6172a4d",
+            "name": "Permissions",
+            "containerId": "",
+            "created": "2023-03-25T08:19:44.276Z",
+            "sortNum": 30000
+        },
+        {
+            "_id": "26343666-5468-444f-8adf-e37c64e9ef83",
+            "name": "Students",
+            "containerId": "",
+            "created": "2023-03-25T17:41:27.795Z",
+            "sortNum": 40000
+        },
+        {
+            "_id": "c7b77429-a552-4681-8175-e17ac1bb8818",
+            "name": "SchoolYears",
+            "containerId": "",
+            "created": "2023-03-29T16:29:28.079Z",
+            "sortNum": 50000
+        },
+        {
+            "_id": "4339d569-3f06-4acf-8494-a19a708a1f03",
+            "name": "SubjectTranscript",
+            "containerId": "",
+            "created": "2023-03-30T15:05:41.576Z",
+            "sortNum": 60000
+        }
+    ],
+    "requests": [
+        {
+            "_id": "f5ef196a-9658-4d29-b02d-37c3e8ef7724",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "acd750d7-d190-4af9-bd45-2d488478afb5",
+            "name": "Signin with google",
+            "url": "/auth/google",
+            "method": "GET",
+            "sortNum": 10000,
+            "created": "2023-03-25T08:19:44.275Z",
+            "modified": "2023-03-25T08:19:44.275Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "oauth2",
+                "oauth2": {
+                    "grantType": "authorization_code",
+                    "callbackUrl": "http://localhost:6789/callback",
+                    "authUrl": "http://localhost:3001/api/auth/google",
+                    "tokenUrl": "",
+                    "clientId": "327767891667-rvmg4le30vijgpvls00806bkn50n2sgr.apps.googleusercontent.com",
+                    "clientSecret": "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",
+                    "clientAuth": "in-header",
+                    "scope": "email profile"
+                }
+            },
+            "tests": []
+        },
+        {
+            "_id": "d763c8df-8579-4302-9239-dfc5fc7f9c68",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "c4b8aeec-79a9-4762-8905-28bf899d71c3",
+            "name": "Get classes ",
+            "url": "/classes",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2023-03-25T08:19:44.276Z",
+            "modified": "2023-03-25T08:19:44.276Z",
+            "headers": [],
+            "params": [],
+            "tests": [
+                {
+                    "type": "res-code",
+                    "custom": "",
+                    "action": "equal",
+                    "value": "200"
+                },
+                {
+                    "type": "res-code",
+                    "custom": "",
+                    "action": "<=",
+                    "value": "401"
+                },
+                {
+                    "type": "res-code",
+                    "custom": "",
+                    "action": "<=",
+                    "value": "403"
+                },
+                {
+                    "type": "res-body",
+                    "custom": "",
+                    "action": "isjson",
+                    "value": ""
+                },
+                {
+                    "type": "custom-header",
+                    "custom": "Content-Type",
+                    "action": "contains",
+                    "value": "application/json"
+                }
+            ]
+        },
+        {
+            "_id": "4661a0b8-9c73-499f-b788-4882a41e03f7",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "c4b8aeec-79a9-4762-8905-28bf899d71c3",
+            "name": "Add new class",
+            "url": "/classes",
+            "method": "POST",
+            "sortNum": 30000,
+            "created": "2023-03-25T08:19:44.277Z",
+            "modified": "2023-03-25T08:19:44.277Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"className\": \"2A\",\n    \"headTeacher\": \"641201214768fdc876470b5b\",\n    \"grade\": 2\n}",
+                "form": []
+            },
+            "tests": [
+                {
+                    "type": "res-body",
+                    "custom": "",
+                    "action": "isjson",
+                    "value": ""
+                },
+                {
+                    "type": "Content-Type",
+                    "custom": "",
+                    "action": "contains",
+                    "value": "application/json"
+                },
+                {
+                    "type": "res-code",
+                    "custom": "",
+                    "action": "equal",
+                    "value": "201"
+                }
+            ]
+        },
+        {
+            "_id": "1c4baa83-eb89-4220-b062-6bc4b70caa4a",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "60e6ab3f-a29b-49b9-9428-f5c8d6172a4d",
+            "name": "Create permissions",
+            "url": "",
+            "method": "GET",
+            "sortNum": 60000,
+            "created": "2023-03-25T08:19:44.278Z",
+            "modified": "2023-03-25T08:19:44.278Z",
+            "headers": []
+        },
+        {
+            "_id": "0bd50167-5669-4a91-a609-bbe61abe1737",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "26343666-5468-444f-8adf-e37c64e9ef83",
+            "name": "attendance",
+            "url": "/students/attendance/6410a8a01e0ac1f41b6ddc00",
+            "method": "PUT",
+            "sortNum": 70000,
+            "created": "2023-03-25T17:41:41.514Z",
+            "modified": "2023-03-26T17:08:59.983Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "[\n  {\n    \"idStudent\": \"6420265eb862c25f87f321c2\",\n    \"absent\": {\n      \"schoolYear\": \"641c92fd17e975b09d28d965\"\n    }\n  }\n]",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "b646fda4-c407-49dd-b633-04cc7dfecc67",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "26343666-5468-444f-8adf-e37c64e9ef83",
+            "name": "selectAttendanceByClass",
+            "url": "/students/attendance/6410a8a01e0ac1f41b6ddc00?date=03-26-2023",
+            "method": "GET",
+            "sortNum": 80000,
+            "created": "2023-03-26T13:27:42.465Z",
+            "modified": "2023-03-26T13:42:33.488Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "date",
+                    "value": "03-26-2023",
+                    "isPath": false
+                }
+            ],
+            "tests": []
+        },
+        {
+            "_id": "1a3576f0-fcc3-4205-8284-a8bbae86d6e9",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "26343666-5468-444f-8adf-e37c64e9ef83",
+            "name": "selectAttendanceStudent",
+            "url": "/student/attendance/641c92fd17e975b09d28d96",
+            "method": "GET",
+            "sortNum": 100000,
+            "created": "2023-03-26T15:37:47.986Z",
+            "modified": "2023-03-26T17:31:15.505Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "54d1c70d-cea2-49f0-a285-ac91ca1cb021",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "26343666-5468-444f-8adf-e37c64e9ef83",
+            "name": "PolicyBeneficiary student",
+            "url": "/students/policyBeneficiary",
+            "method": "GET",
+            "sortNum": 110000,
+            "created": "2023-03-28T16:33:11.913Z",
+            "modified": "2023-03-28T16:33:32.207Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "9969cf37-b3cf-42ff-9659-a462d8b78dc2",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "26343666-5468-444f-8adf-e37c64e9ef83",
+            "name": "update",
+            "url": "/student/641c92fd17e975b09d28d966",
+            "method": "PUT",
+            "sortNum": 120000,
+            "created": "2023-03-28T16:34:28.858Z",
+            "modified": "2023-03-28T16:38:21.858Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"isPolicyBeneficiary\":true\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "23485e07-eb11-44d5-9124-f121255dedff",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "26343666-5468-444f-8adf-e37c64e9ef83",
+            "name": "selectAttendance all class",
+            "url": "/students/attendance?date=03-26-2023",
+            "method": "GET",
+            "sortNum": 130000,
+            "created": "2023-03-28T16:40:30.602Z",
+            "modified": "2023-03-28T16:40:55.704Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "date",
+                    "value": "03-26-2023",
+                    "isPath": false
+                }
+            ],
+            "tests": []
+        },
+        {
+            "_id": "ff767718-7102-4d06-a13b-96370faf9dad",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "c7b77429-a552-4681-8175-e17ac1bb8818",
+            "name": "get list",
+            "url": "/schoolYears",
+            "method": "GET",
+            "sortNum": 140000,
+            "created": "2023-03-29T16:29:37.278Z",
+            "modified": "2023-03-29T16:38:45.937Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "049e7f50-16f9-412e-a2ed-17341f28af62",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "c7b77429-a552-4681-8175-e17ac1bb8818",
+            "name": "create",
+            "url": "/schoolYear",
+            "method": "POST",
+            "sortNum": 150000,
+            "created": "2023-03-29T17:10:05.073Z",
+            "modified": "2023-03-29T17:10:45.813Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "8adf13b8-b6c1-4bc4-908e-34ff9ea93d4d",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "4339d569-3f06-4acf-8494-a19a708a1f03",
+            "name": "newScoreList",
+            "url": "/transcripts/6410a8a01e0ac1f41b6ddc00/641af3f5346143e3ee6e0977",
+            "method": "POST",
+            "sortNum": 160000,
+            "created": "2023-03-30T15:06:01.914Z",
+            "modified": "2023-03-30T16:35:26.667Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "[\n  {\n    \"student\": \"641c92fd17e975b09d28d965\",\n    \"secondSemester\": {\n      \"midtermTest\": 9,\n      \"finalTest\": 0\n    }\n  },\n  {\n    \"student\": \"641c92fd17e975b09d28d966\",\n    \"secondSemester\": {\n      \"midtermTest\": 9,\n      \"finalTest\": 10\n    }\n  }\n]",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "5a20b34a-9eaa-4fd5-9bec-c3808a65a2d5",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "4339d569-3f06-4acf-8494-a19a708a1f03",
+            "name": "inputOne",
+            "url": "/transcript/641c92fd17e975b09d28d967/641af3f5346143e3ee6e0979",
+            "method": "POST",
+            "sortNum": 170000,
+            "created": "2023-03-30T17:00:59.936Z",
+            "modified": "2023-03-30T17:27:18.635Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": " {\n    \"secondSemester\": {\n      \"midtermTest\": 9,\n      \"finalTest\": 2000\n    }\n  }",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "172f36f2-b695-47ab-985e-0382eeca0d52",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "4339d569-3f06-4acf-8494-a19a708a1f03",
+            "name": "getTranscriptByClass",
+            "url": "/transcript/class/6410a8a01e0ac1f41b6ddc00/641af3f5346143e3ee6e097",
+            "method": "GET",
+            "sortNum": 180000,
+            "created": "2023-03-31T12:31:03.633Z",
+            "modified": "2023-03-31T13:05:35.027Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "d05ec545-2cc1-4541-9c00-40d984664455",
+            "colId": "d180250d-d75f-44ac-978c-cc37c5badeb5",
+            "containerId": "4339d569-3f06-4acf-8494-a19a708a1f03",
+            "name": "getTranscriptByStudent",
+            "url": "/transcript/student/641c92fd17e975b09d28d965",
+            "method": "GET",
+            "sortNum": 190000,
+            "created": "2023-03-31T12:46:50.278Z",
+            "modified": "2023-03-31T12:49:12.378Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        }
+    ],
+    "settings": {
+        "headers": [
+            {
+                "name": "Cookie",
+                "value": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXlsb2FkIjp7Il9pZCI6IjY0MGExZDQ2NDM1Yjk2NTUwOTZiMzllMiIsImVtYWlsIjoiaG4udGlldWhvY2JvdHh1eWVuQGdtYWlsLmNvbSIsImRhdGVPZkJpcnRoIjoiMTk3My0xMi0zMVQxNzowMDowMC4wMDBaIiwiZ2VuZGVyIjoibuG7ryIsInJvbGUiOiJIRUFETUFTVEVSIiwiZGlzcGxheU5hbWUiOiJBZG1pbiIsImVtcGxveW1lbnRTdGF0dXMiOnRydWUsImlzVmVyaWZpZWQiOnRydWUsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BR05teXhha0h2ZWs1Y1MwdUs2dmNrTnp6ZjVlUWRCZWhiUkFhY29OZ2lWMD1zOTYtYyJ9LCJpYXQiOjE2NzkzMzU4MjUsImV4cCI6MTY3OTMzOTQyNX0.omXOu34RdGjFxOJrUWFIi9OQzLEXpAgUFI-BDzo6Wkw"
+            },
+            {
+                "name": "Cookie",
+                "value": "credential=640a1d46435b9655096b39e2"
+            }
+        ],
+        "auth": {
+            "type": "oauth2",
+            "oauth2": {
+                "grantType": "authorization_code",
+                "callbackUrl": "http://localhost:6789/callback",
+                "authUrl": "http://localhost:3001/api/auth/google",
+                "tokenUrl": "",
+                "clientId": "327767891667-rvmg4le30vijgpvls00806bkn50n2sgr.apps.googleusercontent.com",
+                "clientSecret": "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",
+                "clientAuth": "in-header",
+                "scope": "email profile"
+            }
+        },
+        "tests": [],
+        "options": {
+            "baseUrl": "http://localhost:3001/api"
+        }
+    }
+}

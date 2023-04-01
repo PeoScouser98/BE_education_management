@@ -1,56 +1,269 @@
-import { Request, Response } from "express";
-import createHttpError, { HttpError } from "http-errors";
-import * as StudentServices from "../services/student.service";
+import { Request, Response } from 'express';
+import createHttpError, { HttpError } from 'http-errors';
+import { MongooseError, SortOrder } from 'mongoose';
+import { formatDate } from '../../helpers/toolkit';
+import { Student } from '../models/student.model';
+import * as StudentServices from '../services/student.service';
 
-export const list = async (req: Request, res: Response) => {
-	try {
-		const students = await StudentServices.getStudentsByClass(req.params.classId).catch((err) => {
-			throw createHttpError.NotFound("Cannot find any student!");
-		});
-		return res.status(200).json(students);
-	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | Error).message,
-			status: (error as HttpError).status || 500,
-		});
-	}
-};
-
-export const read = async (req: Request, res: Response) => {
-	try {
-		return await StudentServices.getStudent(req.params.id).catch((err) => {
-			throw createHttpError.NotFound("Cannot find student!");
-		});
-	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | Error).message,
-			status: (error as HttpError).status || 500,
-		});
-	}
-};
-
-export const create = async (req: Request, res: Response) => {
+// [POST] /api/students
+export const createStudent = async (req: Request, res: Response) => {
 	try {
 		const newStudent = await StudentServices.createStudent(req.body);
-		console.log("new student:>>", newStudent);
+
 		return res.status(201).json(newStudent);
 	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | Error).message,
-			status: (error as HttpError).status || 500,
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
 		});
 	}
 };
 
-export const update = async (req: Request, res: Response) => {
+// [PUT] /api/student/:id
+export const updateStudent = async (req: Request, res: Response) => {
 	try {
-		if (!req.body) throw createHttpError.BadRequest("Provide student data to update");
-		const updatedStudent = await StudentServices.updateStudent(req.body);
-		return res.status(201).json(updatedStudent);
+		const id: string = req.params.id;
+		const payload = req.body;
+		const newStudent = await StudentServices.updateStudent(id, payload);
+
+		return res.status(201).json(newStudent);
 	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | Error).message,
-			status: (error as HttpError).status || 500,
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
+		});
+	}
+};
+
+// [GET] /api/students/:class?page=1&_sort=fullName&_order=asc&select='-absentDays'&limit=10
+export const getStudentByClass = async (req: Request, res: Response) => {
+	try {
+		const idClass = req.params.class;
+		const order: SortOrder = req.query._order === 'desc' ? 1 : -1;
+		const groupBy: string = req.query._sort?.toString() || 'fullName';
+		const select: string = req.query.select?.toString() || '-absentDays';
+		const page = req.query.page || 1;
+		const limit = req.query.limit || 10;
+
+		const result = await StudentServices.getStudentByClass(
+			idClass,
+			Number(page),
+			Number(limit),
+			order,
+			groupBy,
+			select
+		);
+
+		return res.status(200).json(result);
+	} catch (error) {
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
+		});
+	}
+};
+
+// [GET] /api/student/:id
+export const getStudentDetail = async (req: Request, res: Response) => {
+	try {
+		const id: string = req.params.id;
+
+		const result = await StudentServices.getDetailStudent(id);
+
+		return res.status(200).json(result);
+	} catch (error) {
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
+		});
+	}
+};
+
+// [PUT] /api/student/services/:id
+export const serviceStudent = async (req: Request, res: Response) => {
+	try {
+		const id: string = req.params.id;
+		const { type, date } = req.body;
+		const optionList = {
+			transferSchool: 'transferSchool',
+			dropout: 'dropout',
+		};
+		let result: Student | null = null;
+
+		switch (type) {
+			case optionList.transferSchool:
+				result = await StudentServices.setStudentTransferSchool(id, date);
+				break;
+			case optionList.dropout:
+				result = await StudentServices.setDropoutStudent(id, date);
+				break;
+			default:
+				throw createHttpError(400, 'Type is not valid');
+		}
+
+		return res.status(201).json(result);
+	} catch (error) {
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
+		});
+	}
+};
+
+// [GET] /api/students/stop/:type
+export const getStudentStop = async (req: Request, res: Response) => {
+	try {
+		const type = req.params.type;
+		const page = req.query.page || 1;
+		const limit = req.query.limit || 10;
+		const year = req.query.year || new Date().getFullYear();
+		const optionList = {
+			transferSchool: 'transferSchool',
+			dropout: 'dropout',
+		};
+		let result: any = [];
+
+		switch (type) {
+			case optionList.transferSchool:
+				result = await StudentServices.getStudentTransferSchool(
+					Number(year),
+					Number(page),
+					Number(limit)
+				);
+				break;
+			case optionList.dropout:
+				result = await StudentServices.getStudentDropout(
+					Number(year),
+					Number(page),
+					Number(limit)
+				);
+				break;
+			default:
+				throw createHttpError(400, 'Type is not valid');
+		}
+
+		return res.status(200).json(result);
+	} catch (error) {
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
+		});
+	}
+};
+
+// [PUT] /api/student/attendance/:classId
+export const attendanceStudentByClass = async (req: Request, res: Response) => {
+	try {
+		const classId: string = req.params.classId;
+		const data = req.body;
+
+		const result = await StudentServices.markAttendanceStudent(classId, data);
+
+		return res.status(201).json(result);
+	} catch (error) {
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
+		});
+	}
+};
+
+// [GET] /api/students/attendance/:classId?date='03-26-2023' MM-DD-YYYY
+export const selectAttendanceByClass = async (req: Request, res: Response) => {
+	try {
+		const classId: string = req.params.classId;
+		let date: any = req.query?.date;
+
+		if (date) {
+			date = new Date(formatDate(new Date(date)));
+		} else {
+			date = new Date(formatDate(new Date()));
+		}
+
+		const result = await StudentServices.dailyAttendanceList(classId, date);
+
+		return res.status(200).json(result);
+	} catch (error) {
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
+		});
+	}
+};
+
+// [GET] /api/student/attendance/:id?month=03&year2023
+export const selectAttendanceByStudent = async (req: Request, res: Response) => {
+	try {
+		const id: string = req.params.id;
+		let month = req.query.month || new Date().getMonth() + 1;
+		let year = req.query.year || new Date().getFullYear();
+
+		const result = await StudentServices.attendanceOfStudentByMonth(
+			id,
+			Number(month),
+			Number(year)
+		);
+
+		return res.status(200).json(result);
+	} catch (error) {
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
+		});
+	}
+};
+
+// [GET] /api/students/policyBeneficiary?page=1&limit=10
+export const getPolicyBeneficiary = async (req: Request, res: Response) => {
+	try {
+		const page = req.query.page || 1;
+		const limit = req.query.limit || 10;
+		const result = await StudentServices.getPolicyBeneficiary(Number(page), Number(limit));
+
+		return res.status(200).json(result);
+	} catch (error) {
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
+		});
+	}
+};
+
+// [GET] /students/attendance?page=1&limit=10&date='03-28-2023' MM-DD-YYYY
+export const selectAttendanceAllClass = async (req: Request, res: Response) => {
+	try {
+		const page = req.query.page || 1;
+		const limit = req.query.limit || 10;
+		let date: any = req.query?.date;
+
+		if (date) {
+			date = new Date(formatDate(new Date(date)));
+		} else {
+			date = new Date(formatDate(new Date()));
+		}
+
+		const result = await StudentServices.getAttendanceAllClass(
+			Number(page),
+			Number(limit),
+			date
+		);
+
+		return res.status(200).json(result);
+	} catch (error) {
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
 		});
 	}
 };
