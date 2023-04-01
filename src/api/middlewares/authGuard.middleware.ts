@@ -4,14 +4,6 @@ import createHttpError, { HttpError } from 'http-errors';
 import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import redisClient from '../../database/redis';
 
-declare global {
-	namespace Express {
-		interface Request {
-			[key: string]: any;
-		}
-	}
-}
-
 export const checkAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		if (!req.cookies.credential) throw createHttpError.BadRequest('Invalid auth id!');
