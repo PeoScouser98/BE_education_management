@@ -56,7 +56,7 @@ export const newScoreList = async (
 		// validate bảng điểm của các student gửi lên
 		const transcriptStudentErrorValidates: { id: string; message: string }[] = [];
 		data.forEach((item) => {
-			let { error } = validateSubjectTranscript(item);
+			const { error } = validateSubjectTranscript(item);
 			if (error) {
 				transcriptStudentErrorValidates.push({
 					id: item.student.toString(),
@@ -85,7 +85,7 @@ export const newScoreList = async (
 
 		if (idStudentList.length > students.length) {
 			idStudentList.forEach((idStudent) => {
-				let check = students.find((student) => student._id.toString() === idStudent);
+				const check = students.find((student) => student._id.toString() === idStudent);
 				if (!check) {
 					notAClassStudent.push({ id: idStudent });
 				}
@@ -110,7 +110,7 @@ export const newScoreList = async (
 		if (transcriptExists.length !== 0 && transcriptExists.length < data.length) {
 			// trường hợp có tồn tại các học sinh chưa được tạo bảng điểm
 			data.forEach((item) => {
-				let check = transcriptExists.find(
+				const check = transcriptExists.find(
 					(exist) => exist.student.toString() === item.student.toString()
 				);
 				if (!check) {

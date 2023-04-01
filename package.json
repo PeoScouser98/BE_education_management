@@ -8,7 +8,7 @@
 		"dev": "nodemon --watch docs --ext yaml --exec \"nodemon ./src/server.ts\"",
 		"build": "npx webpack --config webpack.config.js",
 		"cleanup": "rm -rf dist && rm -rf build",
-		"eslint:fix": "eslint --fix",
+		"eslint:fix": "eslint --fix . --ext .ts",
 		"lint": "eslint . --ext .ts"
 	},
 	"keywords": [],

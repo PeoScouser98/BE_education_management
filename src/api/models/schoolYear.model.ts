@@ -7,7 +7,7 @@ export interface SchoolYear extends Document {
 	endAt: number;
 }
 
-interface IPaginatedSchoolYearModel extends PaginateModel<SchoolYear> {}
+type IPaginatedSchoolYearModel = PaginateModel<SchoolYear>
 
 const SchoolYearSchema = new mongoose.Schema<SchoolYear>(
 	{

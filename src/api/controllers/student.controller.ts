@@ -203,8 +203,8 @@ export const selectAttendanceByClass = async (req: Request, res: Response) => {
 export const selectAttendanceByStudent = async (req: Request, res: Response) => {
 	try {
 		const id: string = req.params.id;
-		let month = req.query.month || new Date().getMonth() + 1;
-		let year = req.query.year || new Date().getFullYear();
+		const month = req.query.month || new Date().getMonth() + 1;
+		const year = req.query.year || new Date().getFullYear();
 
 		const result = await StudentServices.attendanceOfStudentByMonth(
 			id,

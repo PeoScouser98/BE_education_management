@@ -16,9 +16,9 @@ export interface Permission extends Document {
 
 interface PermissionDocument extends Omit<SoftDeleteDocument, '_id'>, Permission { }
 
-interface PermissionModel extends Model<PermissionDocument> { }
+type PermissionModel = Model<PermissionDocument>
 
-interface SoftDeletePermissionModel extends SoftDeleteModel<PermissionDocument, PermissionModel> { }
+type SoftDeletePermissionModel = SoftDeleteModel<PermissionDocument, PermissionModel>
 
 const PermissionSchema = new mongoose.Schema<Permission>({
 	_id: {

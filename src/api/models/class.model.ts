@@ -11,9 +11,9 @@ export interface Class extends Document {
 
 interface ClassDocument extends Omit<SoftDeleteDocument, '_id'>, Class {}
 
-interface ClassModel extends Model<ClassDocument> {}
+type ClassModel = Model<ClassDocument>
 
-interface SoftDeleteClassModel extends SoftDeleteModel<ClassDocument, ClassModel> {}
+type SoftDeleteClassModel = SoftDeleteModel<ClassDocument, ClassModel>
 
 const ClassSchema = new mongoose.Schema<ClassDocument>(
 	{

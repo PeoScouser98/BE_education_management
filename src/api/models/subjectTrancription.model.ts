@@ -35,10 +35,9 @@ export interface SubjectTranscript extends Document {
 
 interface SubjectTranscriptDocument extends Omit<SoftDeleteDocument, '_id'>, SubjectTranscript {}
 
-interface ISubjectTranscriptModel extends Model<SubjectTranscriptDocument> {}
+type ISubjectTranscriptModel = Model<SubjectTranscriptDocument>
 
-interface SoftDeleteSubjectTranscriptModel
-	extends SoftDeleteModel<SubjectTranscriptDocument, ISubjectTranscriptModel> {}
+type SoftDeleteSubjectTranscriptModel = SoftDeleteModel<SubjectTranscriptDocument, ISubjectTranscriptModel>
 
 const SubjectTranscriptSchema = new mongoose.Schema<SubjectTranscriptDocument>(
 	{

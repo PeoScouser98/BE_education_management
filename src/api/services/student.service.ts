@@ -66,7 +66,7 @@ const createStudentList = async (data: Omit<Student, '_id'>[]) => {
 		// validate
 		const studentErrorValidate: IStudentErrorRes[] = [];
 		data.forEach((item) => {
-			let { error } = validateReqBodyStudent(item);
+			const { error } = validateReqBodyStudent(item);
 			if (error) {
 				studentErrorValidate.push({
 					fullName: item.fullName,
@@ -351,13 +351,13 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 		// validate học sinh nghỉ gửi lên
 		const errorValidates: { id: string; message: string }[] = [];
 
-		let message: string = '';
+		let message = '';
 		absentStudents.forEach((item) => {
 			if (!item.idStudent || !mongoose.Types.ObjectId.isValid(item.idStudent)) {
 				message = 'idStudent of the student is invalid';
 			}
 
-			let { error } = validateAttendanceStudent(item.absent);
+			const { error } = validateAttendanceStudent(item.absent);
 			if (error) {
 				message += ' && ' + error.message;
 			}
@@ -385,7 +385,7 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 		const studentNotExist: string[] = [];
 		if (checkExist.length !== absentStudentIdList.length) {
 			absentStudentIdList.forEach((id) => {
-				let check = checkExist.find((item) => item._id.toString() === id);
+				const check = checkExist.find((item) => item._id.toString() === id);
 
 				if (!check) {
 					studentNotExist.push(id);
@@ -403,13 +403,13 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 		const attendedStudents: { id: string; name: string }[] = [];
 
 		checkExist.forEach((student) => {
-			let check = student.absentDays?.find((item) => {
-				let checkDate = compareDates(new Date(), item?.date);
+			const check = student.absentDays?.find((item) => {
+				const checkDate = compareDates(new Date(), item?.date);
 
 				return checkDate === 0 ? true : false;
 			});
 
-			if (Boolean(check)) {
+			if (check) {
 				attendedStudents.push({
 					id: student._id.toString(),
 					name: student.fullName,
@@ -477,7 +477,7 @@ export const dailyAttendanceList = async (idClass: string, date: Date) => {
 		const result = studentOfClass.map((item) => {
 			let attendanceStatus = true;
 			if (studentAbsents.length > 0) {
-				let check = studentAbsents.find(
+				const check = studentAbsents.find(
 					(itemAb) => itemAb._id.toString() === item._id.toString()
 				);
 
@@ -508,9 +508,9 @@ export const attendanceOfStudentByMonth = async (id: string, month: number, year
 		const result: IAttendance[] = [];
 
 		absentDays?.forEach((item) => {
-			let date = new Date(item.date);
-			let monthItem = date.getMonth() + 1;
-			let yearItem = date.getFullYear();
+			const date = new Date(item.date);
+			const monthItem = date.getMonth() + 1;
+			const yearItem = date.getFullYear();
 
 			if (monthItem === month && yearItem === year) {
 				result.push(item);

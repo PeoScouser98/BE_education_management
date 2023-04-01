@@ -10,9 +10,9 @@ export interface Subject extends Document {
 
 interface SubjectDocument extends Omit<SoftDeleteDocument, '_id'>, Subject {}
 
-interface SubjectModel extends Model<SubjectDocument> {}
+type SubjectModel = Model<SubjectDocument>
 
-interface SoftDeleteSubjectModel extends SoftDeleteModel<SubjectDocument, SubjectModel> {}
+type SoftDeleteSubjectModel = SoftDeleteModel<SubjectDocument, SubjectModel>
 
 const subjectSchema = new mongoose.Schema<SubjectDocument>(
 	{

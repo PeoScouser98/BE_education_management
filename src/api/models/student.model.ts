@@ -27,11 +27,11 @@ export interface IAttendance extends Document {
 
 interface StudentDocument extends Omit<SoftDeleteDocument, '_id'>, Student {}
 
-interface IStudentModel extends Model<StudentDocument> {}
+type IStudentModel = Model<StudentDocument>
 
-interface SoftDeleteStudentModel extends SoftDeleteModel<StudentDocument, IStudentModel> {}
+type SoftDeleteStudentModel = SoftDeleteModel<StudentDocument, IStudentModel>
 
-interface IPaginatedStudentModel extends PaginateModel<StudentDocument> {}
+type IPaginatedStudentModel = PaginateModel<StudentDocument>
 
 const StudentSchema = new mongoose.Schema<StudentDocument>(
 	{
