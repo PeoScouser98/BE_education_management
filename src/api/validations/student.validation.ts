@@ -1,8 +1,8 @@
 import Joi from 'joi';
-import { IAttendance, Student } from '../models/student.model';
+import { IAttendance, IStudent } from '../models/student.model';
 
 // validate
-export const validateReqBodyStudent = (data: Omit<Student, '_id'>) => {
+export const validateReqBodyStudent = (data: Omit<IStudent, '_id'>) => {
 	const schema = Joi.object({
 		class: Joi.string().required(),
 		code: Joi.string().required(),
@@ -28,7 +28,7 @@ export const validateAttendanceStudent = (data: Omit<IAttendance, '_id' | 'date'
 	return schema.validate(data);
 };
 
-export const validateUpdateReqBodyStudent = (data: Partial<Omit<Student, '_id'>>) => {
+export const validateUpdateReqBodyStudent = (data: Partial<Omit<IStudent, '_id'>>) => {
 	const schema = Joi.object({
 		class: Joi.string().required().optional(),
 		code: Joi.string().required().optional(),

@@ -1,12 +1,15 @@
 import createHttpError from 'http-errors';
 import mongoose, { SortOrder } from 'mongoose';
 import { compareDates, compareObject, getPropertieOfArray } from '../../helpers/toolkit';
-import StudentModel, { IAttendance, Student } from '../models/student.model';
+import ClassModel from '../models/class.model';
+import StudentModel, { IAttendance, IStudent } from '../models/student.model';
 import {
 	validateAttendanceStudent,
 	validateReqBodyStudent,
 	validateUpdateReqBodyStudent,
 } from '../validations/student.validation';
+import { selectTranscriptStudent } from './subjectTrancription.service';
+import { ISubjectTranscript } from '../../types/subjectTranscription.type';
 
 interface IStudentErrorRes {
 	fullName: string;
@@ -20,7 +23,7 @@ interface IAbsentStudent {
 }
 
 // create new student using form
-export const createStudent = async (data: Omit<Student, '_id'> | Omit<Student, '_id'>[]) => {
+export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
 	try {
 		// thêm nhiều học sinh cùng lúc
 		if (Array.isArray(data)) {
@@ -37,7 +40,7 @@ export const createStudent = async (data: Omit<Student, '_id'> | Omit<Student, '
 			throw createHttpError.BadRequest(error.message);
 		}
 
-		const check: Student | null = await StudentModel.findOne({
+		const check: IStudent | null = await StudentModel.findOne({
 			code: data.code,
 		});
 
@@ -51,7 +54,7 @@ export const createStudent = async (data: Omit<Student, '_id'> | Omit<Student, '
 	}
 };
 
-const createStudentList = async (data: Omit<Student, '_id'>[]) => {
+const createStudentList = async (data: Omit<IStudent, '_id'>[]) => {
 	try {
 		if (data.length === 0) throw createHttpError(204);
 		if (data.length > 50) {
@@ -63,7 +66,7 @@ const createStudentList = async (data: Omit<Student, '_id'>[]) => {
 		// validate
 		const studentErrorValidate: IStudentErrorRes[] = [];
 		data.forEach((item) => {
-			let { error } = validateReqBodyStudent(item);
+			const { error } = validateReqBodyStudent(item);
 			if (error) {
 				studentErrorValidate.push({
 					fullName: item.fullName,
@@ -111,7 +114,7 @@ const createStudentList = async (data: Omit<Student, '_id'>[]) => {
 };
 
 // update
-export const updateStudent = async (id: string, data: Partial<Omit<Student, '_id' | 'code'>>) => {
+export const updateStudent = async (id: string, data: Partial<Omit<IStudent, '_id' | 'code'>>) => {
 	try {
 		if (!data || Object.keys(data).length === 0) {
 			throw createHttpError(204);
@@ -200,18 +203,23 @@ export const getDetailStudent = async (id: string) => {
 			throw createHttpError.BadRequest('_id of the student is invalid');
 		}
 
-		const student: Student | null = await StudentModel.findOne({
+		const student: IStudent | null = await StudentModel.findOne({
 			_id: id,
 		}).populate({
 			path: 'class',
 			select: 'className headTeacher',
 		});
 
+		const transcriptStudent: ISubjectTranscript[] = await selectTranscriptStudent(id);
+
 		if (!student) {
 			throw createHttpError.NotFound('Student does not exist!');
 		}
 
-		return student;
+		return {
+			info: student,
+			transcript: transcriptStudent,
+		};
 	} catch (error) {
 		throw error;
 	}
@@ -343,13 +351,13 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 		// validate học sinh nghỉ gửi lên
 		const errorValidates: { id: string; message: string }[] = [];
 
-		let message: string = '';
+		let message = '';
 		absentStudents.forEach((item) => {
 			if (!item.idStudent || !mongoose.Types.ObjectId.isValid(item.idStudent)) {
 				message = 'idStudent of the student is invalid';
 			}
 
-			let { error } = validateAttendanceStudent(item.absent);
+			const { error } = validateAttendanceStudent(item.absent);
 			if (error) {
 				message += ' && ' + error.message;
 			}
@@ -369,7 +377,7 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 		const absentStudentIdList: string[] = getPropertieOfArray(absentStudents, 'idStudent');
 
 		// Kiểm tra xem học sinh vắng có đúng học sinh của lớp không
-		const checkExist: Student[] = await StudentModel.find({
+		const checkExist: IStudent[] = await StudentModel.find({
 			_id: { $in: absentStudentIdList },
 			class: idClass,
 		});
@@ -377,7 +385,7 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 		const studentNotExist: string[] = [];
 		if (checkExist.length !== absentStudentIdList.length) {
 			absentStudentIdList.forEach((id) => {
-				let check = checkExist.find((item) => item._id.toString() === id);
+				const check = checkExist.find((item) => item._id.toString() === id);
 
 				if (!check) {
 					studentNotExist.push(id);
@@ -395,13 +403,13 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 		const attendedStudents: { id: string; name: string }[] = [];
 
 		checkExist.forEach((student) => {
-			let check = student.absentDays?.find((item) => {
-				let checkDate = compareDates(new Date(), item?.date);
+			const check = student.absentDays?.find((item) => {
+				const checkDate = compareDates(new Date(), item?.date);
 
 				return checkDate === 0 ? true : false;
 			});
 
-			if (Boolean(check)) {
+			if (check) {
 				attendedStudents.push({
 					id: student._id.toString(),
 					name: student.fullName,
@@ -446,7 +454,7 @@ export const dailyAttendanceList = async (idClass: string, date: Date) => {
 		const nextDay = new Date(date);
 		nextDay.setDate(nextDay.getDate() + 1);
 
-		const studentAbsents: Student[] = await StudentModel.find({
+		const studentAbsents: IStudent[] = await StudentModel.find({
 			absentDays: {
 				$elemMatch: {
 					date: {
@@ -469,7 +477,7 @@ export const dailyAttendanceList = async (idClass: string, date: Date) => {
 		const result = studentOfClass.map((item) => {
 			let attendanceStatus = true;
 			if (studentAbsents.length > 0) {
-				let check = studentAbsents.find(
+				const check = studentAbsents.find(
 					(itemAb) => itemAb._id.toString() === item._id.toString()
 				);
 
@@ -493,14 +501,16 @@ export const dailyAttendanceList = async (idClass: string, date: Date) => {
 // Lấy ra tình trạng điểm danh của 1 học sinh trong 1 tháng (sẽ trả về ngày vắng mặt trong tháng đấy)
 export const attendanceOfStudentByMonth = async (id: string, month: number, year: number) => {
 	try {
-		const { absentDays } = await getDetailStudent(id);
+		const {
+			info: { absentDays },
+		} = await getDetailStudent(id);
 
 		const result: IAttendance[] = [];
 
 		absentDays?.forEach((item) => {
-			let date = new Date(item.date);
-			let monthItem = date.getMonth() + 1;
-			let yearItem = date.getFullYear();
+			const date = new Date(item.date);
+			const monthItem = date.getMonth() + 1;
+			const yearItem = date.getFullYear();
 
 			if (monthItem === month && yearItem === year) {
 				result.push(item);
@@ -508,6 +518,53 @@ export const attendanceOfStudentByMonth = async (id: string, month: number, year
 		});
 
 		return result;
+	} catch (error) {
+		throw error;
+	}
+};
+
+// Lấy ra các học sinh chính sách
+export const getPolicyBeneficiary = async (page: number, limit: number) => {
+	return await StudentModel.paginate(
+		{ dropoutDate: null, transferSchool: null, isPolicyBeneficiary: true },
+		{ page: page, limit: limit, select: '-absentDays', sort: { class: 'desc' } }
+	);
+};
+
+// Lấy ra tất cả các học sinh vắng mặt điểm danh
+export const getAttendanceAllClass = async (page: number, limit: number, date: Date) => {
+	try {
+		const nextDay = new Date(date);
+		nextDay.setDate(date.getDate() + 1);
+
+		// học sinh vắng mặt của toàn trường trong ngày
+		const studentAbsentDays = await StudentModel.paginate(
+			{
+				absentDays: {
+					$elemMatch: {
+						date: {
+							$gte: date,
+							$lt: nextDay,
+						},
+					},
+				},
+			},
+			{
+				lean: true,
+				page: page,
+				limit: limit,
+				sort: { class: 'desc' },
+				populate: { path: 'class', select: 'className' },
+			}
+		);
+
+		// lấy ra tất cả các class hiện tại của trường
+		const classes = await ClassModel.find({}).sort({ grade: 'asc' }).lean().select('className');
+
+		return {
+			...studentAbsentDays,
+			classes,
+		};
 	} catch (error) {
 		throw error;
 	}

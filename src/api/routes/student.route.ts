@@ -9,11 +9,15 @@ import {
 	attendanceStudentByClass,
 	selectAttendanceByClass,
 	selectAttendanceByStudent,
+	selectAttendanceAllClass,
+	getPolicyBeneficiary,
 } from '../controllers/student.controller';
 
 const router = express.Router();
 
 // *** Chú ý ***: có 2 path student: students và student (có s và không s)
+router.get('/students/attendance', selectAttendanceAllClass);
+router.get('/students/policyBeneficiary', getPolicyBeneficiary);
 router.get('/student/attendance/:id', selectAttendanceByStudent);
 router.get('/students/attendance/:classId', selectAttendanceByClass);
 router.get('/students/stop/:type', getStudentStop);

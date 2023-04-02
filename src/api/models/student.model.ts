@@ -3,7 +3,7 @@ import mongoose, { Model, ObjectId, PaginateModel } from 'mongoose';
 import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 import mongoosePaginate from 'mongoose-paginate-v2';
 
-export interface Student extends Document {
+export interface IStudent extends Document {
 	_id: ObjectId;
 	code: string;
 	fullName: string;
@@ -25,13 +25,13 @@ export interface IAttendance extends Document {
 	reason?: string;
 }
 
-interface StudentDocument extends Omit<SoftDeleteDocument, '_id'>, Student {}
+interface StudentDocument extends Omit<SoftDeleteDocument, '_id'>, IStudent {}
 
-interface IStudentModel extends Model<StudentDocument> {}
+type IStudentModel = Model<StudentDocument>;
 
-interface SoftDeleteStudentModel extends SoftDeleteModel<StudentDocument, IStudentModel> {}
+type SoftDeleteStudentModel = SoftDeleteModel<StudentDocument, IStudentModel>;
 
-interface IPaginatedStudentModel extends PaginateModel<StudentDocument> {}
+type IPaginatedStudentModel = PaginateModel<StudentDocument>;
 
 const StudentSchema = new mongoose.Schema<StudentDocument>(
 	{

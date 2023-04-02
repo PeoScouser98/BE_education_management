@@ -1,6 +1,7 @@
-import UserModel, { User } from '../models/user.model';
+import { IUser } from '../../types/user.type';
+import UserModel from '../models/user.model';
 
-export const createUser = async (payload: Partial<User>) => {
+export const createUser = async (payload: Partial<IUser>) => {
 	try {
 		return await new UserModel(payload).save();
 	} catch (error) {
@@ -8,7 +9,7 @@ export const createUser = async (payload: Partial<User>) => {
 	}
 };
 
-export const updateUserInfo = async (authId: string, payload: Partial<User>) => {
+export const updateUserInfo = async (authId: string, payload: Partial<IUser>) => {
 	try {
 		return await UserModel.findOneAndUpdate({ _id: authId }, payload, { new: true });
 	} catch (error) {

@@ -1,5 +1,6 @@
 import { MongooseError } from 'mongoose';
-import PermissionModel, { Permission } from '../models/permission.model';
+import PermissionModel from '../models/permission.model';
+import { Permission } from '../../types/permission.type';
 
 export const createPermission = async (permission: Permission & Partial<Permission>) => {
 	try {
@@ -27,7 +28,7 @@ export const getPermissionByRole = async (role: string) => {
 
 export const softDeletePermission = async (permissionID: string) => {
 	try {
-		await PermissionModel.delete({ _id: permissionID })
+		await PermissionModel.delete({ _id: permissionID });
 
 		return {
 			message: 'The permission has been successfully moved to the trash',
@@ -40,12 +41,12 @@ export const softDeletePermission = async (permissionID: string) => {
 
 export const forceDeletePermission = async (permissionID: string) => {
 	try {
-		await PermissionModel.deleteOne({ _id: permissionID })
+		await PermissionModel.deleteOne({ _id: permissionID });
 
 		return {
 			message: 'The permission has been successfully deleted permanently',
 			statusCode: 200,
-		}
+		};
 	} catch (error) {
 		throw error as MongooseError;
 	}
@@ -58,12 +59,11 @@ export const restoreDeletedPermission = async (permissionID: string) => {
 		return {
 			message: 'The permission has been successfully restored',
 			statusCode: 200,
-		}
-	}
-	catch (error) {
+		};
+	} catch (error) {
 		throw error as MongooseError;
 	}
-}
+};
 
 export const updatePermission = async (
 	permissionID: string,

@@ -1,20 +1,9 @@
-import mongoose, { Model, ObjectId } from 'mongoose';
-import MongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
+import mongoose from 'mongoose';
+import MongooseDelete from 'mongoose-delete';
 import { createSlug } from '../../helpers/toolkit';
+import { ISoftDeleteSubjectModel, ISubjectDocument } from '../../types/subject.type';
 
-export interface Subject extends Document {
-	_id: ObjectId;
-	subjectName: string;
-	slug?: string;
-}
-
-interface SubjectDocument extends Omit<SoftDeleteDocument, '_id'>, Subject {}
-
-interface SubjectModel extends Model<SubjectDocument> {}
-
-interface SoftDeleteSubjectModel extends SoftDeleteModel<SubjectDocument, SubjectModel> {}
-
-const subjectSchema = new mongoose.Schema<SubjectDocument>(
+const subjectSchema = new mongoose.Schema<ISubjectDocument>(
 	{
 		subjectName: String,
 		slug: {
@@ -36,9 +25,9 @@ subjectSchema.pre('save', function (next) {
 	next();
 });
 
-const SubjectModel: SoftDeleteSubjectModel = mongoose.model<
-	SubjectDocument,
-	SoftDeleteSubjectModel
+const SubjectModel: ISoftDeleteSubjectModel = mongoose.model<
+	ISubjectDocument,
+	ISoftDeleteSubjectModel
 >('Subjects', subjectSchema);
 
 export default SubjectModel;

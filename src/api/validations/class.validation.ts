@@ -1,7 +1,7 @@
 import Joi from 'joi';
-import { Class } from '../models/class.model';
+import { IClass } from '../../types/class.type';
 
-export const validateClassData = (data: Omit<Class, '_id'>) => {
+export const validateClassData = (data: Omit<IClass, '_id'>) => {
 	const regexClassName = new RegExp(`^${data.grade}[a-zA-Z]$`);
 	const schema = Joi.object({
 		className: Joi.string().required().pattern(regexClassName),
@@ -11,7 +11,7 @@ export const validateClassData = (data: Omit<Class, '_id'>) => {
 	return schema.validate(data);
 };
 
-export const validateArrayOfClassData = (data: Omit<Class, '_id'>) => {
+export const validateArrayOfClassData = (data: Omit<IClass, '_id'>) => {
 	const regexClassName = new RegExp(`^${data.grade}[a-zA-Z]$`);
 	const schema = Joi.array().items(
 		Joi.object({
@@ -24,7 +24,7 @@ export const validateArrayOfClassData = (data: Omit<Class, '_id'>) => {
 	return schema.validate(data);
 };
 
-export const validateClassEditData = (data: Partial<Omit<Class, '_id'>>) => {
+export const validateClassEditData = (data: Partial<Omit<IClass, '_id'>>) => {
 	const regexClassName = data.grade ? new RegExp(`^${data.grade}[a-zA-Z]$`) : /^[1-5][a-zA-Z]$/;
 	const schema = Joi.object({
 		className: Joi.string().required().pattern(regexClassName).optional(),

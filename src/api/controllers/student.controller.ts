@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import createHttpError, { HttpError } from 'http-errors';
 import { MongooseError, SortOrder } from 'mongoose';
 import { formatDate } from '../../helpers/toolkit';
-import { Student } from '../models/student.model';
+import { IStudent } from '../models/student.model';
 import * as StudentServices from '../services/student.service';
 
 // [POST] /api/students
@@ -92,7 +92,7 @@ export const serviceStudent = async (req: Request, res: Response) => {
 			transferSchool: 'transferSchool',
 			dropout: 'dropout',
 		};
-		let result: Student | null = null;
+		let result: IStudent | null = null;
 
 		switch (type) {
 			case optionList.transferSchool:
@@ -175,7 +175,7 @@ export const attendanceStudentByClass = async (req: Request, res: Response) => {
 	}
 };
 
-// [GET] /api/students/attendance/:classId?date='03-26-2023'
+// [GET] /api/students/attendance/:classId?date='03-26-2023' MM-DD-YYYY
 export const selectAttendanceByClass = async (req: Request, res: Response) => {
 	try {
 		const classId: string = req.params.classId;
@@ -203,13 +203,59 @@ export const selectAttendanceByClass = async (req: Request, res: Response) => {
 export const selectAttendanceByStudent = async (req: Request, res: Response) => {
 	try {
 		const id: string = req.params.id;
-		let month = req.query.month || new Date().getMonth() + 1;
-		let year = req.query.year || new Date().getFullYear();
+		const month = req.query.month || new Date().getMonth() + 1;
+		const year = req.query.year || new Date().getFullYear();
 
 		const result = await StudentServices.attendanceOfStudentByMonth(
 			id,
 			Number(month),
 			Number(year)
+		);
+
+		return res.status(200).json(result);
+	} catch (error) {
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
+		});
+	}
+};
+
+// [GET] /api/students/policyBeneficiary?page=1&limit=10
+export const getPolicyBeneficiary = async (req: Request, res: Response) => {
+	try {
+		const page = req.query.page || 1;
+		const limit = req.query.limit || 10;
+		const result = await StudentServices.getPolicyBeneficiary(Number(page), Number(limit));
+
+		return res.status(200).json(result);
+	} catch (error) {
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
+		});
+	}
+};
+
+// [GET] /students/attendance?page=1&limit=10&date='03-28-2023' MM-DD-YYYY
+export const selectAttendanceAllClass = async (req: Request, res: Response) => {
+	try {
+		const page = req.query.page || 1;
+		const limit = req.query.limit || 10;
+		let date: any = req.query?.date;
+
+		if (date) {
+			date = new Date(formatDate(new Date(date)));
+		} else {
+			date = new Date(formatDate(new Date()));
+		}
+
+		const result = await StudentServices.getAttendanceAllClass(
+			Number(page),
+			Number(limit),
+			date
 		);
 
 		return res.status(200).json(result);
