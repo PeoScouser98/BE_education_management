@@ -342,6 +342,31 @@ components:
                             min: 0
                             max: 10
                             description: Điểm cuối kỳ 2
+
+        LearningMaterial:
+            type: object
+            properties:
+                _id:
+                    type: string
+                fileName:
+                    type: string
+                    required: true
+                mimeType:
+                    type: string
+                    required: true
+                downloadUrl:
+                    type: string
+                    default: ''
+                subject:
+                    type: string
+                    requried: true
+                grade:
+                    type: number
+                    requried: true
+                deleted:
+                    type: boolean
+                    default: false
+
         HttpError:
             type: object
             properties:
