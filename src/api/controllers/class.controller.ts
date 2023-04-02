@@ -2,9 +2,10 @@ import { Request, Response } from 'express';
 import * as ClassService from '../services/class.service';
 
 // class feature
-import createHttpError, { HttpError, isHttpError } from 'http-errors';
+import createHttpError, { HttpError } from 'http-errors';
 import mongoose, { MongooseError, SortOrder } from 'mongoose';
-import ClassModel, { Class } from '../models/class.model';
+import { IClass } from '../../types/class.type';
+import ClassModel from '../models/class.model';
 
 // Todo: Update lại toàn bộ status response
 
@@ -26,7 +27,7 @@ export const createClass = async (req: Request, res: Response) => {
 export const updateClass = async (req: Request, res: Response) => {
 	try {
 		const _id: unknown = req.params.id;
-		const data: Partial<Omit<Class, '_id'>> = req.body;
+		const data: Partial<Omit<IClass, '_id'>> = req.body;
 
 		const { newClasses } = await ClassService.updateClasses(data, _id as string);
 		return res.status(201).json({

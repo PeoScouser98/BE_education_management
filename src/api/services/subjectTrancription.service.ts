@@ -2,20 +2,21 @@ import createHttpError from 'http-errors';
 import mongoose from 'mongoose';
 import ClassModel from '../models/class.model';
 import SubjectModel from '../models/subject.model';
-import SubjectTranscriptionModel, { SubjectTranscript } from '../models/subjectTrancription.model';
+import SubjectTranscriptionModel from '../models/subjectTrancription.model';
 import { getPropertieOfArray } from '../../helpers/toolkit';
 import {
 	validateSubjectTranscript,
 	validateSubjectTranscriptOne,
 } from '../validations/subjectTrancription.validation';
-import StudentModel, { Student } from '../models/student.model';
+import StudentModel, { IStudent } from '../models/student.model';
 import { selectSchoolYearCurr } from './schoolYear.service';
+import { ISubjectTranscript } from '../../types/subjectTranscription.type';
 
 // Nhập điểm nhiều học sinh 1 lúc / môn / lớp
 export const newScoreList = async (
 	subjectId: string,
 	classId: string,
-	data: Omit<SubjectTranscript, '_id' | 'subject' | 'schoolYear'>[]
+	data: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>[]
 ) => {
 	try {
 		// check xem classId và subjectId đã đúng type chưa
@@ -74,7 +75,7 @@ export const newScoreList = async (
 		// check xem data gửi lên có phải học sinh lớp học không
 		const notAClassStudent: { id: string }[] = [];
 		const idStudentList: string[] = getPropertieOfArray(data, 'student');
-		const students: Student[] = await StudentModel.find({
+		const students: IStudent[] = await StudentModel.find({
 			_id: { $in: idStudentList },
 			class: classId,
 			transferSchool: null,
@@ -98,8 +99,9 @@ export const newScoreList = async (
 
 		// Nếu bảng điểm của học sinh chưa có thì tạo mới còn có rồi thì update
 		// lọc ra các bảng điểm của môn đã tồn tại
-		const transcriptNotExists: Omit<SubjectTranscript, '_id' | 'subject' | 'schoolYear'>[] = [];
-		const transcriptExists: SubjectTranscript[] = await SubjectTranscriptionModel.find({
+		const transcriptNotExists: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>[] =
+			[];
+		const transcriptExists: ISubjectTranscript[] = await SubjectTranscriptionModel.find({
 			student: { $in: idStudentList },
 			subject: subjectId,
 			schoolYear: schoolYear._id,
@@ -186,7 +188,7 @@ export const newScoreList = async (
 export const newScore = async (
 	subjectId: string,
 	studentId: string,
-	data: Omit<SubjectTranscript, '_id' | 'subject' | 'schoolYear' | 'student'>
+	data: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear' | 'student'>
 ) => {
 	try {
 		// check xem studentId và subjectId đã đúng type chưa
@@ -276,7 +278,7 @@ export const selectSubjectTranscriptByClass = async (classId: string, subjectId:
 		const schoolYear = await selectSchoolYearCurr();
 
 		// lấy ra list học sinh của lớp
-		const listStudent: Student[] = await StudentModel.find({
+		const listStudent: IStudent[] = await StudentModel.find({
 			class: classId,
 			dropoutDate: null,
 			transferSchool: null,
@@ -306,7 +308,7 @@ export const selectTranscriptStudent = async (id: string) => {
 		}
 
 		// check sự tồn tại của học sinh
-		const student: Student | null = await StudentModel.findOne({
+		const student: IStudent | null = await StudentModel.findOne({
 			_id: id,
 			dropoutDate: null,
 			transferSchool: null,

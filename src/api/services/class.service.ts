@@ -1,7 +1,8 @@
 import createHttpError from 'http-errors';
 import mongoose from 'mongoose';
-import { compareObject, getPropertieOfArray } from '../../helpers/toolkit';
-import ClassModel, { Class } from '../models/class.model';
+import { compareObject } from '../../helpers/toolkit';
+import { IClass } from '../../types/class.type';
+import ClassModel from '../models/class.model';
 import { validateClassData, validateClassEditData } from '../validations/class.validation';
 
 interface ErrorPayloadCreates {
@@ -9,7 +10,7 @@ interface ErrorPayloadCreates {
 	message?: string;
 }
 
-export const createClass = async (payload: Omit<Class, '_id'>) => {
+export const createClass = async (payload: Omit<IClass, '_id'>) => {
 	try {
 		const validateCheck = validateClassData(payload);
 
@@ -22,7 +23,7 @@ export const createClass = async (payload: Omit<Class, '_id'>) => {
 			throw createHttpError(409, `Class ${payload.className} already exists`);
 		}
 
-		const classResult: Class = await new ClassModel(payload).save();
+		const classResult: IClass = await new ClassModel(payload).save();
 		return {
 			classes: classResult,
 		};
@@ -31,7 +32,7 @@ export const createClass = async (payload: Omit<Class, '_id'>) => {
 	}
 };
 
-export const checkClassesExists = async (_id: string, condition: Partial<Class> = {}) => {
+export const checkClassesExists = async (_id: string, condition: Partial<IClass> = {}) => {
 	try {
 		let conditionCurr: any = { ...condition };
 		if (_id) {
@@ -46,7 +47,7 @@ export const checkClassesExists = async (_id: string, condition: Partial<Class> 
 			};
 		}
 
-		const classe: Class | null = await ClassModel.findOne({
+		const classe: IClass | null = await ClassModel.findOne({
 			...conditionCurr,
 		});
 
@@ -59,7 +60,7 @@ export const checkClassesExists = async (_id: string, condition: Partial<Class> 
 	}
 };
 
-export const updateClasses = async (payload: Partial<Omit<Class, '_id'>>, _id: string) => {
+export const updateClasses = async (payload: Partial<Omit<IClass, '_id'>>, _id: string) => {
 	try {
 		// trường hợp data rỗng
 		if (Object.keys(payload).length === 0) {

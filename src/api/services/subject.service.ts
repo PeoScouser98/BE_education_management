@@ -1,11 +1,12 @@
 import createHttpError from 'http-errors';
 import mongoose, { ObjectId } from 'mongoose';
 import { createSlug } from '../../helpers/toolkit';
-import SubjectModel, { Subject } from '../models/subject.model';
+import SubjectModel from '../models/subject.model';
 import {
 	validateSubjectRequestBody,
 	validateSubjectUpdateBody,
 } from '../validations/subject.validation';
+import { ISubject } from '../../types/subject.type';
 
 interface ISubjectCondition {
 	_id: ObjectId | string;
@@ -21,7 +22,7 @@ export const getAllSubjects = async () => {
 	}
 };
 
-export const createNewSubject = async (subject: Omit<Subject, '_id'>) => {
+export const createNewSubject = async (subject: Omit<ISubject, '_id'>) => {
 	try {
 		if (!subject) throw createHttpError(204);
 
@@ -53,7 +54,7 @@ export const checkSubjectExist = async (condition: Partial<ISubjectCondition>) =
 				slug,
 			};
 		}
-		const subject: Subject | null = await SubjectModel.findOne(condition);
+		const subject: ISubject | null = await SubjectModel.findOne(condition);
 
 		return subject ? true : false;
 	} catch (error) {
@@ -62,7 +63,7 @@ export const checkSubjectExist = async (condition: Partial<ISubjectCondition>) =
 };
 
 // update
-export const updateSubject = async (id: string, subject: Partial<Omit<Subject, '_id'>>) => {
+export const updateSubject = async (id: string, subject: Partial<Omit<ISubject, '_id'>>) => {
 	try {
 		if (!id) {
 			throw createHttpError.BadRequest('Missing parameter');

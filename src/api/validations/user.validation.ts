@@ -1,9 +1,9 @@
 import Joi from 'joi';
-import { User } from '../models/user.model';
+import { IUser } from '../../types/user.type';
 
 export const emailRegex = /^[a-z0-9](\.?[a-z0-9]){5,}@g(oogle)?mail\.com$/g;
 
-export const validateSigninData = (payload: Pick<User, 'phone' & 'password'>) => {
+export const validateSigninData = (payload: Pick<IUser, 'phone' & 'password'>) => {
 	const schema = Joi.object({
 		phone: Joi.alternatives()
 			.try(
@@ -25,7 +25,7 @@ export const validateSigninData = (payload: Pick<User, 'phone' & 'password'>) =>
 	return schema.validate(payload);
 };
 
-export const validateNewTeacherData = (payload: Omit<User, '_id'>) => {
+export const validateNewTeacherData = (payload: Omit<IUser, '_id'>) => {
 	const schema = Joi.object({
 		email: Joi.string().email().pattern(emailRegex).required(),
 		password: Joi.string().min(6).max(24),
@@ -41,7 +41,7 @@ export const validateNewTeacherData = (payload: Omit<User, '_id'>) => {
 	return schema.validate(payload);
 };
 
-export const validateUpdateUserData = (payload: Partial<User>) => {
+export const validateUpdateUserData = (payload: Partial<IUser>) => {
 	const schema = Joi.object({
 		displayName: Joi.string().optional(),
 		dateOfBirth: Joi.date().optional(),

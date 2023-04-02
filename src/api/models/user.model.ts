@@ -1,27 +1,8 @@
-import mongoose, { ObjectId } from 'mongoose';
-import bcrypt from 'bcrypt';
+import mongoose from 'mongoose';
 import { emailRegex } from '../validations/user.validation';
+import { IUser } from '../../types/user.type';
 
-export interface User extends Document {
-	_id: string;
-	email: string;
-	displayName: string;
-	password: string;
-	picture: string;
-	dateOfBirth: Date;
-	gender: string;
-	phone: string;
-	role: string;
-	eduBackground?: {
-		universityName: string;
-		graduatedAt: Date;
-		qualification: string;
-	};
-	employmentStatus?: boolean;
-	isVerified: boolean;
-}
-
-const UserSchema = new mongoose.Schema<User>(
+const UserSchema = new mongoose.Schema<IUser>(
 	{
 		email: {
 			type: String,

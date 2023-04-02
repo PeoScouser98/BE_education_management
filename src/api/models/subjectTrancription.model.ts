@@ -1,45 +1,12 @@
+import mongoose from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
-import mongoose, { Model, ObjectId } from 'mongoose';
-import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
+import mongooseDelete from 'mongoose-delete';
+import {
+	ISoftDeleteSubjectTranscriptModel,
+	ISubjectTranscriptDocument,
+} from '../../types/subjectTranscription.type';
 
-export interface SubjectTranscript extends Document {
-	_id: ObjectId;
-	student: ObjectId;
-	schoolYear: ObjectId;
-	subject: ObjectId;
-	firstSemester?: {
-		midtermTest?: {
-			type: number;
-			min: 0;
-			max: 10;
-		};
-		finalTest?: {
-			type: number;
-			min: 0;
-			max: 10;
-		};
-	};
-	secondSemester?: {
-		midtermTest?: {
-			type: number;
-			min: 0;
-			max: 10;
-		};
-		finalTest?: {
-			type: number;
-			min: 0;
-			max: 10;
-		};
-	};
-}
-
-interface SubjectTranscriptDocument extends Omit<SoftDeleteDocument, '_id'>, SubjectTranscript {}
-
-type ISubjectTranscriptModel = Model<SubjectTranscriptDocument>
-
-type SoftDeleteSubjectTranscriptModel = SoftDeleteModel<SubjectTranscriptDocument, ISubjectTranscriptModel>
-
-const SubjectTranscriptSchema = new mongoose.Schema<SubjectTranscriptDocument>(
+const SubjectTranscriptSchema = new mongoose.Schema<ISubjectTranscriptDocument>(
 	{
 		student: {
 			type: mongoose.Types.ObjectId,
@@ -99,9 +66,9 @@ SubjectTranscriptSchema.plugin(mongooseDelete, {
 });
 SubjectTranscriptSchema.plugin(mongooseAutoPopulate);
 
-const SubjectTranscriptionModel: SoftDeleteSubjectTranscriptModel = mongoose.model<
-	SubjectTranscriptDocument,
-	SoftDeleteSubjectTranscriptModel
+const SubjectTranscriptionModel: ISoftDeleteSubjectTranscriptModel = mongoose.model<
+	ISubjectTranscriptDocument,
+	ISoftDeleteSubjectTranscriptModel
 >('SubjectTranscriptions', SubjectTranscriptSchema);
 
 export default SubjectTranscriptionModel;

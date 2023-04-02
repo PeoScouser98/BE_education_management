@@ -2,14 +2,14 @@ import createHttpError from 'http-errors';
 import mongoose, { SortOrder } from 'mongoose';
 import { compareDates, compareObject, getPropertieOfArray } from '../../helpers/toolkit';
 import ClassModel from '../models/class.model';
-import StudentModel, { IAttendance, Student } from '../models/student.model';
+import StudentModel, { IAttendance, IStudent } from '../models/student.model';
 import {
 	validateAttendanceStudent,
 	validateReqBodyStudent,
 	validateUpdateReqBodyStudent,
 } from '../validations/student.validation';
 import { selectTranscriptStudent } from './subjectTrancription.service';
-import { SubjectTranscript } from '../models/subjectTrancription.model';
+import { ISubjectTranscript } from '../../types/subjectTranscription.type';
 
 interface IStudentErrorRes {
 	fullName: string;
@@ -23,7 +23,7 @@ interface IAbsentStudent {
 }
 
 // create new student using form
-export const createStudent = async (data: Omit<Student, '_id'> | Omit<Student, '_id'>[]) => {
+export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
 	try {
 		// thêm nhiều học sinh cùng lúc
 		if (Array.isArray(data)) {
@@ -40,7 +40,7 @@ export const createStudent = async (data: Omit<Student, '_id'> | Omit<Student, '
 			throw createHttpError.BadRequest(error.message);
 		}
 
-		const check: Student | null = await StudentModel.findOne({
+		const check: IStudent | null = await StudentModel.findOne({
 			code: data.code,
 		});
 
@@ -54,7 +54,7 @@ export const createStudent = async (data: Omit<Student, '_id'> | Omit<Student, '
 	}
 };
 
-const createStudentList = async (data: Omit<Student, '_id'>[]) => {
+const createStudentList = async (data: Omit<IStudent, '_id'>[]) => {
 	try {
 		if (data.length === 0) throw createHttpError(204);
 		if (data.length > 50) {
@@ -114,7 +114,7 @@ const createStudentList = async (data: Omit<Student, '_id'>[]) => {
 };
 
 // update
-export const updateStudent = async (id: string, data: Partial<Omit<Student, '_id' | 'code'>>) => {
+export const updateStudent = async (id: string, data: Partial<Omit<IStudent, '_id' | 'code'>>) => {
 	try {
 		if (!data || Object.keys(data).length === 0) {
 			throw createHttpError(204);
@@ -203,14 +203,14 @@ export const getDetailStudent = async (id: string) => {
 			throw createHttpError.BadRequest('_id of the student is invalid');
 		}
 
-		const student: Student | null = await StudentModel.findOne({
+		const student: IStudent | null = await StudentModel.findOne({
 			_id: id,
 		}).populate({
 			path: 'class',
 			select: 'className headTeacher',
 		});
 
-		const transcriptStudent: SubjectTranscript[] = await selectTranscriptStudent(id);
+		const transcriptStudent: ISubjectTranscript[] = await selectTranscriptStudent(id);
 
 		if (!student) {
 			throw createHttpError.NotFound('Student does not exist!');
@@ -377,7 +377,7 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 		const absentStudentIdList: string[] = getPropertieOfArray(absentStudents, 'idStudent');
 
 		// Kiểm tra xem học sinh vắng có đúng học sinh của lớp không
-		const checkExist: Student[] = await StudentModel.find({
+		const checkExist: IStudent[] = await StudentModel.find({
 			_id: { $in: absentStudentIdList },
 			class: idClass,
 		});
@@ -454,7 +454,7 @@ export const dailyAttendanceList = async (idClass: string, date: Date) => {
 		const nextDay = new Date(date);
 		nextDay.setDate(nextDay.getDate() + 1);
 
-		const studentAbsents: Student[] = await StudentModel.find({
+		const studentAbsents: IStudent[] = await StudentModel.find({
 			absentDays: {
 				$elemMatch: {
 					date: {

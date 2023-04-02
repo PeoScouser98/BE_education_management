@@ -1,8 +1,8 @@
 import Joi from 'joi';
-import { SubjectTranscript } from '../models/subjectTrancription.model';
+import { ISubjectTranscript } from '../../types/subjectTranscription.type';
 
 export const validateSubjectTranscript = (
-	data: Omit<SubjectTranscript, '_id' | 'subject' | 'schoolYear'>
+	data: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>
 ) => {
 	const schema = Joi.object({
 		student: Joi.string().required(),
@@ -19,7 +19,7 @@ export const validateSubjectTranscript = (
 };
 
 export const validateSubjectTranscriptOne = (
-	data: Omit<SubjectTranscript, '_id' | 'subject' | 'schoolYear' | 'student'>
+	data: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear' | 'student'>
 ) => {
 	const schema = Joi.object({
 		firstSemester: Joi.object({

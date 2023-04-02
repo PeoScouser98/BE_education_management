@@ -6,11 +6,12 @@ import { MongooseError } from 'mongoose';
 import path from 'path';
 import '../../app/googlePassport';
 import redisClient from '../../database/redis';
-import UserModel, { User } from '../models/user.model';
+import UserModel from '../models/user.model';
+import { IUser } from '../../types/user.type';
 
 export const signinWithGoogle = async (req: Request, res: Response) => {
 	try {
-		const user = req.user as Partial<User>;
+		const user = req.user as Partial<IUser>;
 		const accessToken = jwt.sign({ payload: req.user }, process.env.ACCESS_TOKEN_SECRET!, {
 			expiresIn: '1h',
 		});

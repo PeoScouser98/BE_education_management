@@ -1,5 +1,6 @@
 /* eslint-disable no-useless-catch */
-import SchoolYearModel, { SchoolYear } from '../models/schoolYear.model';
+import { SchoolYear } from '../../types/schoolYear.type';
+import SchoolYearModel from '../models/schoolYear.model';
 import createHttpError from 'http-errors';
 
 // lấy ra toàn bộ các năm học

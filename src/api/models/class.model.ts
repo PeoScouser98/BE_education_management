@@ -1,21 +1,8 @@
 import mongoose, { Model, ObjectId } from 'mongoose';
 import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
+import { IClassDocument, ISoftDeleteClassModel } from '../../types/class.type';
 
-export interface Class extends Document {
-	_id: ObjectId;
-	grade: 1 | 2 | 3 | 4 | 5;
-	className: string;
-	headTeacher: ObjectId;
-	students: Array<ObjectId>;
-}
-
-interface ClassDocument extends Omit<SoftDeleteDocument, '_id'>, Class {}
-
-type ClassModel = Model<ClassDocument>
-
-type SoftDeleteClassModel = SoftDeleteModel<ClassDocument, ClassModel>
-
-const ClassSchema = new mongoose.Schema<ClassDocument>(
+const ClassSchema = new mongoose.Schema<IClassDocument>(
 	{
 		className: {
 			type: String,
@@ -49,7 +36,7 @@ ClassSchema.virtual('students', {
 	ref: 'students',
 });
 
-const ClassModel: SoftDeleteClassModel = mongoose.model<ClassDocument, SoftDeleteClassModel>(
+const ClassModel: ISoftDeleteClassModel = mongoose.model<IClassDocument, ISoftDeleteClassModel>(
 	'Classes',
 	ClassSchema
 );

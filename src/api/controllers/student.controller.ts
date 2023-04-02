@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import createHttpError, { HttpError } from 'http-errors';
 import { MongooseError, SortOrder } from 'mongoose';
 import { formatDate } from '../../helpers/toolkit';
-import { Student } from '../models/student.model';
+import { IStudent } from '../models/student.model';
 import * as StudentServices from '../services/student.service';
 
 // [POST] /api/students
@@ -92,7 +92,7 @@ export const serviceStudent = async (req: Request, res: Response) => {
 			transferSchool: 'transferSchool',
 			dropout: 'dropout',
 		};
-		let result: Student | null = null;
+		let result: IStudent | null = null;
 
 		switch (type) {
 			case optionList.transferSchool:

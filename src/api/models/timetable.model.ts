@@ -1,15 +1,9 @@
 import mongoose, { ObjectId } from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
-import { Subject } from './subject.model';
-import { User } from './user.model';
 
-export interface Timetable {
-	class: ObjectId;
-	dayOfWeek: number;
-	period: number;
-	subject: Subject;
-	teacher: Pick<User, '_id'>;
-}
+import { IUser } from './user.model';
+import { ISubject } from '../../types/subject.type';
+import { ITimetable } from '../../types/timeTable.type';
 
 const TimetableSchema = new mongoose.Schema({
 	class: {
@@ -41,6 +35,6 @@ const TimetableSchema = new mongoose.Schema({
 
 TimetableSchema.plugin(mongooseAutoPopulate);
 
-const TimetableModel = mongoose.model<Timetable>('Timetables', TimetableSchema);
+const TimetableModel = mongoose.model<ITimetable>('Timetables', TimetableSchema);
 
 export default TimetableModel;
