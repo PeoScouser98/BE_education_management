@@ -6,8 +6,7 @@ paths:
             summary: Đăng nhập với Google.
             responses:
                 200:
-                    description: Ok
-                    summary: Redirect đến page signin/success của client -> call api `{{baseUrl}}/auth/user` lấy thông tin user đăng nhập
+                    description: Redirect đến page signin/success của client -> call api `{{baseUrl}}/auth/user` lấy thông tin user đăng nhập
 
     /auth/user:
         get:

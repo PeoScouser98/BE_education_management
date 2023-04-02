@@ -23,7 +23,7 @@ router.get(
 	learningMaterialController.getFiles
 );
 router.patch(
-	'/learning-material/:fileId',
+	'/learning-material/:fileId/edit',
 	/**
 	 * checkAuthenticated
 	 * checkIsTeacherOrHeadmaster
@@ -31,7 +31,7 @@ router.patch(
 	learningMaterialController.updateFile
 );
 router.delete(
-	'/learning-material/:fileId',
+	'/learning-material/:fileId/delete',
 	/**
 	 * checkAuthenticated
 	 * checkIsTeacherOrHeadmaster
