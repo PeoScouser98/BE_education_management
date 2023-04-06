@@ -23,6 +23,7 @@ const swaggerOptions = swaggerJSDoc({
 			description: 'Documentation for all endpoints',
 		},
 	},
+
 	apis: ['./src/**/*.js'],
 });
 
