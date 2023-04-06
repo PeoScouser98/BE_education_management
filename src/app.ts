@@ -2,7 +2,7 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import 'dotenv/config';
-import express, { Request, Response } from 'express';
+import express, { Application, Request, Response } from 'express';
 import session, { MemoryStore } from 'express-session';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -56,7 +56,7 @@ app.use(passport.session());
 app.use('/api', rootRouter);
 
 // Swagger
-app.use('/public', express.static(path.join(SRC_FOLDER, 'public')));
+app.use('/public', express.static(path.join(process.cwd(), 'public')));
 app.use(
 	'/api/document',
 	swaggerUI.serve,
@@ -73,4 +73,4 @@ app.get('/', async (req: Request, res: Response) => {
 	});
 });
 
-export default app;
+export const viteNodeApp: Application = app;

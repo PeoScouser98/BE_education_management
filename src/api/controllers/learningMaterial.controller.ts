@@ -41,7 +41,7 @@ export const getFiles = async (req: Request, res: Response) => {
 
 export const uploadFile = async (req: Request, res: Response) => {
 	try {
-		const [file] = req.files as File[];
+		const [file] = req.files as Express.Multer.File[];
 		if (!file) {
 			throw createHttpError.BadRequest('File must be provided!');
 		}

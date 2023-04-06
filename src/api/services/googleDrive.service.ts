@@ -22,7 +22,10 @@ const setFilePublic = async (fileId: string) => {
 	}
 };
 
-export const uploadFile = async (file: File, dir: string = process.env.FOLDER_ID!) => {
+export const uploadFile = async (
+	file: Express.Multer.File,
+	dir: string = process.env.FOLDER_ID!
+) => {
 	try {
 		/* tạo nơi lưu trữ file tạm thời (buffer) -> file sẽ được upload qua stream */
 		const bufferStream = new Stream.PassThrough();

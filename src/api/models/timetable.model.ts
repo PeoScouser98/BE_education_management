@@ -1,7 +1,6 @@
 import mongoose, { ObjectId } from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
 
-import { IUser } from './user.model';
 import { ISubject } from '../../types/subject.type';
 import { ITimetable } from '../../types/timeTable.type';
 
