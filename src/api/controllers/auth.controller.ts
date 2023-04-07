@@ -22,22 +22,22 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 
 		await Promise.all([
 			redisClient.set(`access_token__${user._id}`, accessToken, {
-				EX: 60 * 60,
+				EX: 60 * 60, // 1 hour
 			}),
 			redisClient.set(`refresh_token__${user._id}`, refreshToken, {
-				EX: 60 * 60 * 24 * 30,
+				EX: 60 * 60 * 24 * 30 * 6, // 6 months
 			}),
 		]);
 
 		res.cookie('access_token', accessToken, {
-			maxAge: 60 * 60 * 1000,
+			maxAge: 60 * 60 * 1000 * 24 * 30, // 30 days
 			httpOnly: true,
-			secure: false,
+			// secure: false,
 		});
 		res.cookie('credential', user._id?.toString().trim(), {
-			maxAge: 60 * 60 * 1000 * 24 * 365,
+			maxAge: 60 * 60 * 1000 * 24 * 365, // 1 year
 			httpOnly: true,
-			secure: false,
+			// secure: false,
 		});
 
 		return res.redirect(`${process.env.CLIENT_URL}/signin/success`);
@@ -117,9 +117,9 @@ export const signout = async (req: Request, res: Response) => {
 		req.logout((err) => {
 			if (err) throw err;
 		});
-		res.cookie('access_token', '');
-		res.cookie('credential', '');
-		res.cookie('user', '');
+		res.clearCookie('access_token');
+		res.clearCookie('credential');
+		res.clearCookie('connect.sid', { path: '/' });
 
 		return res.status(202).json({
 			message: 'Signed out!',

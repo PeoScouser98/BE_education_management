@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongoose';
 import { ISubject } from './subject.type';
-import { IUser } from '../api/models/user.model';
+import { IUser } from './user.type';
 
 export interface ITimetable {
 	class: ObjectId;

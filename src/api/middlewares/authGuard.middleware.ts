@@ -42,9 +42,9 @@ export const checkIsHeadmaster = async (req: Request, res: Response, next: NextF
 
 export const checkIsTeacher = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		if (req.role !== 'TEACHER') {
+		if (req.role !== 'TEACHER' || req.role !== 'HEADMASTER') {
 			return res.status(403).json({
-				message: 'Only teacher allowed to access!',
+				message: 'Only teacher/headmaster allowed to access!',
 				statusCode: 403,
 			});
 		}
