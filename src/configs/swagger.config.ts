@@ -24,7 +24,7 @@ const swaggerOptions = swaggerJSDoc({
 		},
 	},
 
-	apis: ['src/docs/**/*.yaml'],
+	apis: ['src/docs/**/*.yaml', 'dist/docs/**/*.yaml'],
 });
 
 export default swaggerOptions;
