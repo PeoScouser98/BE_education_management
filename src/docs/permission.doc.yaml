@@ -35,7 +35,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/HttpError'
                             example: { message: 'Cannot get permissions!', statusCode: 404 }
-    /permission:
+    /permissions/get-by-roll:
         get:
             tags:
                 - Permission
@@ -132,7 +132,7 @@ paths:
                                     message: 'No data provided! | \"role\" length must be an uppercase string"',
                                     statusCode: 400,
                                 }
-    /permission/:id:
+    /permissions/:id:
         put:
             tags:
                 - Permission

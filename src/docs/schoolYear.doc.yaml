@@ -48,7 +48,6 @@ paths:
                                     'nextPage': null,
                                 }
 
-    /schoolYear:
         post:
             tags:
                 - SchoolYears

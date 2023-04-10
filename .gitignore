@@ -3,5 +3,3 @@ node_modules
 dump.rdb
 thunder-tests
 .vscode
-data
-dist

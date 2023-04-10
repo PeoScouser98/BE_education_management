@@ -18,15 +18,15 @@ const router = express.Router();
 // *** Chú ý ***: có 2 path student: students và student (có s và không s)
 router.get('/students/attendance', selectAttendanceAllClass);
 router.get('/students/policyBeneficiary', getPolicyBeneficiary);
-router.get('/student/attendance/:id', selectAttendanceByStudent);
+router.get('/students/attendance/:id', selectAttendanceByStudent);
 router.get('/students/attendance/:classId', selectAttendanceByClass);
 router.get('/students/stop/:type', getStudentStop);
 router.get('/students/:class', getStudentByClass);
-router.get('/student/:id', getStudentDetail);
+router.get('/students/:id', getStudentDetail);
 router.post('/students', createStudent);
 
 router.put('/students/attendance/:classId', attendanceStudentByClass);
-router.put('/student/services/:id', serviceStudent);
-router.put('/student/:id', updateStudent);
+router.put('/students/services/:id', serviceStudent);
+router.put('/students/:id', updateStudent);
 
 export default router;

@@ -1,5 +1,5 @@
 paths:
-    /learning-material:
+    /learning-materials:
         get:
             tags:
                 - Learning Material
@@ -66,7 +66,7 @@ paths:
                                 $ref: '#/components/schemas/HttpError'
                             example: { message: Not found, statusCode: 404 }
 
-    /learning-material/upload:
+    /learning-materials/upload:
         post:
             tags:
                 - Learning Material
@@ -107,7 +107,7 @@ paths:
                                     __v: 0,
                                 }
 
-    /learning-material/:fileId/edit:
+    /learning-materials/:fileId/edit:
         patch:
             tags:
                 - Learning Material
@@ -148,7 +148,7 @@ paths:
                 500:
                     description: Internal Server Error (Some error from backend)
 
-    /learning-material/:fileId/delete:
+    /learning-materials/:fileId/delete:
         delete:
             tags:
                 - Learning Material
@@ -170,7 +170,7 @@ paths:
                 500:
                     description: Internal Server Error (Some error from backend)
 
-    /learning-material/:fileId:/restore:
+    /learning-materials/:fileId:/restore:
         patch:
             tags:
                 - Learning Material

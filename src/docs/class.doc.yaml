@@ -121,7 +121,7 @@ paths:
                                     statusCode: 502,
                                     message: "sortProperties can only belong to ['className', 'grade','createdAt','updatedAt']",
                                 }
-    /class/:id:
+    /classes/:id:
         get:
             tags:
                 - Classes
@@ -246,7 +246,7 @@ paths:
                                         deleted: true,
                                     },
                                 ]
-    /class/restore/:id:
+    /classes/restore/:id:
         put:
             tags:
                 - Classes

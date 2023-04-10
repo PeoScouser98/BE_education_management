@@ -4,12 +4,17 @@ import { checkIsHeadmaster, checkAuthenticated } from '../middlewares/authGuard.
 const router = express.Router();
 
 router.get('/permissions', checkAuthenticated, permissionController.list);
-router.get('/permission', checkAuthenticated, permissionController.read);
-router.post('/permission', checkAuthenticated, checkIsHeadmaster, permissionController.create);
-router.put('/permission/:id', checkAuthenticated, checkIsHeadmaster, permissionController.update);
-router.put('/permission/restore/:id', checkAuthenticated, checkIsHeadmaster, permissionController.restore);
+router.get('/permissions/get-by-roll', checkAuthenticated, permissionController.read);
+router.post('/permissions', checkAuthenticated, checkIsHeadmaster, permissionController.create);
+router.put('/permissions/:id', checkAuthenticated, checkIsHeadmaster, permissionController.update);
+router.put(
+	'/permissions/:id/restore',
+	checkAuthenticated,
+	checkIsHeadmaster,
+	permissionController.restore
+);
 router.delete(
-	'/permission/:id',
+	'/permissions/:id',
 	checkAuthenticated,
 	checkIsHeadmaster,
 	permissionController.remove

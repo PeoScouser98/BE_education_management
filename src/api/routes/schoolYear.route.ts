@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get('/schoolYears', checkAuthenticated, SchoolYearController.schoolYearList);
 router.post(
-	'/schoolYear',
+	'/schoolYears',
 	checkAuthenticated,
 	checkIsHeadmaster,
 	SchoolYearController.createSchoolYear

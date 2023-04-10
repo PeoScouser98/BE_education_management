@@ -1,5 +1,5 @@
 paths:
-    /transcript/:classId/:subjectId:
+    /transcripts/:classId/:subjectId:
         post:
             tags:
                 - Transcript
@@ -71,7 +71,7 @@ paths:
                                     'statusCode': 404,
                                 }
 
-    /transcript/:studentId/:subjectId:
+    /transcripts/:studentId/:subjectId:
         post:
             tags:
                 - Transcript
@@ -141,7 +141,7 @@ paths:
                                     'statusCode': 404,
                                 }
 
-    /transcript/class/:classId/:subjectId:
+    /transcripts/class/:classId/:subjectId:
         get:
             tags:
                 - Transcript
@@ -203,7 +203,7 @@ paths:
                                     'statusCode': 400,
                                 }
 
-    /transcript/student/:id:
+    /transcripts/student/:id:
         get:
             tags:
                 - Transcript

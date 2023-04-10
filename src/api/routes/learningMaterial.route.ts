@@ -6,7 +6,7 @@ const upload = multer();
 const router = express.Router();
 
 router.post(
-	'/learning-material/upload',
+	'/learning-materials/upload',
 	/**
 	 * checkAuthenticated
 	 * checkIsTeacherOrHeadmaster
@@ -15,7 +15,7 @@ router.post(
 	learningMaterialController.uploadFile
 );
 router.get(
-	'/learning-material',
+	'/learning-materials',
 	/**
 	 * checkAuthenticated
 	 * checkIsTeacherOrHeadmaster
@@ -23,7 +23,7 @@ router.get(
 	learningMaterialController.getFiles
 );
 router.patch(
-	'/learning-material/:fileId/edit',
+	'/learning-materials/:fileId/edit',
 	/**
 	 * checkAuthenticated
 	 * checkIsTeacherOrHeadmaster
@@ -31,7 +31,7 @@ router.patch(
 	learningMaterialController.updateFile
 );
 router.delete(
-	'/learning-material/:fileId/delete',
+	'/learning-materials/:fileId/delete',
 	/**
 	 * checkAuthenticated
 	 * checkIsTeacherOrHeadmaster
