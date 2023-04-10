@@ -694,7 +694,7 @@ paths:
                                 $ref: '#/components/schemas/HttpError'
                             example: { statusCode: 400, message: The provided idClass is invalid }
 
-    /student/attendance/:id:
+    /students/attendance/:id:
         get:
             tags:
                 - Students
@@ -735,7 +735,7 @@ paths:
                 xxx:
                     description: Các lỗi có thể xảy ra trong api get student detail
 
-    /student/services/:id:
+    /students/services/:id:
         put:
             tags:
                 - Students
@@ -807,7 +807,7 @@ paths:
                                     message: 'The student has transferred to another school or dropped out',
                                 }
 
-    /student/:id:
+    /students/:id:
         put:
             tags:
                 - Students
