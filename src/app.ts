@@ -72,5 +72,4 @@ app.get('/', async (req: Request, res: Response) => {
 		status: 200,
 	});
 });
-
-export const viteNodeApp: Application = app;
+export default app;

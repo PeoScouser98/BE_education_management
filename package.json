@@ -6,6 +6,9 @@
 	"scripts": {
 		"start": "SET NODE_ENV=production && node ./dist/bundle.js",
 		"dev": "nodemon --watch docs --ext yaml --exec \"nodemon ./src/server.ts\"",
+		"vite:dev": "vite",
+		"vite:start": "node ./dist/app.mjs",
+		"vite:build": "vite build",
 		"build": "npx webpack --config webpack.config.js",
 		"cleanup": "rm -rf dist && rm -rf build",
 		"eslint:fix": "eslint --fix . --ext .ts",
@@ -71,12 +74,15 @@
 		"@typescript-eslint/eslint-plugin": "^5.54.0",
 		"@typescript-eslint/parser": "^5.54.0",
 		"concurrently": "^7.6.0",
+		"copy-webpack-plugin": "^11.0.0",
 		"eslint": "^8.35.0",
 		"eslint-config-prettier": "^8.6.0",
 		"eslint-plugin-prettier": "^4.2.1",
 		"terser-webpack-plugin": "^5.3.6",
 		"ts-loader": "^9.4.2",
 		"typescript": "^4.9.5",
+		"vite": "^4.2.1",
+		"vite-plugin-node": "^3.0.2",
 		"webpack": "^5.75.0",
 		"webpack-cli": "^5.0.1"
 	}

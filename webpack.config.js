@@ -1,6 +1,7 @@
 /* eslint-disable */
 const path = require('path');
 const TerserPlugin = require('terser-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
 	mode: 'production',
@@ -9,6 +10,7 @@ module.exports = {
 		path: path.resolve(__dirname, 'dist'),
 		filename: 'bundle.js',
 	},
+
 	target: 'node',
 	resolve: {
 		extensions: ['.ts', '.js'],
@@ -35,6 +37,13 @@ module.exports = {
 			}),
 		],
 	},
+	plugins: [
+		new CopyPlugin({
+			patterns: [
+				{ from: 'src/docs', to: 'docs' }, //to the dist root directory
+			],
+		}),
+	],
 	externals: {
 		bcrypt: 'commonjs bcrypt',
 		compression: 'commonjs compression',
@@ -44,21 +53,21 @@ module.exports = {
 		googleapis: 'commonjs googleapis',
 		redis: 'commonjs redis',
 		joi: 'commonjs joi',
-		'express-session': 'commonjs express-session',
-		passport: 'commonjs passport',
-		'http-errors': 'commonjs http-errors',
-		jsonwebtoken: 'commonjs jsonwebtoken',
-		mongoose: 'commonjs mongoose',
-		'mongoose-autopopulate': 'commonjs mongoose-autopopulate',
-		'mongoose-delete': 'commonjs mongoose-delete',
-		'passport-google-oauth2': 'commonjs passport-google-oauth2',
-		'passport-local': 'commonjs passport-local',
-		swagger: 'commonjs swagger',
-		'swagger-jsdoc': 'commonjs swagger-jsdoc',
-		'swagger-ui-express': 'commonjs swagger-ui-express',
 		yaml: 'yaml',
 		morgan: 'commonjs morgan',
 		multer: 'commonjs multer',
 		helmet: 'commonjs helmet',
+		passport: 'commonjs passport',
+		jsonwebtoken: 'commonjs jsonwebtoken',
+		mongoose: 'commonjs mongoose',
+		swagger: 'commonjs swagger',
+		'express-session': 'commonjs express-session',
+		'http-errors': 'commonjs http-errors',
+		'mongoose-autopopulate': 'commonjs mongoose-autopopulate',
+		'mongoose-delete': 'commonjs mongoose-delete',
+		'passport-google-oauth2': 'commonjs passport-google-oauth2',
+		'passport-local': 'commonjs passport-local',
+		'swagger-jsdoc': 'commonjs swagger-jsdoc',
+		'swagger-ui-express': 'commonjs swagger-ui-express',
 	},
 };
