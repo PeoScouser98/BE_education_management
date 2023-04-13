@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { IAttendance, IStudent } from '../models/student.model';
+import { IAttendance, IStudent } from '../../types/student.type';
 
 // validate
 export const validateReqBodyStudent = (data: Omit<IStudent, '_id'>) => {

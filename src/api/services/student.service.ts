@@ -2,7 +2,7 @@ import createHttpError from 'http-errors';
 import mongoose, { SortOrder } from 'mongoose';
 import { compareDates, compareObject, getPropertieOfArray } from '../../helpers/toolkit';
 import ClassModel from '../models/class.model';
-import StudentModel, { IAttendance, IStudent } from '../models/student.model';
+import StudentModel from '../models/student.model';
 import {
 	validateAttendanceStudent,
 	validateReqBodyStudent,
@@ -10,6 +10,7 @@ import {
 } from '../validations/student.validation';
 import { selectTranscriptStudent } from './subjectTrancription.service';
 import { ISubjectTranscript } from '../../types/subjectTranscription.type';
+import { IAttendance, IStudent } from '../../types/student.type';
 
 interface IStudentErrorRes {
 	fullName: string;

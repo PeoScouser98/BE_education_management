@@ -2,8 +2,9 @@ import { Request, Response } from 'express';
 import createHttpError, { HttpError } from 'http-errors';
 import { MongooseError, SortOrder } from 'mongoose';
 import { formatDate } from '../../helpers/toolkit';
-import { IStudent } from '../models/student.model';
+
 import * as StudentServices from '../services/student.service';
+import { IStudent } from '../../types/student.type';
 
 // [POST] /api/students
 export const createStudent = async (req: Request, res: Response) => {

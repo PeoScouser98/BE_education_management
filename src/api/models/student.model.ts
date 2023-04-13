@@ -2,36 +2,11 @@ import mongooseAutoPopulate from 'mongoose-autopopulate';
 import mongoose, { Model, ObjectId, PaginateModel } from 'mongoose';
 import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 import mongoosePaginate from 'mongoose-paginate-v2';
-
-export interface IStudent extends Document {
-	_id: ObjectId;
-	code: string;
-	fullName: string;
-	gender: boolean;
-	dateOfBirth: Date;
-	class: ObjectId;
-	parentsPhoneNumber: string;
-	isPolicyBeneficiary?: boolean;
-	isGraduated?: boolean;
-	transferSchool?: Date;
-	dropoutDate?: Date;
-	absentDays?: IAttendance[];
-}
-
-export interface IAttendance extends Document {
-	_id: ObjectId;
-	date: Date;
-	hasPermision?: boolean;
-	reason?: string;
-}
-
-interface StudentDocument extends Omit<SoftDeleteDocument, '_id'>, IStudent {}
-
-type IStudentModel = Model<StudentDocument>;
-
-type SoftDeleteStudentModel = SoftDeleteModel<StudentDocument, IStudentModel>;
-
-type IPaginatedStudentModel = PaginateModel<StudentDocument>;
+import {
+	IPaginatedStudentModel,
+	SoftDeleteStudentModel,
+	StudentDocument,
+} from '../../types/student.type';
 
 const StudentSchema = new mongoose.Schema<StudentDocument>(
 	{

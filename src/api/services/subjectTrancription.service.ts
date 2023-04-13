@@ -8,9 +8,10 @@ import {
 	validateSubjectTranscript,
 	validateSubjectTranscriptOne,
 } from '../validations/subjectTrancription.validation';
-import StudentModel, { IStudent } from '../models/student.model';
+import StudentModel from '../models/student.model';
 import { selectSchoolYearCurr } from './schoolYear.service';
 import { ISubjectTranscript } from '../../types/subjectTranscription.type';
+import { IStudent } from '../../types/student.type';
 
 // Nhập điểm nhiều học sinh 1 lúc / môn / lớp
 export const newScoreList = async (
