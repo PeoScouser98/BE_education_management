@@ -1,26 +1,29 @@
 import Joi from 'joi';
-import { IPermissionsType } from '../../types/permission.type';
+import { IPermission, PermissionActionsEnum } from '../../types/permission.type';
+import { UserRoleEnum } from '../../types/user.type';
 
-enum Role {
-	ADMIN = 'ADMIN',
-	HEADMASTER = 'HEADMASTER',
-	TEACHER = 'TEACHER',
-	PARENTS = 'PARENTS',
-}
-
-export const validatePermissionData = (data: Omit<IPermissionsType, '_id'>) => {
+export const validatePermissionData = (data: Omit<IPermission, '_id'>) => {
 	const schema = Joi.object({
 		role: Joi.string()
-			.valid(...Object.values(Role))
+			.valid(...Object.values(UserRoleEnum))
 			.required(),
-		type: Joi.string().required(),
 		permissions: Joi.array()
-			.items({
-				_id: Joi.string().strip(),
-				name: Joi.string().required(),
-				code: Joi.string().required(),
-			})
-			.optional(),
+			.items(
+				Joi.object({
+					type: Joi.string().required(),
+					allowedActions: Joi.array().items(
+						Joi.string()
+							.valid(
+								PermissionActionsEnum.GET,
+								PermissionActionsEnum.CREATE,
+								PermissionActionsEnum.UPDATE,
+								PermissionActionsEnum.DELETE
+							)
+							.required()
+					),
+				})
+			)
+			.default([]),
 	});
 	return schema.validate(data);
 };

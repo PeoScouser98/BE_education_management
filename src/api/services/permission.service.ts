@@ -1,8 +1,8 @@
 import { MongooseError } from 'mongoose';
 import PermissionModel from '../models/permission.model';
-import { Permission } from '../../types/permission.type';
+import { IPermission } from '../../types/permission.type';
 
-export const createPermission = async (permission: Permission & Partial<Permission>) => {
+export const createPermission = async (permission: IPermission & Partial<IPermission>) => {
 	try {
 		return await new PermissionModel(permission).save();
 	} catch (error) {
@@ -20,13 +20,13 @@ export const getPermissions = async () => {
 
 export const getPermissionByRole = async (role: string) => {
 	try {
-		return await PermissionModel.findOne({ role: role }).exec();
+		return await PermissionModel.find({ role: role }).exec();
 	} catch (error) {
 		throw error as MongooseError;
 	}
 };
 
-export const softDeletePermission = async (permissionID: string) => {
+export const deletePermission = async (permissionID: string) => {
 	try {
 		await PermissionModel.delete({ _id: permissionID });
 
@@ -67,7 +67,7 @@ export const restoreDeletedPermission = async (permissionID: string) => {
 
 export const updatePermission = async (
 	permissionID: string,
-	permission: Permission & Partial<Permission>
+	permission: IPermission & Partial<IPermission>
 ) => {
 	try {
 		return await PermissionModel.findOneAndUpdate({ _id: permissionID }, permission, {

@@ -1,20 +1,24 @@
 import { Model, ObjectId } from 'mongoose';
 import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 
-export type IPermissionsType = Array<{
-	_id: ObjectId;
-	name: string;
-	code: string;
-}>;
-export interface Permission extends Document {
+export enum PermissionActionsEnum {
+	GET = 'GET',
+	CREATE = 'CREATE',
+	UPDATE = 'UPDATE',
+	DELETE = 'DELETE',
+}
+export interface IPermission extends Document {
 	_id: ObjectId;
 	role: string;
 	type: string;
-	permissions: IPermissionsType;
+	permissions: Array<{
+		type: string;
+		allowedActions: Array<string>;
+	}>;
 }
 
-export interface IPermissionDocument extends Omit<SoftDeleteDocument, '_id'>, Permission {}
+export interface IPermissionDocument extends Omit<SoftDeleteDocument, '_id'>, IPermission {}
 
-export type IPermissionModel = Model<IPermissionDocument>;
+export type IPermissionModel = Model<IPermission>;
 
 export type ISoftDeletePermissionModel = SoftDeleteModel<IPermissionDocument, IPermissionModel>;

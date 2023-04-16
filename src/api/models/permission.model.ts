@@ -1,40 +1,40 @@
+import mongoose from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
-import mongoose, { Model, ObjectId } from 'mongoose';
-import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
-import { Permission, ISoftDeletePermissionModel } from '../../types/permission.type';
+import mongooseDelete from 'mongoose-delete';
+import {
+	IPermission,
+	IPermissionDocument,
+	ISoftDeletePermissionModel,
+	PermissionActionsEnum,
+} from '../../types/permission.type';
+import { UserRoleEnum } from '../../types/user.type';
 
-const PermissionSchema = new mongoose.Schema<Permission>({
-	_id: {
-		type: mongoose.Types.ObjectId,
-		default: new mongoose.Types.ObjectId(),
-	},
+const PermissionSchema = new mongoose.Schema<IPermission>({
 	role: {
 		type: String,
 		require: true,
 		trim: true,
 		uppercase: true,
-		enum: ['ADMIN', 'HEADMASTER', 'TEACHER', 'PARENTS'],
+		enum: UserRoleEnum,
 	},
 	type: {
 		type: String,
 		require: true,
 		trim: true,
 	},
+
 	permissions: [
 		{
-			_id: {
-				type: mongoose.Types.ObjectId,
-				default: new mongoose.Types.ObjectId(),
-			},
-			name: {
+			type: {
 				type: String,
-				require: true,
+				uppercase: true,
 			},
-			code: {
-				type: String,
-				unique: true,
-				require: true,
-			},
+			allowedActions: [
+				{
+					type: String,
+					enum: PermissionActionsEnum,
+				},
+			],
 		},
 	],
 });
@@ -43,7 +43,7 @@ PermissionSchema.plugin(mongooseAutoPopulate);
 PermissionSchema.plugin(mongooseDelete, { deletedAt: true, overrideMethods: true });
 
 const PermissionModel: ISoftDeletePermissionModel = mongoose.model<
-	Permission,
+	IPermissionDocument,
 	ISoftDeletePermissionModel
 >('Permissions', PermissionSchema);
 

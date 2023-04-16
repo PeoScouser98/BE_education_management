@@ -1,5 +1,12 @@
 import { Document } from 'mongoose';
 
+export enum UserRoleEnum {
+	ADMIN = 'ADMIN',
+	HEADMASTER = 'HEADMASTER',
+	TEACHER = 'TEACHER',
+	PARENTS = 'PARENTS',
+}
+
 export interface IUser extends Document {
 	_id: string;
 	email: string;
