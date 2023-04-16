@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import { emailRegex } from '../validations/user.validation';
-import { IUser } from '../../types/user.type';
+import { IUser, UserGenderEnum, UserRoleEnum } from '../../types/user.type';
+import bcrypt, { genSaltSync } from 'bcrypt';
+import 'dotenv/config';
 
 const UserSchema = new mongoose.Schema<IUser>(
 	{
@@ -8,12 +10,6 @@ const UserSchema = new mongoose.Schema<IUser>(
 			type: String,
 			trim: true,
 			unique: true,
-			validate: {
-				validator: function (value: string) {
-					return emailRegex.test(value);
-				},
-				message: (props: any) => `${props.value} is not a valid email address!`,
-			},
 		},
 
 		phone: {
@@ -34,7 +30,7 @@ const UserSchema = new mongoose.Schema<IUser>(
 			type: String,
 			require: true,
 			lowercase: true,
-			enum: ['nam', 'nữ'],
+			enum: UserGenderEnum,
 		},
 		picture: {
 			type: String,
@@ -58,7 +54,7 @@ const UserSchema = new mongoose.Schema<IUser>(
 			type: String,
 			uppercase: true,
 			trim: true,
-			enum: ['ADMIN', 'HEADMASTER', 'TEACHER', 'PARENTS'],
+			enum: UserRoleEnum,
 		},
 		isVerified: {
 			type: Boolean,
@@ -74,7 +70,19 @@ const UserSchema = new mongoose.Schema<IUser>(
 UserSchema.virtual('children', {
 	localField: 'phone',
 	foreignField: 'parentsPhoneNumber',
-	ref: 'users',
+	ref: 'students',
+});
+
+UserSchema.methods.verifyPassword = function (password: string) {
+	if (!password) return false;
+	return bcrypt.compareSync(password, this.password);
+};
+
+UserSchema.pre('save', function (next) {
+	if (this.password) {
+		this.password = bcrypt.hashSync(this.password, genSaltSync(+process.env.SALT_ROUND!));
+	}
+	next();
 });
 
 const UserModel = mongoose.model('Users', UserSchema);

@@ -9,12 +9,8 @@ router.post(
 	checkIsHeadmaster,
 	UserController.createTeacherAccount
 );
-// router.post(
-// 	'/create-parents-account',
-// 	checkAuthenticated,
-// 	checkIsHeadmaster,
-// 	UserController.createTeacherAccount
-// );
+router.post('/create-parents-account', UserController.createParentsAccount);
 
 router.patch('/update-user', checkAuthenticated, UserController.updateUserInfo);
+
 export default router;

@@ -5,6 +5,7 @@ export const createUser = async (payload: Partial<IUser>) => {
 	try {
 		return await new UserModel(payload).save();
 	} catch (error) {
+		console.log(error);
 		throw error;
 	}
 };

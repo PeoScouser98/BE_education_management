@@ -3,12 +3,14 @@ import { NextFunction, Request, Response } from 'express';
 import createHttpError, { HttpError } from 'http-errors';
 import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import redisClient from '../../database/redis';
+import { UserRoleEnum } from '../../types/user.type';
+import { AuthRedisKeyPrefix } from '../../types/redis.type';
 
 export const checkAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		if (!req.cookies.credential) throw createHttpError.BadRequest('Invalid auth id!');
-
-		const storedAccessToken = await redisClient.get(`access_token__${req.cookies.credential}`);
+		if (!req.cookies.uid) throw createHttpError.BadRequest('Invalid auth id!');
+		const accessTokenKey = AuthRedisKeyPrefix.ACCESS_TOKEN + req.cookies.uid;
+		const storedAccessToken = await redisClient.get(accessTokenKey);
 		if (!storedAccessToken) throw createHttpError.Forbidden();
 
 		const accessToken = req.cookies.access_token;
@@ -28,7 +30,7 @@ export const checkAuthenticated = async (req: Request, res: Response, next: Next
 
 export const checkIsHeadmaster = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		if (req.role !== 'HEADMASTER') {
+		if (req.role !== UserRoleEnum.HEADMASTER) {
 			throw createHttpError.Forbidden('Only headmaster allowed to access!');
 		}
 		next();
@@ -42,7 +44,7 @@ export const checkIsHeadmaster = async (req: Request, res: Response, next: NextF
 
 export const checkIsTeacher = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		if (req.role !== 'TEACHER' || req.role !== 'HEADMASTER') {
+		if (req.role !== UserRoleEnum.HEADMASTER || req.role !== UserRoleEnum.HEADMASTER) {
 			return res.status(403).json({
 				message: 'Only teacher/headmaster allowed to access!',
 				statusCode: 403,
