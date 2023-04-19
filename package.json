@@ -5,7 +5,7 @@
 	"main": "index.ts",
 	"scripts": {
 		"start": "SET NODE_ENV=production && node ./dist/bundle.js",
-		"dev": "concurrently \"nodemon --watch docs --ext yaml --exec\" \"nodemon ./src/server.ts\"",
+		"dev": "nodemon --watch docs --ext yaml --exec \"nodemon ./src/server.ts\"",
 		"build": "npx webpack --config webpack.config.js",
 		"cleanup": "rm -rf dist && rm -rf build",
 		"eslint:fix": "eslint --fix . --ext .ts",
@@ -27,6 +27,7 @@
 		"http-errors": "^2.0.0",
 		"joi": "^17.8.3",
 		"jsonwebtoken": "^8.5.1",
+		"messagebird": "^4.0.1",
 		"mongoose": "^6.8.1",
 		"mongoose-autopopulate": "^0.17.1",
 		"mongoose-delete": "^0.5.4",

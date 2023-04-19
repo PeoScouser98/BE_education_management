@@ -1,3 +1,4 @@
+import { authenticator } from '@otplib/preset-default';
 import 'dotenv/config';
 import { NextFunction, Request, Response } from 'express';
 import createHttpError, { HttpError } from 'http-errors';
@@ -5,12 +6,12 @@ import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import { MongooseError } from 'mongoose';
 import path from 'path';
 import '../../app/googlePassport';
+import sms from '../../configs/sms.config';
 import redisClient from '../../database/redis';
 import { AuthRedisKeyPrefix } from '../../types/redis.type';
 import { IUser } from '../../types/user.type';
 import UserModel from '../models/user.model';
-import { authenticator } from '@otplib/preset-default';
-import qrcode from 'qrcode';
+import { changePassword } from '../services/user.service';
 
 export const signinWithGoogle = async (req: Request, res: Response) => {
 	try {
@@ -199,13 +200,7 @@ export const verifyAccount = async (req: Request, res: Response, next: NextFunct
 		});
 	}
 };
-export const forgotPassword = async () => {
-	try {
-		// handle logic ...
-	} catch (error) {
-		// handle errors
-	}
-};
+
 export const sendOtp = async (req: Request, res: Response) => {
 	try {
 		const existedUser = await UserModel.findOne({ phone: req.body.phone });
@@ -216,15 +211,21 @@ export const sendOtp = async (req: Request, res: Response) => {
 		const secret = authenticator.generateSecret(); // base32 encoded hex secret key
 		const token = authenticator.generate(secret);
 		await redisClient.set(AuthRedisKeyPrefix.OTP_KEY + existedUser._id, token, { EX: 60 * 60 });
-		qrcode.toDataURL(token, (err, imageUrl) => {
-			if (err) {
-				throw createHttpError.InternalServerError('Fail to generate QR code');
+
+		sms.messages.create(
+			{
+				originator: '0336089988',
+				recipients: req.body.phone,
+				body: `Mã xác thực của bạn là: ${token}`,
+			},
+			(error, res) => {
+				if (error) {
+					throw createHttpError.InternalServerError('Failed to send OTP sms!');
+				}
+				console.log(res);
+				return res;
 			}
-			return res.status(200).json({
-				qrcodeImageUrl: imageUrl,
-				uid: existedUser._id,
-			});
-		});
+		);
 	} catch (error) {
 		return res.status((error as HttpError).status || 500).json({
 			message: (error as HttpError | Error | MongooseError).message,
@@ -242,15 +243,27 @@ export const verifyUserByPhone = async (req: Request, res: Response) => {
 		if (!code) {
 			throw createHttpError.Gone('Code is expired!');
 		}
-		if (req.body.verifyCode === code) {
-			await redisClient.del(AuthRedisKeyPrefix.OTP_KEY + req.params.userId);
-			return res.redirect(process.env.CLIENT_URL! + '/reset-password');
-		} else {
+		if (req.body.verifyCode !== code) {
 			return res.status(400).json({
 				message: 'Incorrect verify code!',
 				statusCode: 400,
 			});
 		}
+		const accessToken = jwt.sign(
+			{ payload: req.params.userId },
+			process.env.ACCESS_TOKEN_SECRET!,
+			{ expiresIn: '5m' }
+		);
+		res.cookie('access_token', accessToken, { maxAge: 60 * 1000 * 5 });
+		await redisClient.del(AuthRedisKeyPrefix.OTP_KEY + req.params.userId);
+		return res.status(200).json({
+			message: 'Ok',
+			statusCode: 200,
+			data: {
+				accessToken,
+				isSuccess: true,
+			},
+		});
 	} catch (error) {
 		return res.status((error as HttpError).status || 500).json({
 			message: (error as HttpError | Error | MongooseError).message,
@@ -259,10 +272,25 @@ export const verifyUserByPhone = async (req: Request, res: Response) => {
 	}
 };
 
-export const resetPassword = async () => {
+export const resetPassword = async (req: Request, res: Response) => {
 	try {
-		// handle logic ...
+		if (!req.cookies.access_token) {
+			throw createHttpError.Unauthorized('');
+		}
+
+		const decoded = jwt.verify(
+			req.cookies.access_token,
+			process.env.ACCESS_TOKEN_SECRET!
+		) as JwtPayload;
+		await changePassword(decoded.payload, req.body.newPassword);
+		return res.status(200).json({
+			message: 'Ok',
+			statusCode: 200,
+		});
 	} catch (error) {
-		// handle errors
+		return res.status((error as HttpError).status || 500).json({
+			message: (error as HttpError | Error | MongooseError).message,
+			statusCode: (error as HttpError).status,
+		});
 	}
 };
