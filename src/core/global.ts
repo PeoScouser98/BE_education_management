@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/no-empty-interface */
 /* eslint-disable @typescript-eslint/no-namespace */
-import { Readable } from 'stream';
+
+import { IUser, UserRoleEnum } from '../types/user.type';
 
 declare global {
 	namespace Express {
 		interface Request {
-			[key: string]: any;
+			role: UserRoleEnum;
+			profile: Partial<IUser>;
 		}
 	}
 }

@@ -1,6 +1,5 @@
 import express from 'express';
 import passport from 'passport';
-import '../../app/googlePassport';
 import * as AuthController from '../controllers/auth.controller';
 
 const router = express.Router();
@@ -17,6 +16,7 @@ router.get(
 router.get('/auth/signout', AuthController.signout);
 router.get('/auth/user', AuthController.getUser);
 router.get('/auth/verify-account', AuthController.verifyAccount);
-router.get('/refresh-token', AuthController.refreshToken);
+router.get('/auth/refresh-token', AuthController.refreshToken);
+router.post('/auth/send-otp', AuthController.sendOtp);
 
 export default router;

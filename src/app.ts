@@ -2,19 +2,20 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import 'dotenv/config';
-import express, { Application, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import session, { MemoryStore } from 'express-session';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import passport from 'passport';
-import './app/googlePassport';
+import './api/auth/googlePassport';
+import './api/auth/localPassport';
 // swagger
 import swaggerUI from 'swagger-ui-express';
 import swaggerOptions from './configs/swagger.config';
 // routers
 import path from 'path';
 import rootRouter from './api/routes';
-
+import { readFileSync } from 'fs';
 // resolve path
 const ROOT_FOLDER = path.join(__dirname, '..');
 const SRC_FOLDER = path.join(ROOT_FOLDER, 'src');
@@ -56,7 +57,7 @@ app.use(passport.session());
 app.use('/api', rootRouter);
 
 // Swagger
-app.use('/public', express.static(path.join(process.cwd(), 'public')));
+app.use('/public', express.static(path.join(SRC_FOLDER, 'public')));
 app.use(
 	'/api/document',
 	swaggerUI.serve,
@@ -73,4 +74,4 @@ app.get('/', async (req: Request, res: Response) => {
 	});
 });
 
-export const viteNodeApp: Application = app;
+export default app;

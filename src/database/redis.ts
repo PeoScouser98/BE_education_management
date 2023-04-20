@@ -1,24 +1,17 @@
-import * as redis from 'redis';
+import { refreshToken } from './../api/controllers/auth.controller';
 import 'dotenv/config';
-import { RedisClientOptions } from 'redis';
+import * as redis from 'redis';
+import { redisOptions } from '../configs/redis.config';
 
-const redisClientOption = process.env.NODE_ENV?.includes('production')
-	? { username: process.env.REDIS_USERNAME, password: process.env.REDIS_PASSWORD }
-	: (process.env.REDIS_URI as RedisClientOptions);
-1;
-
-const redisClient = redis.createClient({
-	username: process.env.REDIS_USERNAME,
-	password: process.env.REDIS_PASSWORD,
-});
+const redisClient = redis.createClient();
 
 redisClient
 	.connect()
 	.then(() => {
-		console.log('[SUCCESS] Connected to Redis');
+		console.log('[SUCCESS] ::: Connected to Redis');
 	})
 	.catch((error) => {
-		console.log('[ERROR] ', error.message);
+		console.log('[ERROR] ::: ', error.message);
 	});
 
 export default redisClient;

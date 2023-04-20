@@ -41,6 +41,16 @@ export const validateNewTeacherData = (payload: Omit<IUser, '_id'>) => {
 	return schema.validate(payload);
 };
 
+export const validateNewParentsData = (payload: Omit<IUser, '_id'>) => {
+	const schema = Joi.object({
+		phone: Joi.string().length(10).required(),
+		displayName: Joi.string().required(),
+		dateOfBirth: Joi.date().required(),
+		gender: Joi.string().required(),
+	});
+	return schema.validate(payload);
+};
+
 export const validateUpdateUserData = (payload: Partial<IUser>) => {
 	const schema = Joi.object({
 		displayName: Joi.string().optional(),

@@ -5,8 +5,8 @@ const connectMongoDB = async () => {
 		mongoose.set('strictQuery', false);
 		const isProductionEnv = process.env.NODE_ENV?.includes('production');
 		isProductionEnv
-			? console.log('[INFO] ::: Production Mode!')
-			: console.log('[INFO] ::: Development Mode!');
+			? console.log('[INFO] ::: Environment -> Production')
+			: console.log('[INFO] ::: Environment -> Development');
 		const databaseUri = isProductionEnv
 			? process.env.REMOTE_DB_URI!
 			: process.env.LOCAL_DB_URI!;
