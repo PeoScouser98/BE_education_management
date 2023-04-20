@@ -15,6 +15,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@vonage/server-sdk": "^3.3.0",
 		"bcrypt": "^5.1.0",
 		"cookie-parser": "^1.4.6",
 		"cors": "^2.8.5",
@@ -27,7 +28,6 @@
 		"http-errors": "^2.0.0",
 		"joi": "^17.8.3",
 		"jsonwebtoken": "^8.5.1",
-		"messagebird": "^4.0.1",
 		"mongoose": "^6.8.1",
 		"mongoose-autopopulate": "^0.17.1",
 		"mongoose-delete": "^0.5.4",

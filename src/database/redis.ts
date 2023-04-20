@@ -3,7 +3,7 @@ import 'dotenv/config';
 import * as redis from 'redis';
 import { redisOptions } from '../configs/redis.config';
 
-const redisClient = redis.createClient(redisOptions);
+const redisClient = redis.createClient();
 
 redisClient
 	.connect()

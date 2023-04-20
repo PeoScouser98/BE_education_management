@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import { MongooseError } from 'mongoose';
 import { SMTPError } from 'nodemailer/lib/smtp-connection';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import transporter from '../../app/nodemailer';
+import transporter from '../../configs/nodemailer';
 import { UserRoleEnum } from '../../types/user.type';
 import * as UserService from '../services/user.service';
 import { paramsStringify } from './../../helpers/queryParams';

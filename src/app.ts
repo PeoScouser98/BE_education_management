@@ -15,7 +15,7 @@ import swaggerOptions from './configs/swagger.config';
 // routers
 import path from 'path';
 import rootRouter from './api/routes';
-import crypto from 'crypto';
+import { readFileSync } from 'fs';
 // resolve path
 const ROOT_FOLDER = path.join(__dirname, '..');
 const SRC_FOLDER = path.join(ROOT_FOLDER, 'src');
@@ -73,7 +73,5 @@ app.get('/', async (req: Request, res: Response) => {
 		status: 200,
 	});
 });
-
-console.log(crypto.randomBytes(32).toString('hex'));
 
 export default app;

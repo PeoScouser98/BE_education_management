@@ -5,13 +5,14 @@ import createHttpError, { HttpError } from 'http-errors';
 import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import { MongooseError } from 'mongoose';
 import path from 'path';
-import '../../app/googlePassport';
-import sms from '../../configs/sms.config';
+import '../auth/googlePassport';
 import redisClient from '../../database/redis';
 import { AuthRedisKeyPrefix } from '../../types/redis.type';
 import { IUser } from '../../types/user.type';
 import UserModel from '../models/user.model';
 import { changePassword } from '../services/user.service';
+import sendSMS from '../services/sms.service';
+import formatPhoneNumber from '../../helpers/formatPhoneNumber';
 
 export const signinWithGoogle = async (req: Request, res: Response) => {
 	try {
@@ -104,6 +105,7 @@ export const getUser = async (req: Request, res: Response) => {
 		});
 	}
 };
+
 export const refreshToken = async (req: Request, res: Response) => {
 	try {
 		const storedRefreshToken = await redisClient.get(
@@ -177,7 +179,7 @@ export const signout = async (req: Request, res: Response) => {
 	} catch (error) {}
 };
 
-export const verifyAccount = async (req: Request, res: Response, next: NextFunction) => {
+export const verifyAccount = async (req: Request, res: Response) => {
 	try {
 		const token = req.query.token as string;
 		if (!token) {
@@ -192,7 +194,9 @@ export const verifyAccount = async (req: Request, res: Response, next: NextFunct
 			new: true,
 		});
 
-		return res.sendFile(path.resolve(path.join(__dirname, '../views/send-mail-response.html')));
+		return res.sendFile(
+			path.resolve(path.join(__dirname, '../../views/send-mail-response.html'))
+		);
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | JsonWebTokenError | Error).message,
@@ -210,22 +214,17 @@ export const sendOtp = async (req: Request, res: Response) => {
 
 		const secret = authenticator.generateSecret(); // base32 encoded hex secret key
 		const token = authenticator.generate(secret);
-		await redisClient.set(AuthRedisKeyPrefix.OTP_KEY + existedUser._id, token, { EX: 60 * 60 });
+		// await redisClient.set(AuthRedisKeyPrefix.OTP_KEY + existedUser._id, token, { EX: 60 * 60 });
+		console.log('OTP is ', token);
+		const response = await sendSMS({
+			to: formatPhoneNumber(req.body.phone),
+			text: `Mã xác thực của bạn là ${token}`,
+		});
+		if (!response) {
+			throw createHttpError.InternalServerError('Failed to send sms!');
+		}
 
-		sms.messages.create(
-			{
-				originator: '0336089988',
-				recipients: req.body.phone,
-				body: `Mã xác thực của bạn là: ${token}`,
-			},
-			(error, res) => {
-				if (error) {
-					throw createHttpError.InternalServerError('Failed to send OTP sms!');
-				}
-				console.log(res);
-				return res;
-			}
-		);
+		return res.status(200).json(response);
 	} catch (error) {
 		return res.status((error as HttpError).status || 500).json({
 			message: (error as HttpError | Error | MongooseError).message,
@@ -256,6 +255,7 @@ export const verifyUserByPhone = async (req: Request, res: Response) => {
 		);
 		res.cookie('access_token', accessToken, { maxAge: 60 * 1000 * 5 });
 		await redisClient.del(AuthRedisKeyPrefix.OTP_KEY + req.params.userId);
+
 		return res.status(200).json({
 			message: 'Ok',
 			statusCode: 200,
