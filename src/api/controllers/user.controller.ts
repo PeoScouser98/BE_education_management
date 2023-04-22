@@ -118,3 +118,36 @@ export const updateUserInfo = async (req: Request, res: Response) => {
 		});
 	}
 };
+
+export const getAllTeachers = async (req: Request, res: Response) => {
+	try {
+		const teachers = await UserService.getAllTeacherUsers();
+		if (!teachers) {
+			throw createHttpError.NotFound('Không thể tìm thấy giáo viên nào!');
+		}
+	} catch (error) {
+		return res.status((error as HttpError).status || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status,
+		});
+	}
+};
+
+export const deactivateTeacherAccount = async (req: Request, res: Response) => {
+	try {
+		const deactivatedTeacher = await UserService.deactivateTeacherUser(req.params.userId);
+		if (!deactivatedTeacher) {
+			throw createHttpError.BadRequest('Cập nhật trạng thái của giáo viên không thành công!');
+		}
+		return res.status(200).json({
+			data: deactivatedTeacher,
+			message: 'Đã cập trạng thái của giáo viên',
+			statusCode: 200,
+		});
+	} catch (error) {
+		return res.status((error as HttpError).status || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status,
+		});
+	}
+};

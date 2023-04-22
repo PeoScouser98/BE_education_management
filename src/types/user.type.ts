@@ -1,6 +1,18 @@
-import { Document } from 'mongoose';
+import { Model } from 'mongoose';
+import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 
-export interface IUser extends Document {
+export enum UserGenderEnum {
+	MALE = 'Nam',
+	FEMALE = 'Nữ',
+}
+
+export enum UserRoleEnum {
+	HEADMASTER = 'Headmaster',
+	TEACHER = 'Teacher',
+	PARENTS = 'Parents',
+}
+
+export interface IUser {
 	_id: string;
 	email: string;
 	displayName: string;
@@ -20,13 +32,6 @@ export interface IUser extends Document {
 	verifyPassword: (password: string) => boolean;
 }
 
-export enum UserGenderEnum {
-	MALE = 'Nam',
-	FEMALE = 'Nữ',
-}
-
-export enum UserRoleEnum {
-	HEADMASTER = 'Headmaster',
-	TEACHER = 'Teacher',
-	PARENTS = 'Parents',
-}
+export interface IUserDocument extends IUser, Omit<SoftDeleteDocument, '_id'> {}
+export type IUserModel = Model<IUserDocument>;
+export type ISoftDeleteUserModel = SoftDeleteModel<IUserDocument, IUserModel>;

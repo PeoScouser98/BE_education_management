@@ -1,18 +1,18 @@
-import { authenticator } from '@otplib/preset-default';
 import 'dotenv/config';
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import createHttpError, { HttpError } from 'http-errors';
 import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import { MongooseError } from 'mongoose';
 import path from 'path';
-import '../auth/googlePassport';
 import redisClient from '../../database/redis';
+import formatPhoneNumber from '../../helpers/formatPhoneNumber';
+import generateOtp from '../../helpers/otpGenerator';
 import { AuthRedisKeyPrefix } from '../../types/redis.type';
 import { IUser } from '../../types/user.type';
+import '../auth/googlePassport';
 import UserModel from '../models/user.model';
-import { changePassword } from '../services/user.service';
 import sendSMS from '../services/sms.service';
-import formatPhoneNumber from '../../helpers/formatPhoneNumber';
+import { changePassword } from '../services/user.service';
 
 export const signinWithGoogle = async (req: Request, res: Response) => {
 	try {
@@ -212,13 +212,12 @@ export const sendOtp = async (req: Request, res: Response) => {
 			throw createHttpError.NotFound(`User's phone number does not exist!`);
 		}
 
-		const secret = authenticator.generateSecret(); // base32 encoded hex secret key
-		const token = authenticator.generate(secret);
-		// await redisClient.set(AuthRedisKeyPrefix.OTP_KEY + existedUser._id, token, { EX: 60 * 60 });
-		console.log('OTP is ', token);
+		const otp = generateOtp();
+		await redisClient.set(AuthRedisKeyPrefix.OTP_KEY + existedUser._id, otp, { EX: 60 * 60 });
+		console.log('OTP is ', otp);
 		const response = await sendSMS({
 			to: formatPhoneNumber(req.body.phone),
-			text: `Mã xác thực của bạn là ${token}`,
+			text: `Mã xác thực của bạn là ${otp}`,
 		});
 		if (!response) {
 			throw createHttpError.InternalServerError('Failed to send sms!');

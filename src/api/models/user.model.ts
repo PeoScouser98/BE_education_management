@@ -1,8 +1,14 @@
-import mongoose from 'mongoose';
-import { emailRegex } from '../validations/user.validation';
-import { IUser, UserGenderEnum, UserRoleEnum } from '../../types/user.type';
 import bcrypt, { genSaltSync } from 'bcrypt';
 import 'dotenv/config';
+import mongoose from 'mongoose';
+import mongooseDelete from 'mongoose-delete';
+import {
+	ISoftDeleteUserModel,
+	IUser,
+	IUserDocument,
+	UserGenderEnum,
+	UserRoleEnum,
+} from '../../types/user.type';
 
 const UserSchema = new mongoose.Schema<IUser>(
 	{
@@ -11,7 +17,6 @@ const UserSchema = new mongoose.Schema<IUser>(
 			trim: true,
 			unique: true,
 		},
-
 		phone: {
 			type: String,
 			require: true,
@@ -64,6 +69,7 @@ const UserSchema = new mongoose.Schema<IUser>(
 	{
 		timestamps: true,
 		toJSON: { virtuals: true },
+		versionKey: false,
 	}
 );
 
@@ -85,6 +91,6 @@ UserSchema.pre('save', function (next) {
 	next();
 });
 
-const UserModel = mongoose.model('Users', UserSchema);
+const UserModel = mongoose.model<IUserDocument, ISoftDeleteUserModel>('Users', UserSchema);
 
 export default UserModel;
