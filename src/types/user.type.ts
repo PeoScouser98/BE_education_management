@@ -12,7 +12,7 @@ export enum UserRoleEnum {
 	PARENTS = 'Parents',
 }
 
-export interface IUser {
+export interface IUser extends Document {
 	_id: string;
 	email: string;
 	displayName: string;
