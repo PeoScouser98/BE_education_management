@@ -1,4 +1,4 @@
-import { IUser } from '../../types/user.type';
+import { IUser, UserRoleEnum } from '../../types/user.type';
 import UserModel from '../models/user.model';
 import bcrypt, { genSaltSync, hashSync } from 'bcrypt';
 
@@ -26,6 +26,30 @@ export const changePassword = async (userId: string, newPassword: string) => {
 			{ _id: userId },
 			{ password: encryptedNewPassword },
 			{ new: true }
+		);
+	} catch (error) {
+		throw error;
+	}
+};
+
+export const getAllTeacherUsers = async () => {
+	try {
+		return await UserModel.find({
+			role: UserRoleEnum.TEACHER,
+			isVerified: true,
+			employmentStatus: true,
+			deleted: false,
+		});
+	} catch (error) {
+		throw error;
+	}
+};
+
+export const deactivateTeacherUser = async (userId: string) => {
+	try {
+		return await UserModel.findOneAndUpdate(
+			{ _id: userId, role: UserRoleEnum.HEADMASTER },
+			{ employmentStatus: false }
 		);
 	} catch (error) {
 		throw error;

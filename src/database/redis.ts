@@ -3,7 +3,7 @@ import 'dotenv/config';
 import * as redis from 'redis';
 import { redisOptions } from '../configs/redis.config';
 
-const redisClient = redis.createClient();
+const redisClient = redis.createClient(redisOptions);
 
 redisClient
 	.connect()
@@ -13,5 +13,9 @@ redisClient
 	.catch((error) => {
 		console.log('[ERROR] ::: ', error.message);
 	});
+
+redisClient.on('error', (error) => {
+	console.log(error.message);
+});
 
 export default redisClient;

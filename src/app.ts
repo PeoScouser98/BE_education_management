@@ -15,7 +15,6 @@ import swaggerOptions from './configs/swagger.config';
 // routers
 import path from 'path';
 import rootRouter from './api/routes';
-import { readFileSync } from 'fs';
 // resolve path
 const ROOT_FOLDER = path.join(__dirname, '..');
 const SRC_FOLDER = path.join(ROOT_FOLDER, 'src');
@@ -38,6 +37,7 @@ app.use(
 		saveUninitialized: false,
 		secret: process.env.KEY_SESSION!,
 		store: new MemoryStore(),
+		resave: false,
 	})
 );
 
