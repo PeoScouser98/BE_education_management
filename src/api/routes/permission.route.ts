@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get('/permissions/get-by-roll', permissionController.read);
 
-router.post('/permissions', checkAuthenticated, checkIsHeadmaster, permissionController.create);
+router.post('/permissions', permissionController.create);
 
 router.put('/permissions/:id', checkAuthenticated, checkIsHeadmaster, permissionController.update);
 

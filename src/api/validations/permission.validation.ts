@@ -13,12 +13,7 @@ export const validatePermissionData = (data: Omit<IPermission, '_id'>) => {
 					type: Joi.string().required(),
 					allowedActions: Joi.array().items(
 						Joi.string()
-							.valid(
-								PermissionActionsEnum.GET,
-								PermissionActionsEnum.CREATE,
-								PermissionActionsEnum.UPDATE,
-								PermissionActionsEnum.DELETE
-							)
+							.valid(...Object.values(PermissionActionsEnum))
 							.required()
 					),
 				})

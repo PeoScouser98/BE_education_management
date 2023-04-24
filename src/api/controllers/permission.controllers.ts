@@ -4,18 +4,16 @@ import * as PermissionService from '../services/permission.service';
 import { validatePermissionData } from '../validations/permission.validation';
 import { isValidObjectId } from 'mongoose';
 import { PermissionActionsEnum } from '../../types/permission.type';
+import { UserRoleEnum } from '../../types/user.type';
 
 //* [GET] /api/permission?role="Role" (get permissions by role)
 export const read = async (req: Request, res: Response) => {
-	const availableRoles = ['ADMIN', 'HEADMASTER', 'TEACHER', 'PARENTS'];
-	console.log(PermissionActionsEnum);
 	try {
-		const role = req.query.role as string;
-
+		const role = req.query.role as UserRoleEnum;
 		if (!role) throw createHttpError.BadRequest('Missing parameter: role');
-		if (!availableRoles.includes(role))
+		if (!Object.values(UserRoleEnum).includes(role))
 			throw createHttpError.BadRequest(
-				`User's role parameter must be one of these: ${availableRoles}`
+				`User's role parameter must be one of these: ${Object.values(UserRoleEnum)}`
 			);
 
 		const permissions = await PermissionService.getPermissionByRole(role);
@@ -35,12 +33,11 @@ export const read = async (req: Request, res: Response) => {
 //* [POST] /api/permission (create permission)
 export const create = async (req: Request, res: Response) => {
 	try {
-		const data = req.body;
-		const { error } = validatePermissionData(data);
+		const { error } = validatePermissionData(req.body);
 
 		if (error) throw createHttpError.BadRequest(error.message);
 
-		const newPermission = await PermissionService.createPermission(data);
+		const newPermission = await PermissionService.createPermission(req.body);
 
 		if (!newPermission) throw createHttpError.BadRequest('Permission not created!');
 
