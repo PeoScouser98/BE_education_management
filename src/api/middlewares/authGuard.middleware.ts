@@ -17,7 +17,7 @@ export const checkAuthenticated = async (req: Request, res: Response, next: Next
 		if (!accessToken) throw createHttpError.Forbidden();
 
 		const { payload } = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET!) as JwtPayload;
-		req.user = payload;
+		req.profile = payload;
 		req.role = payload.role;
 		next();
 	} catch (error) {

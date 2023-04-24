@@ -14,7 +14,6 @@ const PermissionSchema = new mongoose.Schema<IPermission>({
 		type: String,
 		require: true,
 		trim: true,
-		uppercase: true,
 		enum: UserRoleEnum,
 	},
 	type: {

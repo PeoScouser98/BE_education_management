@@ -57,7 +57,6 @@ const UserSchema = new mongoose.Schema<IUser>(
 		},
 		role: {
 			type: String,
-			uppercase: true,
 			trim: true,
 			enum: UserRoleEnum,
 		},
