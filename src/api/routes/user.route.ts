@@ -26,4 +26,7 @@ router.patch(
 	checkIsHeadmaster,
 	UserController.deactivateTeacherAccount
 );
+router.get('/users/teachers', checkAuthenticated, UserController.getAllTeachers);
+router.get('users/parents/:classId');
+
 export default router;
