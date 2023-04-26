@@ -47,13 +47,12 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 			// secure: false,
 		});
 
-
 		res.cookie('uid', user?._id?.toString().trim(), {
 			maxAge: 60 * 60 * 1000 * 24 * 30, // 30 days
 			httpOnly: true,
 			// secure: false,
 		});
-    
+
 		return res.redirect(appConfig.CLIENT_URL + '/signin/success');
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
@@ -86,13 +85,13 @@ export const signinWithPhoneNumber = async (req: Request, res: Response) => {
 			maxAge: 60 * 60 * 1000 * 24 * 365, // 1 day
 			httpOnly: true,
 			// secure: false,
-		});  
+		});
 		res.cookie('uid', user?._id?.toString().trim(), {
 			maxAge: 60 * 60 * 1000 * 24 * 365, // 30 days
 			httpOnly: true,
 			// secure: false,
 		});
-    
+
 		return res.status(200).json(req.user);
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
@@ -119,24 +118,38 @@ export const getUser = async (req: Request, res: Response) => {
 
 export const refreshToken = async (req: Request, res: Response) => {
 	try {
+		/**
+		 * check refresh token trong redis
+		 * không tồn tại -> không cấp token mới
+		 * ok -> decode token
+		 */
+		//
 		const storedRefreshToken = await redisClient.get(
 			AuthRedisKeyPrefix.REFRESH_TOKEN + req.cookies.uid
 		);
-
 		if (!storedRefreshToken) {
 			throw createHttpError.BadRequest('Invalid refresh token!');
 		}
+		// decode token
 		const decoded = jwt.verify(
 			storedRefreshToken,
 			process.env.REFRESH_TOKEN_SECRET!
 		) as JwtPayload;
+		/**
+		 * nếu ko có payload -> ko cấp token mới
+		 * ok -> tạo token mới
+		 */
 		if (!decoded) {
-			throw createHttpError.Forbidden('Invalid');
+			throw createHttpError.Forbidden('Invalid token payload');
 		}
 		const newAccessToken = jwt.sign(decoded, process.env.ACCESS_TOKEN_SECRET!, {
 			expiresIn: '30m',
 		});
-		await redisClient.set(req.params.userId, newAccessToken);
+		// Lưu lại token mới trong redis
+		await redisClient.set(AuthRedisKeyPrefix.ACCESS_TOKEN + req.cookies.uid, newAccessToken, {
+			EX: 60 * 60, // 1 hour
+		});
+
 		return res.status(200).json({
 			refreshToken: newAccessToken,
 			statusCode: 200,
