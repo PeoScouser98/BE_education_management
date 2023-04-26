@@ -34,8 +34,7 @@ const UserSchema = new mongoose.Schema<IUser>(
 		gender: {
 			type: String,
 			require: true,
-			lowercase: true,
-			enum: UserGenderEnum,
+			enum: Object.values(UserGenderEnum),
 		},
 		picture: {
 			type: String,
@@ -57,9 +56,8 @@ const UserSchema = new mongoose.Schema<IUser>(
 		},
 		role: {
 			type: String,
-			uppercase: true,
 			trim: true,
-			enum: UserRoleEnum,
+			enum: Object.values(UserRoleEnum),
 		},
 		isVerified: {
 			type: Boolean,

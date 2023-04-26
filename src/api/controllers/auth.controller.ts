@@ -35,12 +35,13 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 		]);
 
 		res.cookie('access_token', accessToken, {
-			maxAge: 60 * 60 * 1000 * 24, // 1 day
+			maxAge: 60 * 60 * 1000 * 24 * 365, // 1 day
 			httpOnly: true,
 			// secure: false,
 		});
-		res.cookie('uid', user._id?.toString().trim(), {
-			maxAge: 60 * 60 * 1000 * 24 * 30, // 30 days
+
+		res.cookie('uid', user?._id?.toString().trim(), {
+			maxAge: 60 * 60 * 1000 * 24 * 365, // 30 days
 			httpOnly: true,
 			// secure: false,
 		});
@@ -74,12 +75,12 @@ export const signinWithPhoneNumber = async (req: Request, res: Response) => {
 		]);
 
 		res.cookie('access_token', accessToken, {
-			maxAge: 60 * 60 * 1000 * 24, // 1 day
+			maxAge: 60 * 60 * 1000 * 24 * 365, // 1 day
 			httpOnly: true,
 			// secure: false,
 		});
-		res.cookie('uid', user._id?.toString().trim(), {
-			maxAge: 60 * 60 * 1000 * 24 * 30, // 30 days
+		res.cookie('uid', user?._id?.toString().trim(), {
+			maxAge: 60 * 60 * 1000 * 24 * 365, // 30 days
 			httpOnly: true,
 			// secure: false,
 		});
