@@ -142,14 +142,20 @@ export const refreshToken = async (req: Request, res: Response) => {
 		if (!payload) {
 			throw createHttpError.Forbidden('Invalid token payload');
 		}
-		const newAccessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET!, {
-			expiresIn: '30m',
+		const newAccessToken = jwt.sign({ payload }, process.env.ACCESS_TOKEN_SECRET!, {
+			expiresIn: '1h',
 		});
+
 		// Lưu lại token mới trong redis
-		await redisClient.set(AuthRedisKeyPrefix.ACCESS_TOKEN + req.cookies.uid, newAccessToken, {
+		redisClient.set(AuthRedisKeyPrefix.ACCESS_TOKEN + req.cookies.uid, newAccessToken, {
 			EX: 60 * 60, // 1 hour
 		});
 
+		res.cookie('access_token', newAccessToken, {
+			maxAge: 60 * 60 * 1000 * 24 * 365, // 1 day
+			httpOnly: true,
+			// secure: false,
+		});
 		return res.status(200).json({
 			refreshToken: newAccessToken,
 			statusCode: 200,
