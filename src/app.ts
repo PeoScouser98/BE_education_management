@@ -15,6 +15,7 @@ import swaggerOptions from './configs/swagger.config';
 // routers
 import path from 'path';
 import rootRouter from './api/routes';
+import appConfig from './configs/app.config';
 // resolve path
 const ROOT_FOLDER = path.join(__dirname, '..');
 const SRC_FOLDER = path.join(ROOT_FOLDER, 'src');
@@ -37,14 +38,14 @@ app.use(
 		saveUninitialized: false,
 		secret: process.env.KEY_SESSION!,
 		store: new MemoryStore(),
-		resave: false,
+		resave: true,
 	})
 );
 
 // enable cors
 app.use(
 	cors({
-		origin: [process.env.CLIENT_URL!],
+		origin: appConfig.CLIENT_URL,
 		credentials: true,
 		methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
 	})

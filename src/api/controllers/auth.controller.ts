@@ -13,15 +13,22 @@ import '../auth/googlePassport';
 import UserModel from '../models/user.model';
 import sendSMS from '../services/sms.service';
 import { changePassword } from '../services/user.service';
+import appConfig from '../../configs/app.config';
+import { getPermissionByRole } from '../services/permission.service';
 
 export const signinWithGoogle = async (req: Request, res: Response) => {
 	try {
-		const user = req.profile as Partial<IUser>;
-		const accessToken = jwt.sign({ payload: req.profile }, process.env.ACCESS_TOKEN_SECRET!, {
+		const user = req.user as Partial<IUser>;
+		console.log(user);
+		if (!user) {
+			return res.redirect(appConfig.CLIENT_URL + '/signin');
+		}
+		// const userPermissions =await  getPermissionByRole(user.role!);
+		const accessToken = jwt.sign({ payload: req.user }, process.env.ACCESS_TOKEN_SECRET!, {
 			expiresIn: '1h',
 		});
 
-		const refreshToken = jwt.sign({ payload: req.profile }, process.env.REFRESH_TOKEN_SECRET!, {
+		const refreshToken = jwt.sign({ payload: req.user }, process.env.REFRESH_TOKEN_SECRET!, {
 			expiresIn: '30d',
 		});
 
@@ -40,13 +47,14 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 			// secure: false,
 		});
 
+
 		res.cookie('uid', user?._id?.toString().trim(), {
-			maxAge: 60 * 60 * 1000 * 24 * 365, // 30 days
+			maxAge: 60 * 60 * 1000 * 24 * 30, // 30 days
 			httpOnly: true,
 			// secure: false,
 		});
-
-		return res.redirect(`${process.env.CLIENT_URL}/signin/success`);
+    
+		return res.redirect(appConfig.CLIENT_URL + '/signin/success');
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | MongooseError).message,
@@ -57,7 +65,7 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 
 export const signinWithPhoneNumber = async (req: Request, res: Response) => {
 	try {
-		const user = req.profile as Partial<IUser>;
+		const user = req.user as Partial<IUser>;
 		const accessToken = jwt.sign({ payload: user }, process.env.ACCESS_TOKEN_SECRET!, {
 			expiresIn: '1h',
 		});
@@ -78,12 +86,14 @@ export const signinWithPhoneNumber = async (req: Request, res: Response) => {
 			maxAge: 60 * 60 * 1000 * 24 * 365, // 1 day
 			httpOnly: true,
 			// secure: false,
-		});
+		});  
 		res.cookie('uid', user?._id?.toString().trim(), {
 			maxAge: 60 * 60 * 1000 * 24 * 365, // 30 days
 			httpOnly: true,
 			// secure: false,
 		});
+    
+		return res.status(200).json(req.user);
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | MongooseError | JsonWebTokenError).message,
@@ -94,11 +104,11 @@ export const signinWithPhoneNumber = async (req: Request, res: Response) => {
 
 export const getUser = async (req: Request, res: Response) => {
 	try {
-		if (!req.user) {
+		if (!req.profile) {
 			throw createHttpError.NotFound(`Failed to get user's info`);
 		}
 
-		return res.status(200).json(req.user);
+		return res.status(200).json(req.profile);
 	} catch (error) {
 		return res.status((error as HttpError).status || 500).json({
 			message: (error as HttpError | MongooseError).message,
@@ -142,16 +152,9 @@ export const refreshToken = async (req: Request, res: Response) => {
 
 export const signout = async (req: Request, res: Response) => {
 	try {
-		console.log(req.cookies.uid);
-		const existedUser = await UserModel.findOne({
-			_id: req.cookies.uid,
-		}).exec();
-		if (!existedUser) {
-			throw createHttpError.NotFound("User doesn't exist");
-		}
 		const userRedisTokenKeys = {
-			accessToken: AuthRedisKeyPrefix.ACCESS_TOKEN + req.cookies.uid,
-			refreshToken: AuthRedisKeyPrefix.REFRESH_TOKEN + req.cookies.uid,
+			accessToken: AuthRedisKeyPrefix.ACCESS_TOKEN + req.profile._id,
+			refreshToken: AuthRedisKeyPrefix.REFRESH_TOKEN + req.profile._id,
 		};
 		const accessToken = await redisClient.get(userRedisTokenKeys.accessToken);
 
@@ -177,7 +180,12 @@ export const signout = async (req: Request, res: Response) => {
 			message: 'Signed out!',
 			statusCode: 202,
 		});
-	} catch (error) {}
+	} catch (error) {
+		return res.status((error as HttpError).status || 500).json({
+			message: 'Không thể đăng xuất',
+			statusCode: (error as HttpError).status || 500,
+		});
+	}
 };
 
 export const verifyAccount = async (req: Request, res: Response) => {

@@ -15,18 +15,18 @@ passport.use(
 			passReqToCallback: true,
 		},
 		function (req, accessToken, refreshToken, profile, done) {
-			try {
-				UserModel.findOne({ email: profile.email }).exec((err, user) => {
-					if (err) {
-						return done(null, false);
-					} else {
-						const displayPicture = user?.picture || profile.picture;
-						return done(null, { ...user?.toObject(), picture: displayPicture });
-					}
-				});
-			} catch (error) {
-				console.log((error as Error).message);
-			}
+			UserModel.findOne({ email: profile.email }).exec((err, user) => {
+				console.log(user);
+				if (err) {
+					return done(err, false);
+				}
+				if (!user) {
+					return done(new Error('Account does not exist!'), false);
+				}
+
+				const displayPicture = user?.picture || profile.picture;
+				return done(null, { ...user?.toObject(), picture: displayPicture });
+			});
 		} as VerifyFunctionWithRequest
 	)
 );
