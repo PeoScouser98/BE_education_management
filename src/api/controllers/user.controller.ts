@@ -14,14 +14,15 @@ import {
 	validateNewTeacherData,
 	validateUpdateUserData,
 } from './../validations/user.validation';
+import generatePicureByName from '../../helpers/generatePicture';
 
 export const createTeacherAccount = async (req: Request, res: Response) => {
 	try {
-		const { error } = validateNewTeacherData({ ...req.body, role: 'TEACHER' });
+		const { error } = validateNewTeacherData(req.body);
 		if (error) {
-			throw createHttpError.BadRequest('Invalid teacher data!');
+			throw createHttpError.BadRequest(error.message);
 		}
-		const newUser = await UserService.createUser({ ...req.body, role: 'TEACHER' });
+		const newUser = await UserService.createUser({ ...req.body, role: UserRoleEnum.TEACHER });
 		const token = jwt.sign({ auth: newUser.email }, process.env.ACCESS_TOKEN_SECRET!, {
 			expiresIn: '7d',
 		});
@@ -54,7 +55,7 @@ export const createTeacherAccount = async (req: Request, res: Response) => {
 					`,
 			},
 			(err: Error | null, info: SMTPTransport.SentMessageInfo): void => {
-				if (err) throw new Error(err.message);
+				if (err) throw createHttpError.InternalServerError('Failed to send mail');
 				else console.log(info.response);
 			}
 		);
@@ -70,24 +71,19 @@ export const createTeacherAccount = async (req: Request, res: Response) => {
 
 export const createParentsAccount = async (req: Request, res: Response) => {
 	try {
-		// validate new parent data
 		const { error } = validateNewParentsData(req.body);
 		if (error) {
 			console.log(error.message);
 			throw createHttpError.BadRequest(error.message);
 		}
 
-		// create new user as parent role
 		const newParentUser = await UserService.createUser({
 			...req.body,
 			role: UserRoleEnum.PARENTS,
 			password: '123@123',
-			picture: `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${req.body.displayName.at(
-				0
-			)}`,
+			picture: generatePicureByName(req.body.displayName.at(0)),
 		});
 
-		// done
 		return res.status(201).json(newParentUser);
 	} catch (error) {
 		console.log(error);
@@ -98,6 +94,7 @@ export const createParentsAccount = async (req: Request, res: Response) => {
 	}
 };
 
+//
 export const updateUserInfo = async (req: Request, res: Response) => {
 	try {
 		console.log(req.profile);
@@ -119,6 +116,7 @@ export const updateUserInfo = async (req: Request, res: Response) => {
 	}
 };
 
+// Get all teachers
 export const getAllTeachers = async (req: Request, res: Response) => {
 	try {
 		const teachers = await UserService.getAllTeacherUsers();
@@ -133,6 +131,7 @@ export const getAllTeachers = async (req: Request, res: Response) => {
 	}
 };
 
+// Deactivate teacher account
 export const deactivateTeacherAccount = async (req: Request, res: Response) => {
 	try {
 		const deactivatedTeacher = await UserService.deactivateTeacherUser(req.params.userId);
