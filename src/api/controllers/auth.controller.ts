@@ -131,7 +131,7 @@ export const refreshToken = async (req: Request, res: Response) => {
 			throw createHttpError.BadRequest('Invalid refresh token!');
 		}
 		// decode token
-		const decoded = jwt.verify(
+		const { payload } = jwt.verify(
 			storedRefreshToken,
 			process.env.REFRESH_TOKEN_SECRET!
 		) as JwtPayload;
@@ -139,10 +139,10 @@ export const refreshToken = async (req: Request, res: Response) => {
 		 * nếu ko có payload -> ko cấp token mới
 		 * ok -> tạo token mới
 		 */
-		if (!decoded) {
+		if (!payload) {
 			throw createHttpError.Forbidden('Invalid token payload');
 		}
-		const newAccessToken = jwt.sign(decoded, process.env.ACCESS_TOKEN_SECRET!, {
+		const newAccessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET!, {
 			expiresIn: '30m',
 		});
 		// Lưu lại token mới trong redis
