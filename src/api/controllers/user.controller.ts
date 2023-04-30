@@ -123,6 +123,7 @@ export const getAllTeachers = async (req: Request, res: Response) => {
 		if (!teachers) {
 			throw createHttpError.NotFound('Không thể tìm thấy giáo viên nào!');
 		}
+                return res.status(200).json(teachers)
 	} catch (error) {
 		return res.status((error as HttpError).status || 500).json({
 			message: (error as HttpError | MongooseError).message,
