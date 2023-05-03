@@ -1,11 +1,10 @@
 import mongoose from 'mongoose';
 import { IScheduleSlotTime, ITimeTable } from '../../types/timeTable.type';
-import TimeTableModel from '../models/timetable.model';
+import TimeTableModel from '../models/timeTable.model';
 
 export const createTimetable = async (payload: any) => {
 	try {
-		const newTimetable = await new TimeTableModel(payload).save();
-		return newTimetable;
+		return await new TimeTableModel(payload).save();
 	} catch (error) {
 		throw error;
 	}

@@ -2,38 +2,57 @@ import mongoose, { ObjectId } from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
 
 import { ISubject } from '../../types/subject.type';
-import { ITimetable } from '../../types/timeTable.type';
+import { IScheduleSlotTime, ITimeTable } from '../../types/timeTable.type';
 
-const TimetableSchema = new mongoose.Schema({
-	class: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'Class',
-		required: true,
+const ScheduleSlotSchema = new mongoose.Schema(
+	{
+		period: {
+			type: Number,
+			require: true,
+			enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+		},
+		subject: {
+			type: mongoose.Types.ObjectId,
+			ref: 'Subjects',
+			require: true,
+			autopopulate: { select: 'subjectName _id' },
+		},
+		teacher: {
+			type: mongoose.Types.ObjectId,
+			ref: 'Users',
+			require: true,
+			autopopulate: { select: 'displayName _id' },
+		},
 	},
-	dayOfWeek: {
-		type: Number,
-		enum: [2, 3, 4, 5, 6],
-		require: true,
+	{
+		_id: false,
+	}
+);
+const TimeTableSchema = new mongoose.Schema(
+	{
+		class: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'Classes',
+			required: true,
+		},
+		schedule: {
+			monday: [ScheduleSlotSchema],
+			tuesday: [ScheduleSlotSchema],
+			wednessday: [ScheduleSlotSchema],
+			thursday: [ScheduleSlotSchema],
+			friday: [ScheduleSlotSchema],
+			saturday: [ScheduleSlotSchema],
+		},
 	},
-	period: {
-		type: Number,
-		enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-	},
-	subject: {
-		type: mongoose.Types.ObjectId,
-		ref: 'Subjects',
-		require: true,
-		autopopulate: true,
-	},
-	teacher: {
-		type: mongoose.Types.ObjectId,
-		ref: 'Users',
-		autopopulate: { select: 'username _id' },
-	},
-});
+	{
+		timestamps: true,
+		versionKey: false,
+		collection: 'time_table',
+	}
+);
 
-TimetableSchema.plugin(mongooseAutoPopulate);
+TimeTableSchema.plugin(mongooseAutoPopulate);
 
-const TimetableModel = mongoose.model<ITimetable>('Timetables', TimetableSchema);
+const TimeTableModel = mongoose.model<ITimeTable>('TimeTables', TimeTableSchema);
 
-export default TimetableModel;
+export default TimeTableModel;
