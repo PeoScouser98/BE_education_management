@@ -17,7 +17,7 @@ module.exports = {
 		rules: [
 			{
 				test: /\.ts$/,
-				use: 'ts-loader',
+				use: 'swc-loader',
 				exclude: /node_modules/,
 			},
 		],
@@ -35,6 +35,7 @@ module.exports = {
 			}),
 		],
 	},
+
 	externals: {
 		bcrypt: 'commonjs bcrypt',
 		compression: 'commonjs compression',
@@ -60,5 +61,7 @@ module.exports = {
 		morgan: 'commonjs morgan',
 		multer: 'commonjs multer',
 		helmet: 'commonjs helmet',
+		nock: 'commonjs2 nock',
+		'mock-aws-s3': 'commonjs2 mock-aws-s3',
 	},
 };
