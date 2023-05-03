@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { IScheduleSlotTime, ITimeTable } from '../../types/timeTable.type';
-import TimeTableModel from '../models/timetable.model';
+import TimeTableModel from '../models/timeTable.model';
 
 export const createTimetable = async (payload: any) => {
 	try {
@@ -37,7 +37,9 @@ export const deleteTimeTable = async (classId: string) => {
 
 export const getTimetableByClass = async (classId: string) => {
 	try {
-		return await TimeTableModel.findOne({ class: classId }).sort({ table: 1 });
+		const data = await TimeTableModel.findOne({ class: classId });
+		console.log(data);
+		return data;
 	} catch (error) {
 		throw error;
 	}
