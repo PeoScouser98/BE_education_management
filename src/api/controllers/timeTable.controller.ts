@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as TimeTableService from '../services/timetable.service';
+import * as TimeTableService from '../services/timeTable.service';
 import {
 	validateNewTimeTable,
 	validateUpdateTimeTablePayload,
