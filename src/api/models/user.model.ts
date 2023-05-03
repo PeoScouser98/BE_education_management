@@ -88,6 +88,7 @@ UserSchema.pre('save', function (next) {
 	}
 	next();
 });
+UserSchema.plugin(mongooseDelete, { overrideMethods: true, deletedAt: true });
 
 const UserModel = mongoose.model<IUserDocument, ISoftDeleteUserModel>('Users', UserSchema);
 
