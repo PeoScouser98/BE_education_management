@@ -1,28 +1,26 @@
 import express, { Router } from 'express';
-import userRouter from './user.route';
-import studentRouter from './student.route';
-import schoolYearRouter from './schoolYear.route';
-import authRouter from './auth.router';
-import classRouter from './class.route';
-
-import trancriptRouter from './subjectTrancription.route';
-
-
-import subjectRouter from './subject.route';
-import learningMaterialRouter from './learningMaterial.route';
-import permissionRouter from './permission.route';
+import UserRouter from './user.route';
+import StudentRouter from './student.route';
+import SchoolYearRouter from './schoolYear.route';
+import AuthRouter from './auth.router';
+import ClassRouter from './class.route';
+import TimeTableRouter from './timetable.route';
+import TrancriptRouter from './subjectTrancription.route';
+import SubjectRouter from './subject.route';
+import LearningMaterialRouter from './learningMaterial.route';
+import PermissionRouter from './permission.route';
 
 const rootRouters: Array<Router> = [
-	classRouter,
-	userRouter,
-	authRouter,
-	studentRouter,
-	subjectRouter,
-	schoolYearRouter,
-	permissionRouter,
-	learningMaterialRouter,
-	trancriptRouter,
-
+	ClassRouter,
+	UserRouter,
+	AuthRouter,
+	StudentRouter,
+	SubjectRouter,
+	SchoolYearRouter,
+	PermissionRouter,
+	LearningMaterialRouter,
+	TrancriptRouter,
+	TimeTableRouter,
 ];
 const router = express.Router();
 
