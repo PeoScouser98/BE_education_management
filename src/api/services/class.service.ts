@@ -5,11 +5,6 @@ import { IClass } from '../../types/class.type';
 import ClassModel from '../models/class.model';
 import { validateClassData, validateClassEditData } from '../validations/class.validation';
 
-interface ErrorPayloadCreates {
-	className: string;
-	message?: string;
-}
-
 export const createClass = async (payload: Omit<IClass, '_id'>) => {
 	try {
 		const validateCheck = validateClassData(payload);
@@ -47,13 +42,13 @@ export const checkClassesExists = async (_id: string, condition: Partial<IClass>
 			};
 		}
 
-		const classe: IClass | null = await ClassModel.findOne({
+		const classes: IClass | null = await ClassModel.findOne({
 			...conditionCurr,
 		});
 
 		return {
-			exists: classe ? true : false,
-			classe,
+			exists: !!classes,
+			classes: classes,
 		};
 	} catch (error) {
 		throw error;
@@ -67,13 +62,13 @@ export const updateClasses = async (payload: Partial<Omit<IClass, '_id'>>, _id: 
 			throw createHttpError(304);
 		}
 
-		const { exists, classe } = await checkClassesExists(_id);
+		const { exists, classes } = await checkClassesExists(_id);
 
 		// trường hợp className và grade không khớp nhau
 		if (
 			payload.className &&
 			!payload.grade &&
-			!payload.className.startsWith(JSON.stringify(classe?.grade))
+			!payload.className.startsWith(JSON.stringify(classes?.grade))
 		) {
 			throw createHttpError.BadRequest('Invalid Class name, classname: grade+"A|B|C|D..."');
 		}
@@ -88,22 +83,7 @@ export const updateClasses = async (payload: Partial<Omit<IClass, '_id'>>, _id: 
 			throw createHttpError.BadRequest(error.message);
 		}
 
-		// check xem dữ liệu sửa có giống với dữ liệu cũ hay không
-		if (
-			(() => {
-				const classOld = { ...JSON.parse(JSON.stringify(classe)) };
-				delete classOld._id;
-
-				return compareObject({ ...classOld, ...payload }, classOld);
-			})()
-		) {
-			throw createHttpError(304);
-		}
-		const newClasses = await ClassModel.findOneAndUpdate({ _id }, payload, { new: true });
-
-		return {
-			newClasses,
-		};
+		return await ClassModel.findOneAndUpdate({ _id }, payload, { new: true });
 	} catch (error) {
 		throw error;
 	}

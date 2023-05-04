@@ -48,8 +48,9 @@ export const getAllTeacherUsers = async () => {
 export const deactivateTeacherUser = async (userId: string) => {
 	try {
 		return await UserModel.findOneAndUpdate(
-			{ _id: userId, role: UserRoleEnum.HEADMASTER },
-			{ employmentStatus: false }
+			{ _id: userId, role: UserRoleEnum.TEACHER },
+			{ employmentStatus: false, deleted: true },
+			{ new: true }
 		);
 	} catch (error) {
 		throw error;

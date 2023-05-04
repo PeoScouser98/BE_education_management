@@ -15,7 +15,7 @@ import swaggerOptions from './configs/swagger.config';
 // routers
 import path from 'path';
 import rootRouter from './api/routes';
-import appConfig from './configs/app.config';
+import AppConfig from './configs/app.config';
 // resolve path
 const ROOT_FOLDER = path.join(__dirname, '..');
 const SRC_FOLDER = path.join(ROOT_FOLDER, 'src');
@@ -27,7 +27,18 @@ const app = express();
 app.use(express.json());
 
 // set security HTTP headers
-app.use(helmet());
+app.use(
+	helmet({
+		contentSecurityPolicy: {
+			useDefaults: false,
+			directives: {
+				...helmet.contentSecurityPolicy.getDefaultDirectives(),
+				'style-src': ["'self'", AppConfig.BOOTSTRAP_ICONS_CDN],
+				'script-src': ["'self'", "'unsafe-inline'", AppConfig.TAILWIND_CDN],
+			},
+		},
+	})
+);
 // logging request/response
 app.use(morgan('tiny'));
 
@@ -36,7 +47,7 @@ app.use(cookieParser());
 app.use(
 	session({
 		saveUninitialized: false,
-		secret: process.env.KEY_SESSION!,
+		secret: AppConfig.KEY_SESSION,
 		store: new MemoryStore(),
 		resave: true,
 	})
@@ -45,7 +56,7 @@ app.use(
 // enable cors
 app.use(
 	cors({
-		origin: appConfig.CLIENT_URL,
+		origin: AppConfig.CLIENT_URL,
 		credentials: true,
 		methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
 	})

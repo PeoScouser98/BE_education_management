@@ -1,6 +1,7 @@
 import mongoose, { Model, ObjectId } from 'mongoose';
 import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 import { IClassDocument, ISoftDeleteClassModel } from '../../types/class.type';
+import mongooseAutoPopulate from 'mongoose-autopopulate';
 
 const ClassSchema = new mongoose.Schema<IClassDocument>(
 	{
@@ -18,8 +19,8 @@ const ClassSchema = new mongoose.Schema<IClassDocument>(
 		},
 		headTeacher: {
 			type: mongoose.Types.ObjectId,
-			ref: 'Teachers',
-			autopopulate: { select: '_id fullName phone email' },
+			ref: 'Users',
+			autopopulate: { select: '_id displayName phone email' },
 		},
 	},
 	{
@@ -27,7 +28,7 @@ const ClassSchema = new mongoose.Schema<IClassDocument>(
 		timestamps: true,
 	}
 );
-
+ClassSchema.plugin(mongooseAutoPopulate);
 ClassSchema.plugin(mongooseDelete, { overrideMethods: ['find', 'findOne'], deletedAt: true });
 
 ClassSchema.virtual('students', {

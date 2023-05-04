@@ -22,6 +22,14 @@ export const getAllSubjects = async () => {
 	}
 };
 
+export const getOneSubject = async (subjectId: string) => {
+	try {
+		return await SubjectModel.findById(subjectId);
+	} catch (error) {
+		throw error;
+	}
+};
+
 export const createNewSubject = async (subject: Omit<ISubject, '_id'>) => {
 	try {
 		if (!subject) throw createHttpError(204);

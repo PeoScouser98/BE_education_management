@@ -4,6 +4,7 @@ import createHttpError, { HttpError } from 'http-errors';
 import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import { MongooseError } from 'mongoose';
 import path from 'path';
+import AppConfig from '../../configs/app.config';
 import redisClient from '../../database/redis';
 import formatPhoneNumber from '../../helpers/formatPhoneNumber';
 import generateOtp from '../../helpers/otpGenerator';
@@ -13,15 +14,13 @@ import '../auth/googlePassport';
 import UserModel from '../models/user.model';
 import sendSMS from '../services/sms.service';
 import { changePassword } from '../services/user.service';
-import appConfig from '../../configs/app.config';
-import { getPermissionByRole } from '../services/permission.service';
 
 export const signinWithGoogle = async (req: Request, res: Response) => {
 	try {
 		const user = req.user as Partial<IUser>;
 		console.log(user);
 		if (!user) {
-			return res.redirect(appConfig.CLIENT_URL + '/signin');
+			return res.redirect(AppConfig.CLIENT_URL + '/signin');
 		}
 		// const userPermissions =await  getPermissionByRole(user.role!);
 		const accessToken = jwt.sign({ payload: req.user }, process.env.ACCESS_TOKEN_SECRET!, {
@@ -53,7 +52,7 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 			// secure: false,
 		});
 
-		return res.redirect(appConfig.CLIENT_URL + '/signin/success');
+		return res.redirect(AppConfig.CLIENT_URL + '/signin/success');
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | MongooseError).message,
@@ -92,7 +91,10 @@ export const signinWithPhoneNumber = async (req: Request, res: Response) => {
 			// secure: false,
 		});
 
-		return res.status(200).json(req.user);
+		return res.status(200).json({
+			user: req.user,
+			accessToken: accessToken,
+		});
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | MongooseError | JsonWebTokenError).message,
@@ -219,10 +221,13 @@ export const verifyAccount = async (req: Request, res: Response) => {
 		await UserModel.findOneAndUpdate({ email: auth }, updateUserData, {
 			new: true,
 		});
-
-		return res.sendFile(
-			path.resolve(path.join(__dirname, '../../views/send-mail-response.html'))
+		res.setHeader(
+			'Content-Security-Policy',
+			"script-src 'self' 'sha256-U4zEO4vaaKh4LmTYmi2f3RnTHxX3wvmvLn8RHEUiEs8=' https://cdn.tailwindcss.com"
 		);
+		res.setHeader('Cross-origin-Embedder-Policy', 'same-origin');
+		res.setHeader('Access-Control-Allow-Origin', '*');
+		return res.sendFile(path.resolve(path.join(__dirname, '../views/send-mail-response.html')));
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | JsonWebTokenError | Error).message,

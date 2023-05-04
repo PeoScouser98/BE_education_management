@@ -21,12 +21,12 @@ router.post(
 );
 router.patch('/update-user', checkAuthenticated, UserController.updateUserInfo);
 router.patch(
-	'/user/:userId/deactivate',
+	'/users/:userId/deactivate',
 	checkAuthenticated,
 	checkIsHeadmaster,
 	UserController.deactivateTeacherAccount
 );
 router.get('/users/teachers', checkAuthenticated, UserController.getAllTeachers);
-router.get('users/parents/:classId');
+// router.get('/users/parents/:classId'); // NOT YET
 
 export default router;

@@ -34,13 +34,13 @@ export const createTeacherAccount = async (req: Request, res: Response) => {
 				html: /* html */ `
 			<div>
 				<p>
-					Gửi ${req.body.gender === 'nam' ? 'thầy' : 'cô'} ${req.body.username}!
+					Gửi ${req.body.gender === 'nam' ? 'thầy' : 'cô'} ${req.body.displayName}!
 					<p>
 						Giáo viên nhận được mail vui lòng click vào <a href='${
 							req.protocol +
 							'://' +
 							req.get('host') +
-							req.originalUrl +
+							'/api/auth/verify-account' +
 							paramsStringify({ user_type: 'teacher', token: token })
 						}'>link</a> này để xác thực tài khoản.
 					</p>
@@ -123,7 +123,7 @@ export const getAllTeachers = async (req: Request, res: Response) => {
 		if (!teachers) {
 			throw createHttpError.NotFound('Không thể tìm thấy giáo viên nào!');
 		}
-                return res.status(200).json(teachers)
+		return res.status(200).json(teachers);
 	} catch (error) {
 		return res.status((error as HttpError).status || 500).json({
 			message: (error as HttpError | MongooseError).message,
@@ -136,14 +136,11 @@ export const getAllTeachers = async (req: Request, res: Response) => {
 export const deactivateTeacherAccount = async (req: Request, res: Response) => {
 	try {
 		const deactivatedTeacher = await UserService.deactivateTeacherUser(req.params.userId);
+		console.log(deactivatedTeacher);
 		if (!deactivatedTeacher) {
-			throw createHttpError.BadRequest('Cập nhật trạng thái của giáo viên không thành công!');
+			throw createHttpError.NotFound('Cannot find teacher to deactivate!');
 		}
-		return res.status(200).json({
-			data: deactivatedTeacher,
-			message: 'Đã cập trạng thái của giáo viên',
-			statusCode: 200,
-		});
+		return res.status(201).json(deactivatedTeacher);
 	} catch (error) {
 		return res.status((error as HttpError).status || 500).json({
 			message: (error as HttpError | MongooseError).message,
