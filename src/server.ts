@@ -1,10 +1,10 @@
 import app from './app';
 import 'dotenv/config';
 import http from 'http';
-import connectSocketIO from './app/socket';
+import connectSocketIO from './configs/socket';
 import connectMongoDB from './database/mongodb';
 import './database/redis';
-import './core/global';
+import './types/global';
 
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3004;
