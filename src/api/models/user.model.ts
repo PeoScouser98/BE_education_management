@@ -49,6 +49,7 @@ const UserSchema = new mongoose.Schema<IUser>(
 				graduatedAt: Date,
 			},
 			required: true,
+			_id: false,
 		},
 		employmentStatus: {
 			type: Boolean,
@@ -88,7 +89,10 @@ UserSchema.pre('save', function (next) {
 	}
 	next();
 });
-UserSchema.plugin(mongooseDelete, { overrideMethods: true, deletedAt: true });
+UserSchema.plugin(mongooseDelete, {
+	overrideMethods: ['find', 'findOne', 'findOneAndUpdate'],
+	deletedAt: true,
+});
 
 const UserModel = mongoose.model<IUserDocument, ISoftDeleteUserModel>('Users', UserSchema);
 

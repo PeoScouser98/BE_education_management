@@ -138,13 +138,9 @@ export const deactivateTeacherAccount = async (req: Request, res: Response) => {
 		const deactivatedTeacher = await UserService.deactivateTeacherUser(req.params.userId);
 		console.log(deactivatedTeacher);
 		if (!deactivatedTeacher) {
-			throw createHttpError.BadRequest('Cập nhật trạng thái của giáo viên không thành công!');
+			throw createHttpError.NotFound('Cannot find teacher to deactivate!');
 		}
-		return res.status(200).json({
-			data: deactivatedTeacher,
-			message: 'Đã cập trạng thái của giáo viên',
-			statusCode: 200,
-		});
+		return res.status(201).json(deactivatedTeacher);
 	} catch (error) {
 		return res.status((error as HttpError).status || 500).json({
 			message: (error as HttpError | MongooseError).message,
