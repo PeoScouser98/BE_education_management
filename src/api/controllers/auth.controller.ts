@@ -223,8 +223,9 @@ export const verifyAccount = async (req: Request, res: Response) => {
 		});
 		res.setHeader(
 			'Content-Security-Policy',
-			"script-src 'self' 'sha256-U4zEO4vaaKh4LmTYmi2f3RnTHxX3wvmvLn8RHEUiEs8=' https://cdn.tailwindcss.com"
+			"script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com"
 		);
+		// ;
 		res.setHeader('Cross-origin-Embedder-Policy', 'same-origin');
 		res.setHeader('Access-Control-Allow-Origin', '*');
 		return res.sendFile(path.resolve(path.join(__dirname, '../views/send-mail-response.html')));

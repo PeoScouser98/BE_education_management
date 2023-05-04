@@ -33,8 +33,13 @@ app.use(
 			useDefaults: false,
 			directives: {
 				...helmet.contentSecurityPolicy.getDefaultDirectives(),
-				'style-src': ["'self'", AppConfig.BOOTSTRAP_ICONS_CDN],
-				'script-src': ["'self'", "'unsafe-inline'", AppConfig.TAILWIND_CDN],
+				'style-src': ["'self'", "'unsafe-inline'", AppConfig.BOOTSTRAP_ICONS_CDN],
+				'script-src': [
+					"'self'",
+					"'unsafe-hash'",
+					"'unsafe-inline'",
+					AppConfig.TAILWIND_CDN,
+				],
 			},
 		},
 	})
@@ -69,14 +74,8 @@ app.use(passport.session());
 app.use('/api', rootRouter);
 
 // Swagger
-app.use('/public', express.static(path.join(SRC_FOLDER, 'public')));
-app.use(
-	'/api/document',
-	swaggerUI.serve,
-	swaggerUI.setup(swaggerOptions, {
-		customCssUrl: '/public/swagger-ui.css',
-	})
-);
+// app.use('/public', express.static(path.join(SRC_FOLDER, 'public')));
+app.use('/api/document', swaggerUI.serve, swaggerUI.setup(swaggerOptions));
 
 // Default response
 app.get('/', async (req: Request, res: Response) => {
