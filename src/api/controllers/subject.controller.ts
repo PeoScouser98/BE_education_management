@@ -17,6 +17,18 @@ export const list = async (req: Request, res: Response) => {
 	}
 };
 
+export const read = async (req: Request, res: Response) => {
+	try {
+		const subject = await SubjectServices.getOneSubject(req.params.id);
+		return res.status(200).json(subject);
+	} catch (error) {
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+		});
+	}
+};
+
 // [POST] /api/subjects
 export const create = async (req: Request, res: Response) => {
 	try {
