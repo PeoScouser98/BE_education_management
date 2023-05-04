@@ -7,8 +7,6 @@ import mongoose, { MongooseError, SortOrder } from 'mongoose';
 import { IClass } from '../../types/class.type';
 import ClassModel from '../models/class.model';
 
-// Todo: Update lại toàn bộ status response
-
 // [POST] /api/classes (create classes)
 export const createClass = async (req: Request, res: Response) => {
 	try {
@@ -29,11 +27,8 @@ export const updateClass = async (req: Request, res: Response) => {
 		const _id: unknown = req.params.id;
 		const data: Partial<Omit<IClass, '_id'>> = req.body;
 
-		const { newClasses } = await ClassService.updateClasses(data, _id as string);
-		return res.status(201).json({
-			classe: newClasses,
-			message: 'Class update successful',
-		});
+		const updatedClass = await ClassService.updateClasses(data, _id as string);
+		return res.status(201).json(updatedClass);
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | MongooseError).message,
@@ -106,14 +101,11 @@ export const getClasses = async (req: Request, res: Response) => {
 			);
 		}
 
-		const result = await ClassModel.find().sort({
+		const classes = await ClassModel.find().sort({
 			[groupBy]: order,
 		});
 
-		return res.status(200).json({
-			classes: result,
-			sort: [groupBy, order],
-		});
+		return res.status(200).json(classes);
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | MongooseError).message,
