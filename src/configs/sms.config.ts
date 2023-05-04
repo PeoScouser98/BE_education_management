@@ -1,9 +1,8 @@
 import 'dotenv/config';
 
-import { Vonage } from '@vonage/server-sdk';
 import { AuthInterface } from '@vonage/auth';
+import { Vonage } from '@vonage/server-sdk';
 import 'dotenv/config';
-import path from 'path';
 
 const vonage = new Vonage({
 	apiKey: process.env.SMS_API_KEY,

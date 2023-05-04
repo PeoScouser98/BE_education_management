@@ -1,7 +1,7 @@
 import express from 'express';
 import passport from 'passport';
 import * as AuthController from '../controllers/auth.controller';
-import appConfig from '../../configs/app.config';
+import AppConfig from '../../configs/app.config';
 import { checkAuthenticated } from '../middlewares/authGuard.middleware';
 
 const router = express.Router();
@@ -9,7 +9,7 @@ router.get('/auth/google', passport.authenticate('google', { scope: ['email', 'p
 router.get(
 	'/auth/google/callback',
 	passport.authenticate('google', {
-		failureRedirect: `${appConfig.CLIENT_URL}/signin`,
+		failureRedirect: `${AppConfig.CLIENT_URL}/signin`,
 	}),
 	AuthController.signinWithGoogle
 );
