@@ -1,19 +1,102 @@
-import { IUser, UserRoleEnum } from '../../types/user.type';
+import { genSaltSync, hashSync } from 'bcrypt';
+import createHttpError from 'http-errors';
+import { IUser } from '../../types/user.type';
 import UserModel from '../models/user.model';
-import bcrypt, { genSaltSync, hashSync } from 'bcrypt';
+import { UserRoleEnum } from './../../types/user.type';
+import StudentModel from '../models/student.model';
+import transporter from '../../configs/nodemailer.config';
+import SMTPTransport from 'nodemailer/lib/smtp-transport';
+import { sendVerificationEmail } from './mail.service';
+import getVerificationEmailTemplate from '../emails/verifyUserEmail';
 
-export const createUser = async (payload: Partial<IUser>) => {
+// Add multi parents users
+const checkIsValidParentUser = async ({ email, phone }: { email: string; phone: string }) => {
 	try {
-		return await new UserModel(payload).save();
+		const [existedUser, childrenOfExistedUser] = await Promise.all([
+			UserModel.exists({ email: email, phone: phone }),
+			StudentModel.exists({ parentsPhoneNumber: phone }),
+		]);
+		return { isUserExisted: !!existedUser, hasChildren: !!childrenOfExistedUser };
 	} catch (error) {
-		console.log(error);
 		throw error;
 	}
 };
 
+export const createUser = async ({
+	payload,
+	multi,
+}: {
+	payload: Partial<IUser> & Array<Partial<IUser>>;
+	multi: Boolean;
+}) => {
+	try {
+		if (
+			multi &&
+			(payload as Array<Partial<IUser>>).every((user) => user.role === UserRoleEnum.PARENTS)
+		) {
+			const newParentsUsers = await Promise.all(
+				payload.map(async (user) => {
+					const checkResult = await checkIsValidParentUser({
+						email: user?.email!,
+						phone: user?.phone!,
+					});
+					if (checkResult.isUserExisted)
+						throw createHttpError.BadRequest('Parent account already existed!');
+					if (!checkResult.hasChildren)
+						throw createHttpError.BadRequest(
+							`No student has this parent's phone number!`
+						);
+					return await new UserModel(user).save();
+				})
+			);
+			return newParentsUsers;
+		}
+		// Add a new parents user
+		if (payload.role === UserRoleEnum.PARENTS) {
+			const checkResult = await checkIsValidParentUser({
+				email: payload?.email!,
+				phone: payload?.phone!,
+			});
+			if (checkResult.isUserExisted)
+				throw createHttpError.BadRequest('Parent account already existed!');
+			if (!checkResult.hasChildren)
+				throw createHttpError.BadRequest(`No student has this parent's phone number!`);
+			return await new UserModel(payload).save();
+		}
+		// Add a new teacher user
+		if (payload.role === UserRoleEnum.TEACHER) {
+			const existedTeacher = await UserModel.findOne({
+				email: payload.email,
+				role: UserRoleEnum.TEACHER,
+			});
+			if (existedTeacher) {
+				throw createHttpError.BadRequest('Teacher account already existed!');
+			}
+
+			return await new UserModel(payload).save();
+		}
+	} catch (error) {
+		throw error;
+	}
+};
+
+// Users update them self account's info
 export const updateUserInfo = async (authId: string, payload: Partial<IUser>) => {
 	try {
 		return await UserModel.findOneAndUpdate({ _id: authId }, payload, { new: true });
+	} catch (error) {
+		throw error;
+	}
+};
+
+// Headmaster update teacher user's info
+export const updateTeacherInfo = async (teacherId: string, payload: Partial<IUser>) => {
+	try {
+		return await UserModel.findOneAndUpdate(
+			{ _id: teacherId, role: UserRoleEnum.TEACHER },
+			payload,
+			{ new: true }
+		);
 	} catch (error) {
 		throw error;
 	}
@@ -32,14 +115,20 @@ export const changePassword = async (userId: string, newPassword: string) => {
 	}
 };
 
-export const getAllTeacherUsers = async () => {
+export const getTeacherUsersByStatus = async ({
+	isVerified,
+	employmentStatus,
+}: {
+	isVerified: boolean | string;
+	employmentStatus: boolean | string;
+}) => {
 	try {
 		return await UserModel.find({
 			role: UserRoleEnum.TEACHER,
-			isVerified: true,
-			employmentStatus: true,
-			deleted: false,
-		});
+			isVerified: isVerified,
+			employmentStatus: employmentStatus,
+			deleted: employmentStatus,
+		}).lean();
 	} catch (error) {
 		throw error;
 	}
@@ -51,7 +140,29 @@ export const deactivateTeacherUser = async (userId: string) => {
 			{ _id: userId, role: UserRoleEnum.TEACHER },
 			{ employmentStatus: false, deleted: true },
 			{ new: true }
-		);
+		).lean();
+	} catch (error) {
+		throw error;
+	}
+};
+
+export const getParentsUserByClass = async (classId: string) => {
+	try {
+		const parents = await UserModel.find({ role: UserRoleEnum.PARENTS })
+			.populate({
+				path: 'children',
+				select: '_id fullName parentsPhoneNumber',
+				options: {
+					id: false,
+					lean: true,
+				},
+				justOne: true,
+				match: { parentsPhoneNumber: { $exists: true } },
+			})
+			.select('_id displayName phone gender dateOfBirth')
+			.lean();
+
+		return parents;
 	} catch (error) {
 		throw error;
 	}

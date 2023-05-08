@@ -15,7 +15,6 @@ const UserSchema = new mongoose.Schema<IUser>(
 		email: {
 			type: String,
 			trim: true,
-			unique: true,
 		},
 		phone: {
 			type: String,
@@ -48,7 +47,6 @@ const UserSchema = new mongoose.Schema<IUser>(
 				universityName: String, // tên trường đã tốt nghiệp
 				graduatedAt: Date,
 			},
-			required: true,
 			_id: false,
 		},
 		employmentStatus: {
@@ -75,7 +73,7 @@ const UserSchema = new mongoose.Schema<IUser>(
 UserSchema.virtual('children', {
 	localField: 'phone',
 	foreignField: 'parentsPhoneNumber',
-	ref: 'students',
+	ref: 'Students',
 });
 
 UserSchema.methods.verifyPassword = function (password: string) {
