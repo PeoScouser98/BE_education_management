@@ -14,6 +14,8 @@ import '../auth/googlePassport';
 import UserModel from '../models/user.model';
 import sendSMS from '../services/sms.service';
 import { changePassword } from '../services/user.service';
+import { oauth2Client } from '../../configs/googleApis.config';
+import { HttpException } from '../../types/httpException.type';
 
 export const signinWithGoogle = async (req: Request, res: Response) => {
 	try {
@@ -225,7 +227,6 @@ export const verifyAccount = async (req: Request, res: Response) => {
 			'Content-Security-Policy',
 			"script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com"
 		);
-		// ;
 		res.setHeader('Cross-origin-Embedder-Policy', 'same-origin');
 		res.setHeader('Access-Control-Allow-Origin', '*');
 		return res.sendFile(path.resolve(path.join(__dirname, '../views/send-mail-response.html')));

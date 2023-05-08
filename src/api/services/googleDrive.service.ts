@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { drive_v3, google } from 'googleapis';
 import { Stream } from 'stream';
-import drive from '../../configs/googleDrive.config';
+import { drive } from '../../configs/googleApis.config';
 
 // Creates a permission for a file or shared drive.
 const setFilePublic = async (fileId: string) => {

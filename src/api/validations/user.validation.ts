@@ -27,7 +27,11 @@ export const validateNewTeacherData = (payload: Omit<IUser, '_id'>) => {
 	const schema = Joi.object({
 		email: Joi.string()
 			.email({ tlds: { allow: true } })
-			.required(),
+			.regex(/^[\w.+\-]+@gmail\.com$/)
+			.required()
+			.messages({
+				'object.regex': 'Email must be a valid Gmail address !',
+			}),
 		password: Joi.string().min(6).max(24),
 		displayName: Joi.string().required(),
 		dateOfBirth: Joi.date().required(),
@@ -44,14 +48,32 @@ export const validateNewTeacherData = (payload: Omit<IUser, '_id'>) => {
 	return schema.validate(payload);
 };
 
-export const validateNewParentsData = (payload: Omit<IUser, '_id'>) => {
+export const validateNewParentsData = ({
+	payload,
+	multi,
+}: {
+	payload: Omit<IUser, '_id'>;
+	multi: Boolean;
+}) => {
 	const schema = Joi.object({
+		email: Joi.string()
+			.email()
+			.regex(/^[\w.+\-]+@gmail\.com$/)
+			.required()
+			.messages({
+				'string.pattern.base': 'User email must be a valid Gmail address !',
+			}),
 		phone: Joi.string().length(10).required(),
 		displayName: Joi.string().required(),
 		dateOfBirth: Joi.date().required(),
 		gender: Joi.string().required(),
 	});
-	return schema.validate(payload);
+
+	const arraySchema = Joi.array()
+		.items(schema)
+		.unique((user1, user2) => user1.phone === user2.phone);
+
+	return multi ? arraySchema.validate(payload) : schema.validate(payload);
 };
 
 export const validateUpdateUserData = (payload: Partial<IUser>) => {

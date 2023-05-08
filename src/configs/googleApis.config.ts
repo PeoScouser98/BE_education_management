@@ -15,7 +15,6 @@ const oauth2Client = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECR
 oauth2Client.setCredentials({
 	refresh_token: GOOGLE_API_REFRESH_TOKEN!,
 });
-
 // Get a non-expired access token, after refreshing if necessary
 oauth2Client.getAccessToken();
 
@@ -24,4 +23,6 @@ const drive: drive_v3.Drive = google.drive({
 	auth: oauth2Client,
 });
 
-export default drive;
+const baseDownloadUrl = 'https://drive.google.com/uc?export=download&id=';
+
+export { oauth2Client, baseDownloadUrl, drive };

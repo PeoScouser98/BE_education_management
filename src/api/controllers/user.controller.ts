@@ -1,12 +1,13 @@
 import 'dotenv/config';
 import { Request, Response } from 'express';
-import createHttpError, { HttpError } from 'http-errors';
+import createHttpError from 'http-errors';
 import jwt from 'jsonwebtoken';
-import { MongooseError } from 'mongoose';
-import { SMTPError } from 'nodemailer/lib/smtp-connection';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import transporter from '../../configs/nodemailer.config';
-import { UserRoleEnum } from '../../types/user.type';
+import { HttpStatusCode } from '../../configs/statusCode.config';
+import generatePicureByName from '../../helpers/generatePicture';
+import { HttpException } from '../../types/httpException.type';
+import { IUser, UserRoleEnum } from '../../types/user.type';
 import * as UserService from '../services/user.service';
 import { paramsStringify } from './../../helpers/queryParams';
 import {
@@ -14,7 +15,8 @@ import {
 	validateNewTeacherData,
 	validateUpdateUserData,
 } from './../validations/user.validation';
-import generatePicureByName from '../../helpers/generatePicture';
+import { sendVerificationEmail } from '../services/mail.service';
+import getVerificationEmailTemplate from '../emails/verifyUserEmail';
 
 export const createTeacherAccount = async (req: Request, res: Response) => {
 	try {
@@ -22,79 +24,117 @@ export const createTeacherAccount = async (req: Request, res: Response) => {
 		if (error) {
 			throw createHttpError.BadRequest(error.message);
 		}
-		const newUser = await UserService.createUser({ ...req.body, role: UserRoleEnum.TEACHER });
+		const newUser = (await UserService.createUser({
+			payload: { ...req.body, role: UserRoleEnum.TEACHER },
+			multi: false,
+		})) as IUser;
+
 		const token = jwt.sign({ auth: newUser.email }, process.env.ACCESS_TOKEN_SECRET!, {
 			expiresIn: '7d',
 		});
-		transporter.sendMail(
-			{
-				from: process.env.ADMIN_EMAIL!,
-				to: req.body.email,
-				subject: `Kích hoạt tài khoản đăng nhập hệ thống quản lý giáo dục trường TH Bột Xuyên`,
-				html: /* html */ `
-			<div>
-				<p>
-					Gửi ${req.body.gender === 'nam' ? 'thầy' : 'cô'} ${req.body.displayName}!
-					<p>
-						Giáo viên nhận được mail vui lòng click vào <a href='${
-							req.protocol +
-							'://' +
-							req.get('host') +
-							'/api/auth/verify-account' +
-							paramsStringify({ user_type: 'teacher', token: token })
-						}'>link</a> này để xác thực tài khoản.
-					</p>
-					<i>Giáo viên lưu ý: Mail xác thực này có hiệu lực trong vòng 7 ngày</i>
-				</p>
-				<hr>
-				<p>
-					<span style="display: block">Trân trọng!</span>
-					<i>Tiểu học Bột Xuyên</i>
-				</p>
-			</div>
-					`,
-			},
-			(err: Error | null, info: SMTPTransport.SentMessageInfo): void => {
-				if (err) throw createHttpError.InternalServerError('Failed to send mail');
-				else console.log(info.response);
-			}
-		);
-
+		const domain = req.protocol + '://' + req.get('host');
+		await sendVerificationEmail({
+			to: req.body.email,
+			subject: 'Kích hoạt tài khoản đăng nhập hệ thống quản lý giáo dục trường TH Bột Xuyên',
+			template: getVerificationEmailTemplate({
+				redirectDomain: domain,
+				user: req.body,
+				token,
+			}),
+		});
 		return res.status(201).json(newUser);
 	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | SMTPError | Error).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
+// [POST] /users/create-parents-account
 export const createParentsAccount = async (req: Request, res: Response) => {
 	try {
-		const { error } = validateNewParentsData(req.body);
-		if (error) {
-			console.log(error.message);
-			throw createHttpError.BadRequest(error.message);
+		const isMulti = req.query.multi || false;
+
+		const { error, value } = validateNewParentsData({
+			payload: req.body,
+			multi: Boolean(isMulti),
+		});
+
+		if (error) throw createHttpError.BadRequest(error.message);
+
+		const payload = Array.isArray(value)
+			? value.map((user) => ({
+					...user,
+					role: UserRoleEnum.PARENTS,
+			  }))
+			: {
+					...value,
+					role: UserRoleEnum.PARENTS,
+			  };
+
+		// Create multiple or single parent user depending on type of payload and multi optional value
+		const newParents = await UserService.createUser({
+			payload,
+			multi: Boolean(isMulti),
+		});
+
+		const domain = req.protocol + '://' + req.get('host');
+
+		// send verification mail to multiple users
+		if (isMulti && Array.isArray(payload)) {
+			const sendMailPromises = [];
+
+			for (let i = 0; i < payload.length; i++) {
+				sendMailPromises.push(
+					new Promise((resolve, reject) => {
+						const token = jwt.sign(
+							{ auth: payload.at(i)?.email },
+							process.env.ACCESS_TOKEN_SECRET!,
+							{
+								expiresIn: '7d',
+							}
+						);
+						sendVerificationEmail({
+							to: payload.at(i)?.email,
+							subject:
+								'Kích hoạt tài khoản đăng nhập hệ thống quản lý giáo dục trường TH Bột Xuyên',
+							template: getVerificationEmailTemplate({
+								redirectDomain: domain,
+								token: token,
+								user: payload.at(i),
+							}),
+						})
+							.then((info) => resolve(info))
+							.catch((error) => reject(error));
+					})
+				);
+			}
+			await Promise.all(sendMailPromises);
+		}
+		// Send mail for one user
+		else {
+			const token = jwt.sign({ auth: payload?.email }, process.env.ACCESS_TOKEN_SECRET!, {
+				expiresIn: '7d',
+			});
+			sendVerificationEmail({
+				to: payload?.email,
+				subject:
+					'Kích hoạt tài khoản đăng nhập hệ thống quản lý giáo dục trường TH Bột Xuyên',
+				template: getVerificationEmailTemplate({
+					redirectDomain: domain,
+					token: token,
+					user: payload,
+				}),
+			});
 		}
 
-		const newParentUser = await UserService.createUser({
-			...req.body,
-			role: UserRoleEnum.PARENTS,
-			password: '123@123',
-			picture: generatePicureByName(req.body.displayName.at(0)),
-		});
-
-		return res.status(201).json(newParentUser);
+		return res.status(201).json(newParents);
 	} catch (error) {
-		console.log(error);
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | Error | MongooseError).message,
-			statusCode: (error as HttpError).status,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
-//
+// [PATCH] /
 export const updateUserInfo = async (req: Request, res: Response) => {
 	try {
 		console.log(req.profile);
@@ -109,42 +149,50 @@ export const updateUserInfo = async (req: Request, res: Response) => {
 		}
 		return res.status(201).json(updatedUser);
 	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | Error | MongooseError).message,
-			statusCode: (error as HttpError).status,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
-// Get all teachers
-export const getAllTeachers = async (req: Request, res: Response) => {
+// [GET] /users/teachers?is_verified=true&employment_status=false
+export const getTeachersByStatus = async (req: Request, res: Response) => {
 	try {
-		const teachers = await UserService.getAllTeacherUsers();
+		const { is_verified, employment_status } = req.query;
+
+		const teachers = await UserService.getTeacherUsersByStatus({
+			isVerified: is_verified as string,
+			employmentStatus: employment_status as string,
+		});
 		if (!teachers) {
 			throw createHttpError.NotFound('Không thể tìm thấy giáo viên nào!');
 		}
 		return res.status(200).json(teachers);
 	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
-// Deactivate teacher account
+// [PATCH] /
 export const deactivateTeacherAccount = async (req: Request, res: Response) => {
 	try {
 		const deactivatedTeacher = await UserService.deactivateTeacherUser(req.params.userId);
-		console.log(deactivatedTeacher);
 		if (!deactivatedTeacher) {
 			throw createHttpError.NotFound('Cannot find teacher to deactivate!');
 		}
 		return res.status(201).json(deactivatedTeacher);
 	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
+	}
+};
+
+export const getParentsUserByClass = async (req: Request, res: Response) => {
+	try {
+		const parents = await UserService.getParentsUserByClass(req.params.classId);
+		return res.status(HttpStatusCode.OK).json(parents);
+	} catch (error) {
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
