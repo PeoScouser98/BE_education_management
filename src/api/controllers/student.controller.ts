@@ -44,7 +44,7 @@ export const getStudentByClass = async (req: Request, res: Response) => {
 		const idClass = req.params.class;
 		const order: SortOrder = req.query._order === 'desc' ? 1 : -1;
 		const groupBy: string = req.query._sort?.toString() || 'fullName';
-		const select: string = req.query.select?.toString() || '-absentDays';
+		const select: string = req.query.select?.toString() || '';
 		const page = req.query.page || 1;
 		const limit = req.query.limit || 10;
 
