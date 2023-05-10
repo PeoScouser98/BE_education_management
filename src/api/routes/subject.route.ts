@@ -13,11 +13,11 @@ router.put(
 	checkIsHeadmaster,
 	SubjectController.restore
 );
+router.get('/subjects/trash', checkAuthenticated, checkIsTeacher, SubjectController.getTrash);
 router.post('/subjects', checkAuthenticated, checkIsHeadmaster, SubjectController.create);
 router.get('/subjects/:id', checkAuthenticated, checkIsTeacher, SubjectController.read);
 router.put('/subjects/:id', checkAuthenticated, checkIsHeadmaster, SubjectController.update);
 router.delete('/subjects/:id', checkAuthenticated, checkIsHeadmaster, SubjectController.deleted);
-router.get('/subjects/trash', checkAuthenticated, checkIsTeacher, SubjectController.getTrash);
 router.get('/subjects', checkAuthenticated, checkIsTeacher, SubjectController.list);
 
 export default router;
