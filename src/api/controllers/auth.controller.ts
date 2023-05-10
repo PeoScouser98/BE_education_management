@@ -11,7 +11,7 @@ import formatPhoneNumber from '../../helpers/formatPhoneNumber';
 import generateOtp from '../../helpers/otpGenerator';
 import { HttpException } from '../../types/httpException.type';
 import { AuthRedisKeyPrefix } from '../../types/redis.type';
-import { IUser } from '../../types/user.type';
+import { IUser, UserRoleEnum } from '../../types/user.type';
 import '../auth/googlePassport';
 import UserModel from '../models/user.model';
 import sendSMS from '../services/sms.service';
@@ -212,7 +212,7 @@ export const verifyAccount = async (req: Request, res: Response) => {
 		}
 		const { auth } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as JwtPayload;
 		const updateUserData =
-			req.query.user_type === 'teacher'
+			req.query.user_type === UserRoleEnum.TEACHER
 				? { isVerified: true, employmentStatus: true }
 				: { isVerified: true };
 		await UserModel.findOneAndUpdate({ email: auth }, updateUserData, {

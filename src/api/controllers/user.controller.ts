@@ -34,7 +34,7 @@ export const createTeacherAccount = async (req: Request, res: Response) => {
 			subject: 'Kích hoạt tài khoản đăng nhập hệ thống quản lý giáo dục trường TH Bột Xuyên',
 			template: getVerificationEmailTemplate({
 				redirectDomain: domain,
-				user: req.body,
+				user: { ...req.body, role: UserRoleEnum.TEACHER },
 				token,
 			}),
 		});
