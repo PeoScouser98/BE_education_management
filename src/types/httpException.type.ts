@@ -1,6 +1,7 @@
 import { HttpError, isHttpError } from 'http-errors';
 import { MongooseError } from 'mongoose';
 import { HttpStatusCode } from '../configs/statusCode.config';
+import { JsonWebTokenError } from 'jsonwebtoken';
 
 interface ErrorResponse {
 	message: string;
@@ -13,6 +14,10 @@ export class HttpException implements ErrorResponse {
 
 	constructor(error: HttpError | MongooseError | Error | any) {
 		this.message = error.message;
-		this.statusCode = isHttpError(error) ? error.status : HttpStatusCode.INTERNAL_SERVER_ERROR;
+		this.statusCode = isHttpError(error)
+			? error.status
+			: error instanceof JsonWebTokenError
+			? HttpStatusCode.UNAUTHORIZED
+			: HttpStatusCode.INTERNAL_SERVER_ERROR;
 	}
 }
