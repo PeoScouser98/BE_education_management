@@ -16,6 +16,7 @@ import swaggerOptions from './configs/swagger.config';
 import path from 'path';
 import rootRouter from './api/routes';
 import AppConfig from './configs/app.config';
+import { HttpStatusCode } from './configs/statusCode.config';
 // resolve path
 const ROOT_FOLDER = path.join(__dirname, '..');
 const SRC_FOLDER = path.join(ROOT_FOLDER, 'src');
@@ -34,16 +35,12 @@ app.use(
 			directives: {
 				...helmet.contentSecurityPolicy.getDefaultDirectives(),
 				'style-src': ["'self'", "'unsafe-inline'", AppConfig.BOOTSTRAP_ICONS_CDN],
-				'script-src': [
-					"'self'",
-					"'unsafe-hash'",
-					"'unsafe-inline'",
-					AppConfig.TAILWIND_CDN,
-				],
+				'script-src': ["'self'", "'unsafe-inline'", AppConfig.TAILWIND_CDN],
 			},
 		},
 	})
 );
+
 // logging request/response
 app.use(morgan('tiny'));
 
@@ -78,11 +75,8 @@ app.use('/api', rootRouter);
 app.use('/api/document', swaggerUI.serve, swaggerUI.setup(swaggerOptions));
 
 // Default response
-app.get('/', async (req: Request, res: Response) => {
-	return res.status(200).json({
-		message: 'Server now is running!',
-		status: 200,
-	});
+app.get('*', async (req: Request, res: Response) => {
+	return res.redirect('/api/document');
 });
 
 export default app;

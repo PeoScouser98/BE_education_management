@@ -33,7 +33,7 @@ export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent,
 
 		// thêm 1 học sinh
 		if (!data) {
-			throw createHttpError(204);
+			throw createHttpError(HttpStatusCode.NO_CONTENT);
 		}
 
 		const { error } = validateReqBodyStudent(data);
@@ -57,7 +57,7 @@ export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent,
 
 const createStudentList = async (data: Omit<IStudent, '_id'>[]) => {
 	try {
-		if (data.length === 0) throw createHttpError(204);
+		if (data.length === 0) throw createHttpError(HttpStatusCode.NO_CONTENT);
 		if (data.length > 50) {
 			throw createHttpError.PayloadTooLarge(
 				'You are only allowed to add 50 students at a time'
@@ -118,7 +118,7 @@ const createStudentList = async (data: Omit<IStudent, '_id'>[]) => {
 export const updateStudent = async (id: string, data: Partial<Omit<IStudent, '_id' | 'code'>>) => {
 	try {
 		if (!data || Object.keys(data).length === 0) {
-			throw createHttpError(204);
+			throw createHttpError(HttpStatusCode.NO_CONTENT);
 		}
 		if (!id || !mongoose.Types.ObjectId.isValid(id)) {
 			throw createHttpError.BadRequest('_id of the student is invalid');
@@ -334,7 +334,7 @@ export const getStudentDropout = async (year: 'all' | number, page: number, limi
 export const markAttendanceStudent = async (idClass: string, absentStudents: IAbsentStudent[]) => {
 	try {
 		if (!absentStudents) {
-			throw createHttpError(204);
+			throw createHttpError(HttpStatusCode.NO_CONTENT);
 		}
 
 		if (!Array.isArray(absentStudents)) {

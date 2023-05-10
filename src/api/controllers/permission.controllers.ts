@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
 import createHttpError, { HttpError } from 'http-errors';
+import { isValidObjectId } from 'mongoose';
+import { HttpException } from '../../types/httpException.type';
+import { UserRoleEnum } from '../../types/user.type';
 import * as PermissionService from '../services/permission.service';
 import { validatePermissionData } from '../validations/permission.validation';
-import { isValidObjectId } from 'mongoose';
-import { PermissionActionsEnum } from '../../types/permission.type';
-import { UserRoleEnum } from '../../types/user.type';
+import { HttpStatusCode } from '../../configs/statusCode.config';
 
 //* [GET] /api/permission?role="Role" (get permissions by role)
 export const read = async (req: Request, res: Response) => {
@@ -20,13 +21,11 @@ export const read = async (req: Request, res: Response) => {
 
 		if (!permissions) throw createHttpError.NotFound('Permission not found');
 
-		return res.status(200).json(permissions);
+		return res.status(HttpStatusCode.OK).json(permissions);
 	} catch (error) {
 		console.log(error);
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | Error).message,
-			status: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -41,12 +40,10 @@ export const create = async (req: Request, res: Response) => {
 
 		if (!newPermission) throw createHttpError.BadRequest('Permission not created!');
 
-		return res.status(201).json(newPermission);
+		return res.status(HttpStatusCode.CREATED).json(newPermission);
 	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | Error).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -71,12 +68,10 @@ export const remove = async (req: Request, res: Response) => {
 				throw createHttpError.BadRequest('Invalid query');
 		}
 
-		return res.status(200).json(result);
+		return res.status(HttpStatusCode.OK).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | Error).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -91,7 +86,7 @@ export const restore = async (req: Request, res: Response) => {
 
 		if (!result) throw createHttpError.NotFound('Permission not found');
 
-		return res.status(201).json(result);
+		return res.status(HttpStatusCode.CREATED).json(result);
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | Error).message,
@@ -116,11 +111,9 @@ export const update = async (req: Request, res: Response) => {
 
 		if (!updatedPermission) throw createHttpError.NotFound('Permission not found');
 
-		return res.status(200).json(updatedPermission);
+		return res.status(HttpStatusCode.OK).json(updatedPermission);
 	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | Error).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };

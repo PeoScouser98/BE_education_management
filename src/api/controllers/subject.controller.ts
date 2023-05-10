@@ -1,31 +1,28 @@
 import { Request, Response } from 'express';
-import createHttpError, { HttpError } from 'http-errors';
-import { MongooseError } from 'mongoose';
+import createHttpError from 'http-errors';
+import { HttpException } from '../../types/httpException.type';
 import * as SubjectServices from '../services/subject.service';
+import { HttpStatusCode } from '../../configs/statusCode.config';
 
 // [GET] /api/subjects
 export const list = async (req: Request, res: Response) => {
 	try {
 		const subjects = await SubjectServices.getAllSubjects();
 		if (!subjects) throw createHttpError.NotFound('Cannot get subjects!');
-		return res.status(200).json(subjects);
+		return res.status(HttpStatusCode.OK).json(subjects);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
 export const read = async (req: Request, res: Response) => {
 	try {
 		const subject = await SubjectServices.getOneSubject(req.params.id);
-		return res.status(200).json(subject);
+		return res.status(HttpStatusCode.OK).json(subject);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -34,12 +31,10 @@ export const create = async (req: Request, res: Response) => {
 	try {
 		const newSubject = await SubjectServices.createNewSubject(req.body);
 		if (!newSubject) throw createHttpError.BadRequest('Cannot create new subject!');
-		return res.status(201).json(newSubject);
+		return res.status(HttpStatusCode.CREATED).json(newSubject);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -49,12 +44,10 @@ export const update = async (req: Request, res: Response) => {
 		const id = req.params.id;
 		const newSubject = await SubjectServices.updateSubject(id, req.body);
 
-		return res.status(201).json(newSubject);
+		return res.status(HttpStatusCode.CREATED).json(newSubject);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -64,7 +57,7 @@ export const deleted = async (req: Request, res: Response) => {
 		const id = req.params.id;
 		const option = req.query.option || 'soft';
 		if (!id) {
-			throw createHttpError(204);
+			throw createHttpError(HttpStatusCode.NO_CONTENT);
 		}
 		let result;
 
@@ -82,10 +75,8 @@ export const deleted = async (req: Request, res: Response) => {
 
 		return res.status(result.statusCode).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -98,10 +89,8 @@ export const restore = async (req: Request, res: Response) => {
 
 		return res.status(result.statusCode).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -109,12 +98,9 @@ export const restore = async (req: Request, res: Response) => {
 export const getTrash = async (req: Request, res: Response) => {
 	try {
 		const result = await SubjectServices.getTrash();
-
-		return res.status(200).json(result);
+		return res.status(HttpStatusCode.OK).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };

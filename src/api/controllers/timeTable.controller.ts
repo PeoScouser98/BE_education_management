@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
+import createHttpError from 'http-errors';
+import { HttpException } from '../../types/httpException.type';
 import * as TimeTableService from '../services/timeTable.service';
 import {
 	validateNewTimeTable,
 	validateUpdateTimeTablePayload,
 } from '../validations/timeTable.validation';
-import createHttpError, { HttpError } from 'http-errors';
-import { MongooseError } from 'mongoose';
+import { HttpStatusCode } from './../../configs/statusCode.config';
 
 // [POST]: /time-table
 export const createTimeTable = async (req: Request, res: Response) => {
@@ -15,12 +16,10 @@ export const createTimeTable = async (req: Request, res: Response) => {
 			throw createHttpError.BadRequest(error.message);
 		}
 		const newTimeTable = await TimeTableService.createTimetable(req.body);
-		return res.status(201).json(newTimeTable);
+		return res.status(HttpStatusCode.CREATED).json(newTimeTable);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -38,12 +37,10 @@ export const updateTimeTable = async (req: Request, res: Response) => {
 		if (!updatedTimeTable) {
 			throw createHttpError.NotFound('Cannot find time table to update!');
 		}
-		return res.status(201).json(updatedTimeTable);
+		return res.status(HttpStatusCode.CREATED).json(updatedTimeTable);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -55,15 +52,13 @@ export const deleteTimeTable = async (req: Request, res: Response) => {
 			throw createHttpError.NotFound('Cannot find time table to delete!');
 		}
 
-		return res.status(204).json({
+		return res.status(HttpStatusCode.NO_CONTENT).json({
 			message: 'Deleted!',
-			statusCode: 204,
+			statusCode: HttpStatusCode.NO_CONTENT,
 		});
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -74,11 +69,9 @@ export const getTimeTableByClass = async (req: Request, res: Response) => {
 		if (!timeTable) {
 			throw createHttpError.NotFound('Time table not found!');
 		}
-		return res.status(200).json(timeTable);
+		return res.status(HttpStatusCode.OK).json(timeTable);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };

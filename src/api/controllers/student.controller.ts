@@ -1,23 +1,22 @@
 import { Request, Response } from 'express';
-import createHttpError, { HttpError } from 'http-errors';
-import { MongooseError, SortOrder } from 'mongoose';
+import createHttpError from 'http-errors';
+import { SortOrder } from 'mongoose';
 import { formatDate } from '../../helpers/toolkit';
 
-import * as StudentServices from '../services/student.service';
+import { HttpException } from '../../types/httpException.type';
 import { IStudent } from '../../types/student.type';
+import * as StudentServices from '../services/student.service';
+import { HttpStatusCode } from '../../configs/statusCode.config';
 
 // [POST] /api/students
 export const createStudent = async (req: Request, res: Response) => {
 	try {
 		const newStudent = await StudentServices.createStudent(req.body);
 
-		return res.status(201).json(newStudent);
+		return res.status(HttpStatusCode.CREATED).json(newStudent);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-			error: (error as any).error,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -28,13 +27,10 @@ export const updateStudent = async (req: Request, res: Response) => {
 		const payload = req.body;
 		const newStudent = await StudentServices.updateStudent(id, payload);
 
-		return res.status(201).json(newStudent);
+		return res.status(HttpStatusCode.CREATED).json(newStudent);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-			error: (error as any).error,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -57,13 +53,10 @@ export const getStudentByClass = async (req: Request, res: Response) => {
 			select
 		);
 
-		return res.status(200).json(result);
+		return res.status(HttpStatusCode.OK).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-			error: (error as any).error,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -74,13 +67,10 @@ export const getStudentDetail = async (req: Request, res: Response) => {
 
 		const result = await StudentServices.getDetailStudent(id);
 
-		return res.status(200).json(result);
+		return res.status(HttpStatusCode.OK).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-			error: (error as any).error,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -106,13 +96,10 @@ export const serviceStudent = async (req: Request, res: Response) => {
 				throw createHttpError(400, 'Type is not valid');
 		}
 
-		return res.status(201).json(result);
+		return res.status(HttpStatusCode.CREATED).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-			error: (error as any).error,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -148,13 +135,10 @@ export const getStudentStop = async (req: Request, res: Response) => {
 				throw createHttpError(400, 'Type is not valid');
 		}
 
-		return res.status(200).json(result);
+		return res.status(HttpStatusCode.OK).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-			error: (error as any).error,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -166,13 +150,10 @@ export const attendanceStudentByClass = async (req: Request, res: Response) => {
 
 		const result = await StudentServices.markAttendanceStudent(classId, data);
 
-		return res.status(201).json(result);
+		return res.status(HttpStatusCode.CREATED).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-			error: (error as any).error,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -190,13 +171,10 @@ export const selectAttendanceByClass = async (req: Request, res: Response) => {
 
 		const result = await StudentServices.dailyAttendanceList(classId, date);
 
-		return res.status(200).json(result);
+		return res.status(HttpStatusCode.OK).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-			error: (error as any).error,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -213,13 +191,10 @@ export const selectAttendanceByStudent = async (req: Request, res: Response) => 
 			Number(year)
 		);
 
-		return res.status(200).json(result);
+		return res.status(HttpStatusCode.OK).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-			error: (error as any).error,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -230,13 +205,10 @@ export const getPolicyBeneficiary = async (req: Request, res: Response) => {
 		const limit = req.query.limit || 10;
 		const result = await StudentServices.getPolicyBeneficiary(Number(page), Number(limit));
 
-		return res.status(200).json(result);
+		return res.status(HttpStatusCode.OK).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-			error: (error as any).error,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -259,12 +231,9 @@ export const selectAttendanceAllClass = async (req: Request, res: Response) => {
 			date
 		);
 
-		return res.status(200).json(result);
+		return res.status(HttpStatusCode.OK).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-			error: (error as any).error,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };

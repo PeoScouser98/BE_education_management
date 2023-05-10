@@ -2,22 +2,22 @@ import { Request, Response } from 'express';
 import * as ClassService from '../services/class.service';
 
 // class feature
-import createHttpError, { HttpError } from 'http-errors';
-import mongoose, { MongooseError, SortOrder } from 'mongoose';
+import createHttpError from 'http-errors';
+import mongoose, { SortOrder } from 'mongoose';
 import { IClass } from '../../types/class.type';
+import { HttpException } from '../../types/httpException.type';
 import ClassModel from '../models/class.model';
+import { HttpStatusCode } from '../../configs/statusCode.config';
 
 // [POST] /api/classes (create classes)
 export const createClass = async (req: Request, res: Response) => {
 	try {
 		const { classes } = await ClassService.createClass(req.body);
 
-		return res.status(201).json(classes);
+		return res.status(HttpStatusCode.CREATED).json(classes);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -28,12 +28,10 @@ export const updateClass = async (req: Request, res: Response) => {
 		const data: Partial<Omit<IClass, '_id'>> = req.body;
 
 		const updatedClass = await ClassService.updateClasses(data, _id as string);
-		return res.status(201).json(updatedClass);
+		return res.status(HttpStatusCode.CREATED).json(updatedClass);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -43,7 +41,7 @@ export const removeClass = async (req: Request, res: Response) => {
 		const id = req.params.id;
 		const option = req.query.option || 'soft';
 		if (!id) {
-			throw createHttpError(204);
+			throw createHttpError(HttpStatusCode.NO_CONTENT);
 		}
 		let result;
 
@@ -61,10 +59,8 @@ export const removeClass = async (req: Request, res: Response) => {
 
 		return res.status(result.statusCode).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -79,12 +75,10 @@ export const restoreClass = async (req: Request, res: Response) => {
 
 		const result = await ClassService.restoreClass(id);
 
-		return res.status(201).json(result);
+		return res.status(HttpStatusCode.CREATED).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -105,12 +99,10 @@ export const getClasses = async (req: Request, res: Response) => {
 			[groupBy]: order,
 		});
 
-		return res.status(200).json(classes);
+		return res.status(HttpStatusCode.OK).json(classes);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -128,12 +120,10 @@ export const getClassOne = async (req: Request, res: Response) => {
 			throw createHttpError.NotFound('Class not found');
 		}
 
-		return res.status(200).json(classResult);
+		return res.status(HttpStatusCode.OK).json(classResult);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -144,11 +134,9 @@ export const getClassTrash = async (req: Request, res: Response) => {
 			deleted: true,
 		});
 
-		return res.status(200).json(result);
+		return res.status(HttpStatusCode.OK).json(result);
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };

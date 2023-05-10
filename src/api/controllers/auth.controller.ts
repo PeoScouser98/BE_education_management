@@ -5,22 +5,21 @@ import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import { MongooseError } from 'mongoose';
 import path from 'path';
 import AppConfig from '../../configs/app.config';
+import { HttpStatusCode } from '../../configs/statusCode.config';
 import redisClient from '../../database/redis';
 import formatPhoneNumber from '../../helpers/formatPhoneNumber';
 import generateOtp from '../../helpers/otpGenerator';
+import { HttpException } from '../../types/httpException.type';
 import { AuthRedisKeyPrefix } from '../../types/redis.type';
 import { IUser } from '../../types/user.type';
 import '../auth/googlePassport';
 import UserModel from '../models/user.model';
 import sendSMS from '../services/sms.service';
 import { changePassword } from '../services/user.service';
-import { oauth2Client } from '../../configs/googleApis.config';
-import { HttpException } from '../../types/httpException.type';
 
 export const signinWithGoogle = async (req: Request, res: Response) => {
 	try {
 		const user = req.user as Partial<IUser>;
-		console.log(user);
 		if (!user) {
 			return res.redirect(AppConfig.CLIENT_URL + '/signin');
 		}
@@ -56,10 +55,8 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 
 		return res.redirect(AppConfig.CLIENT_URL + '/signin/success');
 	} catch (error) {
-		return res.status((error as HttpError).statusCode || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -93,7 +90,7 @@ export const signinWithPhoneNumber = async (req: Request, res: Response) => {
 			// secure: false,
 		});
 
-		return res.status(200).json({
+		return res.status(HttpStatusCode.OK).json({
 			user: req.user,
 			accessToken: accessToken,
 		});
@@ -111,12 +108,10 @@ export const getUser = async (req: Request, res: Response) => {
 			throw createHttpError.NotFound(`Failed to get user's info`);
 		}
 
-		return res.status(200).json(req.profile);
+		return res.status(HttpStatusCode.OK).json(req.profile);
 	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -158,9 +153,9 @@ export const refreshToken = async (req: Request, res: Response) => {
 			httpOnly: true,
 			// secure: false,
 		});
-		return res.status(200).json({
+		return res.status(HttpStatusCode.OK).json({
 			refreshToken: newAccessToken,
-			statusCode: 200,
+			statusCode: HttpStatusCode.OK,
 			message: 'ok',
 		});
 	} catch (error) {
@@ -256,7 +251,7 @@ export const sendOtp = async (req: Request, res: Response) => {
 			throw createHttpError.InternalServerError('Failed to send sms!');
 		}
 
-		return res.status(200).json(response);
+		return res.status(HttpStatusCode.OK).json(response);
 	} catch (error) {
 		return res.status((error as HttpError).status || 500).json({
 			message: (error as HttpError | Error | MongooseError).message,
@@ -288,9 +283,9 @@ export const verifyUserByPhone = async (req: Request, res: Response) => {
 		res.cookie('access_token', accessToken, { maxAge: 60 * 1000 * 5 });
 		await redisClient.del(AuthRedisKeyPrefix.OTP_KEY + req.params.userId);
 
-		return res.status(200).json({
+		return res.status(HttpStatusCode.OK).json({
 			message: 'Ok',
-			statusCode: 200,
+			statusCode: HttpStatusCode.OK,
 			data: {
 				accessToken,
 				isSuccess: true,
@@ -315,9 +310,9 @@ export const resetPassword = async (req: Request, res: Response) => {
 			process.env.ACCESS_TOKEN_SECRET!
 		) as JwtPayload;
 		await changePassword(decoded.payload, req.body.newPassword);
-		return res.status(200).json({
+		return res.status(HttpStatusCode.OK).json({
 			message: 'Ok',
-			statusCode: 200,
+			statusCode: HttpStatusCode.OK,
 		});
 	} catch (error) {
 		return res.status((error as HttpError).status || 500).json({
