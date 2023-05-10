@@ -21,7 +21,7 @@ passport.use(
 					return done(err, false);
 				}
 				if (!user) {
-					return done(new Error('Account does not exist!'), false);
+					return done(null, false);
 				}
 
 				const displayPicture = user?.picture || profile.picture;
