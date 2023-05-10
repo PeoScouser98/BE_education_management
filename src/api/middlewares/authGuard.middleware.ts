@@ -5,6 +5,8 @@ import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import redisClient from '../../database/redis';
 import { UserRoleEnum } from '../../types/user.type';
 import { AuthRedisKeyPrefix } from '../../types/redis.type';
+import { HttpStatusCode } from '../../configs/statusCode.config';
+import { HttpException } from '../../types/httpException.type';
 
 export const checkAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
 	try {
@@ -17,14 +19,13 @@ export const checkAuthenticated = async (req: Request, res: Response, next: Next
 		if (!accessToken) throw createHttpError.Forbidden();
 
 		const { payload } = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET!) as JwtPayload;
+
 		req.profile = payload;
 		req.role = payload.role;
 		next();
-	} catch (error) {
-		return res.status((error as HttpError).status || 401).json({
-			message: (error as JsonWebTokenError | HttpError).message,
-			statusCode: (error as HttpError).status,
-		});
+	} catch (error: any) {
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -35,26 +36,22 @@ export const checkIsHeadmaster = async (req: Request, res: Response, next: NextF
 		}
 		next();
 	} catch (error) {
-		return res.status(403).json({
-			message: (error as JsonWebTokenError).message,
-			statusCode: 403,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
 export const checkIsTeacher = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		if (req.role !== UserRoleEnum.HEADMASTER || req.role !== UserRoleEnum.HEADMASTER) {
-			return res.status(403).json({
+			return res.status(HttpStatusCode.FORBIDDEN).json({
 				message: 'Only teacher/headmaster allowed to access!',
-				statusCode: 403,
+				statusCode: HttpStatusCode.FORBIDDEN,
 			});
 		}
 		next();
 	} catch (error) {
-		return res.status(401).json({
-			message: (error as JsonWebTokenError).message,
-			statusCode: 401,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };

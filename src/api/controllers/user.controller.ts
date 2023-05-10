@@ -2,21 +2,17 @@ import 'dotenv/config';
 import { Request, Response } from 'express';
 import createHttpError from 'http-errors';
 import jwt from 'jsonwebtoken';
-import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import transporter from '../../configs/nodemailer.config';
 import { HttpStatusCode } from '../../configs/statusCode.config';
-import generatePicureByName from '../../helpers/generatePicture';
 import { HttpException } from '../../types/httpException.type';
 import { IUser, UserRoleEnum } from '../../types/user.type';
+import getVerificationEmailTemplate from '../emails/verifyUserEmail';
+import { sendVerificationEmail } from '../services/mail.service';
 import * as UserService from '../services/user.service';
-import { paramsStringify } from './../../helpers/queryParams';
 import {
 	validateNewParentsData,
 	validateNewTeacherData,
 	validateUpdateUserData,
 } from './../validations/user.validation';
-import { sendVerificationEmail } from '../services/mail.service';
-import getVerificationEmailTemplate from '../emails/verifyUserEmail';
 
 export const createTeacherAccount = async (req: Request, res: Response) => {
 	try {
@@ -42,7 +38,7 @@ export const createTeacherAccount = async (req: Request, res: Response) => {
 				token,
 			}),
 		});
-		return res.status(201).json(newUser);
+		return res.status(HttpStatusCode.CREATED).json(newUser);
 	} catch (error) {
 		const httpException = new HttpException(error);
 		return res.status(httpException.statusCode).json(httpException);
@@ -127,7 +123,7 @@ export const createParentsAccount = async (req: Request, res: Response) => {
 			});
 		}
 
-		return res.status(201).json(newParents);
+		return res.status(HttpStatusCode.CREATED).json(newParents);
 	} catch (error) {
 		const httpException = new HttpException(error);
 		return res.status(httpException.statusCode).json(httpException);
@@ -147,7 +143,7 @@ export const updateUserInfo = async (req: Request, res: Response) => {
 		if (!updatedUser) {
 			throw createHttpError.BadRequest('User does not exist!');
 		}
-		return res.status(201).json(updatedUser);
+		return res.status(HttpStatusCode.CREATED).json(updatedUser);
 	} catch (error) {
 		const httpException = new HttpException(error);
 		return res.status(httpException.statusCode).json(httpException);
@@ -157,16 +153,13 @@ export const updateUserInfo = async (req: Request, res: Response) => {
 // [GET] /users/teachers?is_verified=true&employment_status=false
 export const getTeachersByStatus = async (req: Request, res: Response) => {
 	try {
-		const { is_verified, employment_status } = req.query;
+		const { status } = req.query;
 
-		const teachers = await UserService.getTeacherUsersByStatus({
-			isVerified: is_verified as string,
-			employmentStatus: employment_status as string,
-		});
+		const teachers = await UserService.getTeacherUsersByStatus(status as string | undefined);
 		if (!teachers) {
 			throw createHttpError.NotFound('Không thể tìm thấy giáo viên nào!');
 		}
-		return res.status(200).json(teachers);
+		return res.status(HttpStatusCode.OK).json(teachers);
 	} catch (error) {
 		const httpException = new HttpException(error);
 		return res.status(httpException.statusCode).json(httpException);
@@ -180,7 +173,7 @@ export const deactivateTeacherAccount = async (req: Request, res: Response) => {
 		if (!deactivatedTeacher) {
 			throw createHttpError.NotFound('Cannot find teacher to deactivate!');
 		}
-		return res.status(201).json(deactivatedTeacher);
+		return res.status(HttpStatusCode.CREATED).json(deactivatedTeacher);
 	} catch (error) {
 		const httpException = new HttpException(error);
 		return res.status(httpException.statusCode).json(httpException);

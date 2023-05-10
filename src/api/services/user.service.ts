@@ -115,20 +115,36 @@ export const changePassword = async (userId: string, newPassword: string) => {
 	}
 };
 
-export const getTeacherUsersByStatus = async ({
-	isVerified,
-	employmentStatus,
-}: {
-	isVerified: boolean | string;
-	employmentStatus: boolean | string;
-}) => {
+export const getTeacherUsersByStatus = async (status?: string) => {
 	try {
-		return await UserModel.find({
-			role: UserRoleEnum.TEACHER,
-			isVerified: isVerified,
-			employmentStatus: employmentStatus,
-			deleted: employmentStatus,
-		}).lean();
+		switch (status) {
+			case 'inactive':
+				return await UserModel.find({
+					role: UserRoleEnum.TEACHER,
+					isVerified: false,
+				});
+
+			// In working teacher
+			case 'in_working':
+				return await UserModel.find({
+					role: UserRoleEnum.TEACHER,
+					employmentStatus: true,
+				});
+
+			// Inactivate user
+			case 'quited':
+				return await UserModel.findWithDeleted({
+					role: UserRoleEnum.TEACHER,
+					deleted: true,
+					isVerified: true,
+					employmentStatus: false,
+				});
+
+			default:
+				return await UserModel.findWithDeleted({
+					role: UserRoleEnum.TEACHER,
+				});
+		}
 	} catch (error) {
 		throw error;
 	}

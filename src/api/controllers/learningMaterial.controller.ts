@@ -7,6 +7,8 @@ import { multiFieldSortObjectParser } from '../../helpers/queryParams';
 import * as googleDriveService from '../services/googleDrive.service';
 import * as learningMaterialService from '../services/learningMaterial.service';
 import { checkValidMimeType } from './../validations/file.validations';
+import { HttpException } from '../../types/httpException.type';
+import { HttpStatusCode } from '../../configs/statusCode.config';
 
 export const getFiles = async (req: Request, res: Response) => {
 	try {
@@ -23,19 +25,17 @@ export const getFiles = async (req: Request, res: Response) => {
 
 		if (!req.query.grade && !req.query.subject) {
 			const allFiles = await learningMaterialService.getFiles({ deleted: false }, query);
-			return res.status(200).json(allFiles);
+			return res.status(HttpStatusCode.OK).json(allFiles);
 		} else {
 			const files = await learningMaterialService.getFiles(
 				{ subject: req.query.subject, grade: req.query.grade },
 				query
 			);
-			return res.status(200).json(files);
+			return res.status(HttpStatusCode.OK).json(files);
 		}
 	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -59,7 +59,7 @@ export const uploadFile = async (req: Request, res: Response) => {
 			grade: +req.body.grade,
 		};
 		const savedFile = await learningMaterialService.saveFile(newFile);
-		return res.status(201).json(savedFile);
+		return res.status(HttpStatusCode.CREATED).json(savedFile);
 	} catch (error) {
 		return res.status((error as HttpError).status || 500).json({
 			message: (error as HttpError).message,
@@ -71,12 +71,10 @@ export const uploadFile = async (req: Request, res: Response) => {
 export const updateFile = async (req: Request, res: Response) => {
 	try {
 		const updatedFile = await learningMaterialService.updateFile(req.params.fileId, req.body);
-		return res.status(201).json(updatedFile);
+		return res.status(HttpStatusCode.CREATED).json(updatedFile);
 	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
@@ -86,32 +84,28 @@ export const deleteFile = async (req: Request, res: Response) => {
 			const deletedFileInDb = await learningMaterialService.hardDeleteFile(req.params.fileId);
 			const deletedFile = await googleDriveService.deleteFile(req.params.fileId);
 
-			return res.status(204).json({
+			return res.status(HttpStatusCode.NO_CONTENT).json({
 				deletedFile,
 				deletedFileInDb,
 			});
 		} else {
 			const tempDeletedFile = await learningMaterialService.softDeleteFile(req.params.fileId);
-			return res.status(204).json(tempDeletedFile);
+			return res.status(HttpStatusCode.NO_CONTENT).json(tempDeletedFile);
 		}
 	} catch (error) {
 		console.log((error as HttpError | MongooseError).message);
 
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status || 500,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };
 
 export const restoreFile = async (req: Request, res: Response) => {
 	try {
 		const restoredFile = await learningMaterialService.restoreDeletedFile(req.params.fileId);
-		return res.status(200).json(restoredFile);
+		return res.status(HttpStatusCode.OK).json(restoredFile);
 	} catch (error) {
-		return res.status((error as HttpError).status || 500).json({
-			message: (error as HttpError | MongooseError).message,
-			statusCode: (error as HttpError).status,
-		});
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
 	}
 };

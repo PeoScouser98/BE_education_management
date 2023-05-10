@@ -9,6 +9,7 @@ import {
 	UserGenderEnum,
 	UserRoleEnum,
 } from '../../types/user.type';
+import mongooseLeanVirtuals from 'mongoose-lean-virtuals';
 
 const UserSchema = new mongoose.Schema<IUser>(
 	{
@@ -74,6 +75,20 @@ UserSchema.virtual('children', {
 	localField: 'phone',
 	foreignField: 'parentsPhoneNumber',
 	ref: 'Students',
+	options: { lean: true },
+});
+
+UserSchema.virtual('userStatusText').get(function () {
+	switch (true) {
+		case !this.isVerified:
+			return 'Chưa kích hoạt';
+		case this.employmentStatus:
+			return 'Đang làm việc';
+		case !this.employmentStatus:
+			return 'Đã nghỉ việc';
+		default:
+			return '';
+	}
 });
 
 UserSchema.methods.verifyPassword = function (password: string) {
@@ -91,6 +106,7 @@ UserSchema.plugin(mongooseDelete, {
 	overrideMethods: ['find', 'findOne', 'findOneAndUpdate'],
 	deletedAt: true,
 });
+UserSchema.plugin(mongooseLeanVirtuals);
 
 const UserModel = mongoose.model<IUserDocument, ISoftDeleteUserModel>('Users', UserSchema);
 

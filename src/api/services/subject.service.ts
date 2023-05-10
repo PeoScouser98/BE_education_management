@@ -32,7 +32,7 @@ export const getOneSubject = async (subjectId: string) => {
 
 export const createNewSubject = async (subject: Omit<ISubject, '_id'>) => {
 	try {
-		if (!subject) throw createHttpError(204);
+		if (!subject) throw createHttpError(HttpStatusCode.NO_CONTENT);
 
 		// check validate
 		const { error } = validateSubjectRequestBody(subject);
@@ -77,7 +77,7 @@ export const updateSubject = async (id: string, subject: Partial<Omit<ISubject, 
 			throw createHttpError.BadRequest('Missing parameter');
 		}
 		if (Object.keys(subject).length === 0) {
-			throw createHttpError(204);
+			throw createHttpError(HttpStatusCode.NO_CONTENT);
 		}
 
 		const { error } = validateSubjectUpdateBody(subject);
