@@ -467,23 +467,20 @@ export const dailyAttendanceList = async (idClass: string, date: Date) => {
 			class: idClass,
 		}).lean();
 
-		// lấy ra các học sinh toàn bộ lớp
-		const studentOfClass = await StudentModel.find({
-			class: idClass,
-		})
-			.select('-absentDays')
-			.lean();
+		if (studentAbsents.length === 0) {
+			return {
+				absent: 0,
+				students: [],
+			};
+		}
 
-		// xác định trạng thái điểm danh của học sinh bằng cách xem học sinh đó có tồn tại trong danh sách học sinh nghỉ học không
-		const result = studentOfClass.map((item) => {
+		const result = studentAbsents.map((item) => {
 			let attendanceStatus = true;
-			if (studentAbsents.length > 0) {
-				const check = studentAbsents.find(
-					(itemAb) => itemAb._id.toString() === item._id.toString()
-				);
+			const check = studentAbsents.find(
+				(itemAb) => itemAb._id.toString() === item._id.toString()
+			);
 
-				attendanceStatus = check ? false : true;
-			}
+			attendanceStatus = check ? false : true;
 			return {
 				...item,
 				attendanceStatus: attendanceStatus,
