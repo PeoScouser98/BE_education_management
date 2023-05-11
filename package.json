@@ -5,7 +5,7 @@
 	"main": "index.ts",
 	"scripts": {
 		"start": "SET NODE_ENV=production && node ./dist/bundle.js",
-		"dev": "nodemon --watch docs --ext yaml --exec \"nodemon --swc ./src/server.ts\"",
+		"dev": "nodemon --watch src/docs --ext yaml --exec \"nodemon --swc ./src/server.ts\"",
 		"build": "npx webpack --config webpack.config.js",
 		"cleanup": "rm -rf dist && rm -rf build",
 		"eslint:fix": "eslint --fix . --ext .ts",
