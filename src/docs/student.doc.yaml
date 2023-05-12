@@ -528,11 +528,11 @@ paths:
                             [
                                 {
                                     'idStudent': '641c92fd17e975b09d28d965',
-                                    'absent': { 'schoolYear': '641c92fd17e975b09d28d965' },
+                                    'absent': { 'hasPermision': true },
                                 },
                                 {
                                     'idStudent': '641c92fd17e975b09d28d966',
-                                    'absent': { 'schoolYear': '641c92fd17e975b09d28d965' },
+                                    'absent': { reason: 'Lý do abc xyz' },
                                 },
                             ]
 

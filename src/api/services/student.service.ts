@@ -11,6 +11,7 @@ import {
 import { selectTranscriptStudent } from './subjectTrancription.service';
 import { ISubjectTranscript } from '../../types/subjectTranscription.type';
 import { IAttendance, IStudent } from '../../types/student.type';
+import { selectSchoolYearCurr } from './schoolYear.service';
 
 interface IStudentErrorRes {
 	fullName: string;
@@ -20,7 +21,7 @@ interface IStudentErrorRes {
 
 interface IAbsentStudent {
 	idStudent: string;
-	absent: Omit<IAttendance, '_id'>;
+	absent?: Omit<IAttendance, '_id'>;
 }
 
 // create new student using form
@@ -358,9 +359,11 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 				message = 'idStudent of the student is invalid';
 			}
 
-			const { error } = validateAttendanceStudent(item.absent);
-			if (error) {
-				message += ' && ' + error.message;
+			if (item.absent) {
+				const { error } = validateAttendanceStudent(item.absent);
+				if (error) {
+					message += ' && ' + error.message;
+				}
 			}
 
 			if (message.length > 0) {
@@ -424,12 +427,23 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 			});
 		}
 
+		// lấy ra học kỳ hiện tại
+		const schoolYearCurr = await selectSchoolYearCurr();
+
 		// Thời gian điểm danh sẽ được server  tự động lấy là thời gian hiện tại
 		const bulkUpdateAbsentStudents: any = absentStudents.map((item) => {
 			return {
 				updateOne: {
 					filter: { _id: item.idStudent },
-					update: { $push: { absentDays: { ...item.absent, date: new Date() } } },
+					update: {
+						$push: {
+							absentDays: {
+								...item.absent,
+								date: new Date(),
+								schoolYear: schoolYearCurr._id,
+							},
+						},
+					},
 				},
 			};
 		});
