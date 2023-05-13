@@ -12,6 +12,7 @@ import { selectTranscriptStudent } from './subjectTrancription.service';
 import { ISubjectTranscript } from '../../types/subjectTranscription.type';
 import { IAttendance, IStudent } from '../../types/student.type';
 import { selectSchoolYearCurr } from './schoolYear.service';
+import { HttpStatusCode } from '../../configs/statusCode.config';
 
 interface IStudentErrorRes {
 	fullName: string;

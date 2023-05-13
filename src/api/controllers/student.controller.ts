@@ -170,7 +170,6 @@ export const selectAttendanceByClass = async (req: Request, res: Response) => {
 		}
 
 		const result = await StudentServices.dailyAttendanceList(classId, date);
-
 		return res.status(HttpStatusCode.OK).json(result);
 	} catch (error) {
 		const httpException = new HttpException(error);
