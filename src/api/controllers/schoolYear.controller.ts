@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { HttpException } from '../../types/httpException.type';
+import createHttpError, { HttpError } from 'http-errors';
+import { MongooseError } from 'mongoose';
 import * as SchoolYearServices from '../services/schoolYear.service';
 import { HttpStatusCode } from '../../configs/statusCode.config';
 
@@ -14,6 +15,21 @@ export const schoolYearList = async (req: Request, res: Response) => {
 	} catch (error) {
 		const httpException = new HttpException(error);
 		return res.status(httpException.statusCode).json(httpException);
+	}
+};
+
+// [GET] /api/schoolYears/current
+export const getCurrentYear = async (req: Request, res: Response) => {
+	try {
+		const result = await SchoolYearServices.selectSchoolYearCurr();
+
+		return res.status(200).json(result);
+	} catch (error) {
+		return res.status((error as HttpError).statusCode || 500).json({
+			message: (error as HttpError | MongooseError).message,
+			statusCode: (error as HttpError).status || 500,
+			error: (error as any).error,
+		});
 	}
 };
 

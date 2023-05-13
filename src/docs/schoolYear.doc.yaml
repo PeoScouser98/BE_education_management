@@ -81,3 +81,39 @@ paths:
                                     'message': 'The academic year 2023-2024 already exists',
                                     'statusCode': 409,
                                 }
+
+    /schoolYears/current:
+        get:
+            tags:
+                - SchoolYears
+            description: Lấy ra tất cả các năm học
+            summary: Lấy ra năm học hiện tại
+
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SchoolYear'
+                            example:
+                                {
+                                    '_id': '6449730da245bed3af6277f1',
+                                    'startAt': 2023,
+                                    'createdAt': '2023-04-26T18:53:01.203Z',
+                                    'updatedAt': '2023-04-26T18:53:01.203Z',
+                                    'endAt': 2024,
+                                    '__v': 0,
+                                }
+
+                404:
+                    description: Năm học hiện tại chưa được tạo
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    'message': 'The new academic year has not started yet, please come back later',
+                                    'statusCode': 404,
+                                }
