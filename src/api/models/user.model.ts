@@ -41,7 +41,6 @@ const UserSchema = new mongoose.Schema<IUser>(
 			trim: true,
 			require: true,
 		},
-
 		eduBackground: {
 			type: {
 				qualification: String, // học vấn
@@ -57,6 +56,7 @@ const UserSchema = new mongoose.Schema<IUser>(
 		role: {
 			type: String,
 			trim: true,
+			require: true,
 			enum: Object.values(UserRoleEnum),
 		},
 		isVerified: {
