@@ -528,11 +528,11 @@ paths:
                             [
                                 {
                                     'idStudent': '641c92fd17e975b09d28d965',
-                                    'absent': { 'schoolYear': '641c92fd17e975b09d28d965' },
+                                    'absent': { 'hasPermision': true },
                                 },
                                 {
                                     'idStudent': '641c92fd17e975b09d28d966',
-                                    'absent': { 'schoolYear': '641c92fd17e975b09d28d965' },
+                                    'absent': { reason: 'Lý do abc xyz' },
                                 },
                             ]
 
@@ -694,7 +694,7 @@ paths:
                                 $ref: '#/components/schemas/HttpError'
                             example: { statusCode: 400, message: The provided idClass is invalid }
 
-    /students/attendance/:id:
+    /students/attendance/student/:id:
         get:
             tags:
                 - Students
@@ -901,6 +901,7 @@ paths:
                                 $ref: '#/components/schemas/HttpError'
                             example: { statusCode: 404, message: 'Student does not exist!' }
 
+    /students/detail/:id:
         get:
             tags:
                 - Students

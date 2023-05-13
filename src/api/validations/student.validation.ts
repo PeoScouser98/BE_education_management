@@ -20,7 +20,6 @@ export const validateReqBodyStudent = (data: Omit<IStudent, '_id'>) => {
 
 export const validateAttendanceStudent = (data: Omit<IAttendance, '_id' | 'date'>) => {
 	const schema = Joi.object({
-		schoolYear: Joi.string().required(),
 		hasPermision: Joi.bool().optional(),
 		reason: Joi.string().min(8).max(256).optional(),
 	});
