@@ -107,7 +107,7 @@ paths:
                                 $ref: '#/components/schemas/HttpError'
                             example: { message: 'INTERNAL ERROR', statusCode: 500 }
 
-    /update-user-info:
+    /update-user:
         patch:
             tags:
                 - User
@@ -146,3 +146,178 @@ paths:
                                     message: 'ok',
                                     statusCode: 200,
                                 }
+    /users/teachers:
+        get:
+            tags:
+                - User
+            summary: Lấy tất cả giáo viên 
+            description: Lấy tất cả giáo viên của tất cả trạng thái
+            parameters:
+                - name: is_verified
+                  in: query
+                  required: true
+                  description: Lọc giáo viên đã xác thực mail
+                  schema:
+                      type: boolean
+                      
+                - name: employment_status
+                  in: query
+                  required: true
+                  description: Lọc giáo viên theo employment_status
+                  schema:
+                      type: boolean
+
+            responses:
+                200:
+                    description: OK
+                    content: 
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Teacher'
+                            example:
+                                [  
+                                    {
+                                        "_id": "6448f4d7d362bc157275d9df",
+                                        "email": "hieptqph19231@fpt.edu.vn",
+                                        "phone": "0123321123",
+                                        "displayName": "Teacher 1",
+                                        "dateOfBirth": "1989-12-31T17:00:00.000Z",
+                                        "gender": "Nữ",
+                                        "eduBackground": {
+                                        "qualification": "Đại Học",
+                                        "universityName": "Đại học Sư Phạm Hà Nội",
+                                        "graduatedAt": "1999-12-31T17:00:00.000Z",
+                                        "_id": "6448f4d7d362bc157275d9e0"
+                                        },
+                                        "employmentStatus": false,
+                                        "role": "Teacher",
+                                        "isVerified": true,
+                                        "createdAt": "2023-04-26T09:54:31.379Z",
+                                        "updatedAt": "2023-05-07T12:33:52.645Z",
+                                        "deleted": true,
+                                        "userStatusText": "Đã nghỉ việc",
+                                        "id": "6448f4d7d362bc157275d9df"
+                                    }
+                                ]
+                404:  
+                    description: Không tìm thấy giáo viên nào
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '/#/components/schemas/HttpError'
+                5xx:
+                    description: Unexpected Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { message: 'INTERNAL ERROR', statusCode: 500 }    
+
+    /users/teachers/:userId/deactivate:
+        patch:
+            tags:
+                - User
+            summary: Thay đổi trạng thái giáo viên
+            description: Thay đổi trạng thái giáo viên thành đã nghỉ việc   
+            parameters:
+                - in: path
+                  name: userId
+                  type: string
+                  reqrequired: true 
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                        properties:
+                            employmentStatus:
+                                type: boolean
+                            deleted:
+                                type: boolean
+            responses:
+                200:
+                    description: Chuyển trạng thái giáo viên thành công
+                404:
+                    description: Không tìm thấy giáo viên với userId được cung cấp
+
+    /users/create-parents-account:   
+        post:
+            tags:
+                - User
+            summary: Tạo mới tài khoản phụ huynh 
+            description: Tạo mới tài khoản phụ huynh
+            requestBody:  
+                content:
+                    application/json:
+                        schema: 
+                            type: object
+                            $ref: '#/components/schemas/Parent'
+                        example: 
+                            {
+                                email: "viet@gmail.com",
+                                displayName: "Parent of student 9",
+                                gender: "Nam",
+                                phone: "0930000009",
+                                dateOfBirth: "1/1/1990"
+                            }
+            responses:
+                201: 
+                    description: Tạo tài khoản phụ huynh thành công và gửi mail xác thực
+                    content: 
+                        application/json:
+                            schema: 
+                                $ref: '#/components/schemas/Parent'
+                            example: 
+                                {
+                                    email: "assgsgdfdfasdf@gmail.com",
+                                    phone: "0930000009",
+                                    displayName: "Parent of student 9",
+                                    dateOfBirth: "1989-12-31T17:00:00.000Z",
+                                    gender: "Nam",
+                                    employmentStatus: false,
+                                    role: "Parents",
+                                    isVerified: false,
+                                    _id: "645f526bb03aefe08458cec9",
+                                    deleted: false,
+                                    createdAt: "2023-05-13T09:03:39.801Z",
+                                    updatedAt: "2023-05-13T09:03:39.801Z",
+                                    userStatusText: "Chưa kích hoạt",
+                                    id: "645f526bb03aefe08458cec9"
+                                }
+                400:
+                    description: Bad Request
+                5xx: 
+                    description: Internal Server Error
+
+    /users/parents/:classId:
+        get: 
+            tags: 
+                - User
+            summary: Lấy thông tin phụ huynh theo lớp học
+            description: Lấy ra thông tin phụ huynh của lớp đó
+            responses:
+                200: 
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Parent'
+                    example: 
+                        [
+                            {
+                                _id: "6457716cf84f02478de4cb86",
+                                phone: "0123000001",
+                                displayName: "Parent of student 1",
+                                dateOfBirth: "1989-12-31T17:00:00.000Z",
+                                gender: "Nam",
+                                children: [
+                                    {
+                                        _id: "645751893a9c237034e67959",
+                                        fullName: "Tran Thi B",
+                                        parentsPhoneNumber: "0123000001"
+                                    }
+                                ]
+                            }
+                        ]

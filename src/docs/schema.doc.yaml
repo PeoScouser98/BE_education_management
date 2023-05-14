@@ -52,7 +52,48 @@ components:
                 employmentStatus:
                     type: boolean
                     default: false
-
+        Parent: 
+            type: object
+            properties:
+                _id:
+                    type: string
+                displayName:
+                    type: string
+                gender:
+                    type: string
+                    format: uppercase
+                    enum:
+                        - nam
+                        - nữ
+                email:
+                    type: string
+                children:
+                    type: array
+                    properties:
+                        _id:
+                            type: string
+                        fullName:
+                            type: string
+                        parentsPhoneNumber:
+                            type: string
+                    example:
+                        {
+                            _id: '645751893a9c237034e6795a',
+                            fullName: 'Le Van C',
+                            parentsPhoneNumber: '0123000003'
+                        }
+                phone:
+                    type: string
+                dateOfBirth:
+                    type: Date
+                isVerified:
+                    type: boolean
+            required:
+                - displayName
+                - email
+                - phone
+                - dateOfBirth
+                - gender
         Class:
             type: object
             properties:
