@@ -55,7 +55,7 @@ paths:
                                 $ref: '#/components/schemas/HttpResponse'
                             example: { message: 'Signed out!', statusCode: 200 }
 
-    /create-teacher-account:
+    /users/create-teacher-account:
         post:
             tags:
                 - User
@@ -112,16 +112,76 @@ paths:
             tags:
                 - User
             summary: Update thông tin người dùng
+            schema:
+                properties:
+                    displayName:
+                        type: string
+                    gender:
+                        type: string
+                        format: uppercase
+                        enum:
+                            - nam
+                            - nữ
+                    dateOfBirth:
+                        type: Date
+                    picture:
+                        type: string
+                    eduBackground: 
+                        type: object 
+                        properties:
+                            universityName:
+                                type: string
+                            graduatedAt:
+                                type: date
+                            qualification:
+                                type: string
+
             responses:
                 201:
                     description: Updated
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    displayName:
+                                        type: string
+                                    gender:
+                                        type: string
+                                        format: uppercase
+                                        enum:
+                                            - nam
+                                            - nữ
+                                    dateOfBirth:
+                                        type: Date
+                                    picture:
+                                        type: string
+                                    eduBackground: 
+                                        type: object 
+                                        properties:
+                                            universityName:
+                                                type: string
+                                            graduatedAt:
+                                                type: date
+                                            qualification:
+                                                type: string
+
                 401:
                     description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
                 400:
                     description: Bad Request
-                5xx:
-                    description: Internal Server Error
-
+                    content:
+                        application/json:
+                            schema: 
+                                $ref: '#/components/schemas/HttpError'
+                            example: 
+                                {
+                                    message: "User does not exist!",
+                                    statusCode: 400
+                                }
     /refresh-token:
         get:
             tags:
@@ -207,6 +267,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '/#/components/schemas/HttpError'
+                                # test api
                 5xx:
                     description: Unexpected Error
                     content:
@@ -237,11 +298,43 @@ paths:
                             deleted:
                                 type: boolean
             responses:
-                200:
+                201:
                     description: Chuyển trạng thái giáo viên thành công
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Teacher'
+                            example:
+                                {
+                                    _id: "6453e220568371f8807768f9",
+                                    email: "duongcoi1803@gmail.com",
+                                    phone: "0982967646",
+                                    displayName": "Dương teacher",
+                                    dateOfBirth: "2023-05-10T17:00:00.000Z",
+                                    gender: "Nam",
+                                    eduBackground: {
+                                        qualification: "12/12",
+                                        universityName: "cao đẳng fpt",
+                                        graduatedAt: "2023-06-02T17:00:00.000Z"
+                                    },
+                                    employmentStatus: false,
+                                    role: "Teacher",
+                                    isVerified: true,
+                                    deleted: true,
+                                    createdAt: "2023-05-04T16:49:36.082Z",
+                                    updatedAt: "2023-05-14T08:36:13.460Z"
+                                }
                 404:
                     description: Không tìm thấy giáo viên với userId được cung cấp
-
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '/#/components/schemas/HttpError'
+                            example:
+                                {
+                                    message: "Cannot find teacher to deactivate!",
+                                    statusCode: 404
+                                }
     /users/create-parents-account:   
         post:
             tags:
@@ -249,11 +342,32 @@ paths:
             summary: Tạo mới tài khoản phụ huynh 
             description: Tạo mới tài khoản phụ huynh
             requestBody:  
+                type: object
                 content:
                     application/json:
                         schema: 
-                            type: object
-                            $ref: '#/components/schemas/Parent'
+                            properties:
+                                displayName:
+                                    type: string
+                                    required: true
+                                gender:
+                                    type: string
+                                    format: uppercase
+                                    enum:
+                                        - nam
+                                        - nữ
+                                    required: true
+                                email:
+                                    type: string
+                                    regex: '/^[\w.+\-]+@gmail\.com$/'
+                                    required: true
+                                phone:
+                                    type: string
+                                    length: 10
+                                    required: true
+                                dateOfBirth:
+                                    type: Date
+                                    required: true
                         example: 
                             {
                                 email: "viet@gmail.com",
@@ -268,28 +382,57 @@ paths:
                     content: 
                         application/json:
                             schema: 
-                                $ref: '#/components/schemas/Parent'
+                                properties:
+                                    displayName:
+                                        type: string
+                                        required: true
+                                    gender:
+                                        type: string
+                                        format: uppercase
+                                        enum:
+                                            - nam
+                                            - nữ
+                                        required: true
+                                    email:
+                                        type: string
+                                        regex: '/^[\w.+\-]+@gmail\.com$/'
+                                        required: true
+                                    phone:
+                                        type: string
+                                        length: 10
+                                        required: true
+                                    dateOfBirth:
+                                        type: Date
+                                        required: true
                             example: 
-                                {
-                                    email: "assgsgdfdfasdf@gmail.com",
-                                    phone: "0930000009",
-                                    displayName: "Parent of student 9",
-                                    dateOfBirth: "1989-12-31T17:00:00.000Z",
-                                    gender: "Nam",
-                                    employmentStatus: false,
-                                    role: "Parents",
-                                    isVerified: false,
-                                    _id: "645f526bb03aefe08458cec9",
-                                    deleted: false,
-                                    createdAt: "2023-05-13T09:03:39.801Z",
-                                    updatedAt: "2023-05-13T09:03:39.801Z",
-                                    userStatusText: "Chưa kích hoạt",
-                                    id: "645f526bb03aefe08458cec9"
+                               {
+                                    "email": "1692002@gmail.com",
+                                    "phone": "0123000003",
+                                    "displayName": "Parent of student 10",
+                                    "dateOfBirth": "1989-12-31T17:00:00.000Z",
+                                    "gender": "Nam",
+                                    "employmentStatus": false,
+                                    "role": "Parents",
+                                    "isVerified": false,
+                                    "_id": "6460c815d82dec42df50c6e2",
+                                    "deleted": false,
+                                    "createdAt": "2023-05-14T11:37:57.219Z",
+                                    "updatedAt": "2023-05-14T11:37:57.219Z",
+                                    "userStatusText": "Chưa kích hoạt",
+                                    "id": "6460c815d82dec42df50c6e2"
                                 }
                 400:
                     description: Bad Request
-                5xx: 
-                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '/#/components/schemas/HttpError'
+                            example:
+                                {
+                                    "message": "No student has this parent's phone number!",
+                                    "statusCode": 400
+                                }
+
 
     /users/parents/:classId:
         get: 
@@ -305,9 +448,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Parent'
                     example: 
-                        [
-                            {
-                                _id: "6457716cf84f02478de4cb86",
+                        {
+                            _id: "6457716cf84f02478de4cb86",
                                 phone: "0123000001",
                                 displayName: "Parent of student 1",
                                 dateOfBirth: "1989-12-31T17:00:00.000Z",
@@ -319,5 +461,5 @@ paths:
                                         parentsPhoneNumber: "0123000001"
                                     }
                                 ]
-                            }
-                        ]
+                        }
+                        

@@ -58,6 +58,7 @@ components:
                 _id:
                     type: string
                 displayName:
+                    description: Tên Phụ Huynh 
                     type: string
                 gender:
                     type: string
@@ -76,18 +77,11 @@ components:
                             type: string
                         parentsPhoneNumber:
                             type: string
-                    example:
-                        {
-                            _id: '645751893a9c237034e6795a',
-                            fullName: 'Le Van C',
-                            parentsPhoneNumber: '0123000003'
-                        }
                 phone:
                     type: string
                 dateOfBirth:
                     type: Date
-                isVerified:
-                    type: boolean
+               
             required:
                 - displayName
                 - email
