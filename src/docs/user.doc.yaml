@@ -40,6 +40,7 @@ paths:
                             schema:
                                 $ref: '/#/components/schemas/HttpError'
 
+
     /auth/signout:
         get:
             tags:
@@ -63,21 +64,60 @@ paths:
             description: Trả về thông tin tài khoản giáo viên và gửi mật khẩu về mail cho giáo viên
             requestBody:
                 type: object
-                schema:
-                    $ref: '#/components/schemas/Teacher'
-                example:
-                    {
-                        email: 'quanghiep03198@gmail.com',
-                        password: '123123',
-                        fullName: 'Quang Hiep',
-                        dateOfBirth: '1/1/1980',
-                        eduBackground: 'ĐẠI HỌC',
-                        employmentStatus: 'ĐANG CÔNG TÁC',
-                        phone: '0336089988',
-                    }
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                email:
+                                    type: string
+                                    regex: '/^[\w.+\-]+@gmail\.com$/'
+                                    required: true
+                                displayName:
+                                    type: string
+                                    required: true
+                                gender:
+                                    type: string
+                                    required: true
+                                    format: uppercase
+                                    enum:
+                                        - nam
+                                        - nữ
+                                dateOfBirth:
+                                    type: Date
+                                    required: true
+                                phone: 
+                                    type: string
+                                    min: 10
+                                    max: 11
+                                    required: true
+                                eduBackground: 
+                                    type: object 
+                                    properties:
+                                        universityName:
+                                            type: string
+                                            required: true
+                                        graduatedAt:
+                                            type: date
+                                            required: true
+                                        qualification:
+                                            type: string
+                                            required: true
+                        example:
+                            {
+                                email: 'quanghiep03198@gmail.com',
+                                displayName: 'Quang Hiep',
+                                dateOfBirth: '1/1/1980',
+                                eduBackground: {
+                                    qualification: 'Đại Học',
+                                    universityName: 'Đại học Sư Phạm Hà Nội',
+                                    graduatedAt: '1999-12-31T17:00:00.000Z',
+                                },
+                                phone: '0336089988',
+                                gender: 'Nam'
+                            }
             responses:
                 201:
-                    description: Created
+                    description: Tạo mới giáo viên thành công
                     content:
                         application/json:
                             schema:
@@ -86,32 +126,30 @@ paths:
                                 {
                                     email: 'quanghiep03198@gmail.com',
                                     password: '123123',
-                                    fullName: 'Quang Hiep',
+                                    displayName: 'Quang Hiep',
                                     dateOfBirth: '1/1/1980',
-                                    eduBackground: 'ĐẠI HỌC',
+                                eduBackground: {
+                                        qualification: 'Đại Học',
+                                        universityName: 'Đại học Sư Phạm Hà Nội',
+                                        graduatedAt: '1999-12-31T17:00:00.000Z',
+                                    },
                                     employmentStatus: 'ĐANG CÔNG TÁC',
                                     phone: '0336089988',
+                                    gender: 'Nam'
                                 }
                 400:
-                    description: Bad Request
+                    description: Sai định dạng dữ liệu gửi lên hoặc giáo viên đã tồn tại trong hệ thống
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/HttpError'
                             example: { message: 'BAD REQUEST', statusCode: 400 }
-                5xx:
-                    description: Unexpected Error
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/HttpError'
-                            example: { message: 'INTERNAL ERROR', statusCode: 500 }
-
     /update-user:
         patch:
             tags:
                 - User
-            summary: Update thông tin người dùng
+            summary: Chỉnh sửa và cập nhật thông tin người dùng
+            description: Chỉnh sửa và cập nhật thông tin của người dùng đang đăng nhập trên hệ thống
             schema:
                 properties:
                     displayName:
@@ -135,10 +173,9 @@ paths:
                                 type: date
                             qualification:
                                 type: string
-
             responses:
                 201:
-                    description: Updated
+                    description: Chỉnh sửa và cập nhật thông tin của người dùng thành công
                     content:
                         application/json:
                             schema:
@@ -165,14 +202,8 @@ paths:
                                             qualification:
                                                 type: string
 
-                401:
-                    description: Unauthorized
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/HttpError'
                 400:
-                    description: Bad Request
+                    description: Sai định dạng dữ liệu gửi lên hoặc user không tồn tại trong hệ thống
                     content:
                         application/json:
                             schema: 
@@ -216,20 +247,20 @@ paths:
                 - name: is_verified
                   in: query
                   required: true
-                  description: Lọc giáo viên đã xác thực mail
+                  description: Lọc những giáo viên đã xác thực gmail
                   schema:
                       type: boolean
                       
                 - name: employment_status
                   in: query
                   required: true
-                  description: Lọc giáo viên theo employment_status
+                  description: Lọc giáo viên theo tình trạng làm việc
                   schema:
                       type: boolean
 
             responses:
                 200:
-                    description: OK
+                    description: Lấy thành công danh sách tất cả giáo viên của 3 trạng thái
                     content: 
                         application/json:
                             schema:
@@ -239,7 +270,6 @@ paths:
                             example:
                                 [  
                                     {
-                                        "_id": "6448f4d7d362bc157275d9df",
                                         "email": "hieptqph19231@fpt.edu.vn",
                                         "phone": "0123321123",
                                         "displayName": "Teacher 1",
@@ -267,36 +297,17 @@ paths:
                         application/json:
                             schema:
                                 $ref: '/#/components/schemas/HttpError'
-                                # test api
-                5xx:
-                    description: Unexpected Error
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/HttpError'
-                            example: { message: 'INTERNAL ERROR', statusCode: 500 }    
-
+                            example:
+                                {
+                                    message: "Không thể tìm thấy giáo viên nào!",
+                                    statusCode: 400
+                                }
     /users/teachers/:userId/deactivate:
         patch:
             tags:
                 - User
             summary: Thay đổi trạng thái giáo viên
             description: Thay đổi trạng thái giáo viên thành đã nghỉ việc   
-            parameters:
-                - in: path
-                  name: userId
-                  type: string
-                  reqrequired: true 
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                        properties:
-                            employmentStatus:
-                                type: boolean
-                            deleted:
-                                type: boolean
             responses:
                 201:
                     description: Chuyển trạng thái giáo viên thành công
@@ -410,27 +421,18 @@ paths:
                                     "phone": "0123000003",
                                     "displayName": "Parent of student 10",
                                     "dateOfBirth": "1989-12-31T17:00:00.000Z",
-                                    "gender": "Nam",
-                                    "employmentStatus": false,
-                                    "role": "Parents",
-                                    "isVerified": false,
-                                    "_id": "6460c815d82dec42df50c6e2",
-                                    "deleted": false,
-                                    "createdAt": "2023-05-14T11:37:57.219Z",
-                                    "updatedAt": "2023-05-14T11:37:57.219Z",
-                                    "userStatusText": "Chưa kích hoạt",
-                                    "id": "6460c815d82dec42df50c6e2"
+                                    "gender": "Nam"
                                 }
                 400:
-                    description: Bad Request
+                    description: Parent không thỏa mãn validate hoặc không học sinh nào có số điện thoại của phụ huynh này
                     content:
                         application/json:
                             schema:
                                 $ref: '/#/components/schemas/HttpError'
                             example:
                                 {
-                                    "message": "No student has this parent's phone number!",
-                                    "statusCode": 400
+                                    message: "No student has this parent's phone number!",
+                                    statusCode: 400
                                 }
 
 
@@ -442,24 +444,28 @@ paths:
             description: Lấy ra thông tin phụ huynh của lớp đó
             responses:
                 200: 
-                    description: Ok
+                    description: Lấy thông tin phụ huynh theo lớp học thành công
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/Parent'
-                    example: 
-                        {
-                            _id: "6457716cf84f02478de4cb86",
-                                phone: "0123000001",
-                                displayName: "Parent of student 1",
-                                dateOfBirth: "1989-12-31T17:00:00.000Z",
-                                gender: "Nam",
-                                children: [
+                                type: array
+                                items: 
+                                    $ref: '#/components/schemas/Parent'
+                            example: 
+                                [
                                     {
-                                        _id: "645751893a9c237034e67959",
-                                        fullName: "Tran Thi B",
-                                        parentsPhoneNumber: "0123000001"
+                                        _id: '6457716cf84f02478de4cb86',
+                                        phone: '0123000001',
+                                        displayName: 'Parent of student 1',
+                                        dateOfBirth: '1989-12-31T17:00:00.000Z',
+                                        gender: 'Nam',
+                                        children: [
+                                            {
+                                                _id: '645751893a9c237034e67959',
+                                                fullName: 'Tran Thi B',
+                                                parentsPhoneNumber: '0123000001'
+                                            }
+                                        ]
                                     }
                                 ]
-                        }
                         
