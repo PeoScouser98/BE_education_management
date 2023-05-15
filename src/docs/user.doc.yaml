@@ -38,7 +38,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '/#/components/schemas/HttpError'
+                                $ref: '#/components/schemas/HttpError'
 
 
     /auth/signout:
@@ -296,7 +296,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '/#/components/schemas/HttpError'
+                                $ref: '#/components/schemas/HttpError'
                             example:
                                 {
                                     message: "Không thể tìm thấy giáo viên nào!",
@@ -340,7 +340,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '/#/components/schemas/HttpError'
+                                $ref: '#/components/schemas/HttpError'
                             example:
                                 {
                                     message: "Cannot find teacher to deactivate!",
@@ -428,7 +428,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '/#/components/schemas/HttpError'
+                                $ref: '#/components/schemas/HttpError'
                             example:
                                 {
                                     message: "No student has this parent's phone number!",
