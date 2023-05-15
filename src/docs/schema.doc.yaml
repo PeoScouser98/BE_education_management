@@ -52,7 +52,42 @@ components:
                 employmentStatus:
                     type: boolean
                     default: false
-
+        Parent: 
+            type: object
+            properties:
+                _id:
+                    type: string
+                displayName:
+                    description: Tên Phụ Huynh 
+                    type: string
+                gender:
+                    type: string
+                    format: uppercase
+                    enum:
+                        - nam
+                        - nữ
+                email:
+                    type: string
+                children:
+                    type: array
+                    properties:
+                        _id:
+                            type: string
+                        fullName:
+                            type: string
+                        parentsPhoneNumber:
+                            type: string
+                phone:
+                    type: string
+                dateOfBirth:
+                    type: Date
+               
+            required:
+                - displayName
+                - email
+                - phone
+                - dateOfBirth
+                - gender
         Class:
             type: object
             properties:

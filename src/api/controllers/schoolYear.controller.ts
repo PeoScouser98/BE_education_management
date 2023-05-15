@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { HttpException } from '../../types/httpException.type';
+import createHttpError, { HttpError } from 'http-errors';
+import { MongooseError } from 'mongoose';
 import * as SchoolYearServices from '../services/schoolYear.service';
 import { HttpStatusCode } from '../../configs/statusCode.config';
-import { HttpError } from 'http-errors';
-import { MongooseError } from 'mongoose';
+import { HttpException } from '../../types/httpException.type';
 
 // [GET] /api/schoolYears?limit=10&page=1
 export const schoolYearList = async (req: Request, res: Response) => {
