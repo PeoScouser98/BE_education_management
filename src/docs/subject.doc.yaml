@@ -177,7 +177,29 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/HttpError'
                             example: { statusCode: 400, message: '_id of the subject is invalid' }
-
+        get:
+            tags: 
+                - Subjects
+            description: Lấy subject theo id 
+            summary: Đăng nhập
+            responses: 
+                200: 
+                    description: Lấy ra subject theo id thành công
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Subject' 
+                            example: 
+                                {
+                                    "_id": "644921d8d739366960dfc2af",
+                                    "subjectName": "Tiếng việt",
+                                    "deleted": false,
+                                    "createdAt": "2023-04-26T13:06:32.372Z",
+                                    "updatedAt": "2023-05-11T04:51:57.449Z",
+                                    "slug": "tieng-viet",
+                                    "__v": 0,
+                                    "deletedAt": "2023-05-07T06:46:47.603Z"
+                                }
     /subjects/restore/:id:
         put:
             tags:

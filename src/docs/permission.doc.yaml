@@ -1,81 +1,5 @@
 paths:
     /permissions:
-        get:
-            tags:
-                - Permission
-            description: Lấy tất cả user permission
-            summary: Đăng nhập
-            responses:
-                200:
-                    description: ok
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Permissions'
-                            example:
-                                [
-                                    {
-                                        _id: '637ec5ce577ebd6709c65124',
-                                        role: 'HEADMASTER',
-                                        type: 'class',
-                                        permissions:
-                                            [
-                                                {
-                                                    _id: '637ec5ce572ebd6759c65124',
-                                                    name: 'Lớp học',
-                                                    code: 'class.list_all',
-                                                },
-                                            ],
-                                    },
-                                ]
-                404:
-                    description: Not found
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/HttpError'
-                            example: { message: 'Cannot get permissions!', statusCode: 404 }
-    /permissions/get-by-roll:
-        get:
-            tags:
-                - Permission
-            description: Lấy thông tin 1 permission
-            summary: Đăng nhập
-            responses:
-                200:
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Permissions'
-                            example:
-                                {
-                                    _id: '637ec5ce572ebd6759c65124',
-                                    role: 'HEADMASTER',
-                                    type: 'class',
-                                    permissions:
-                                        [
-                                            {
-                                                _id: '637ec5ce572ebd6759c65124',
-                                                name: 'Lớp học',
-                                                code: 'class.list_all',
-                                            },
-                                        ],
-                                }
-                400:
-                    description: không truyền role hoặc không thoả mãn validate
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/HttpError'
-                            example: { message: 'Bad request', statusCode: 400 }
-                404:
-                    description: Không tìm thấy permission
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/HttpError'
-                            example: { message: 'Cannot get permissions!', statusCode: 404 }
         post:
             tags:
                 - Permission
@@ -132,6 +56,48 @@ paths:
                                     message: 'No data provided! | \"role\" length must be an uppercase string"',
                                     statusCode: 400,
                                 }
+    /permissions/get-by-roll:
+        get:
+            tags:
+                - Permission
+            description: Lấy thông tin 1 permission
+            summary: Đăng nhập
+            responses:
+                200:
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Permissions'
+                            example:
+                                {
+                                    _id: '637ec5ce572ebd6759c65124',
+                                    role: 'HEADMASTER',
+                                    type: 'class',
+                                    permissions:
+                                        [
+                                            {
+                                                _id: '637ec5ce572ebd6759c65124',
+                                                name: 'Lớp học',
+                                                code: 'class.list_all',
+                                            },
+                                        ],
+                                }
+                400:
+                    description: không truyền role hoặc không thoả mãn validate
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { message: 'Bad request', statusCode: 400 }
+                404:
+                    description: Không tìm thấy permission
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { message: 'Cannot get permissions!', statusCode: 404 }
+        
     /permissions/:id:
         put:
             tags:
@@ -238,7 +204,7 @@ paths:
                                 $ref: '#/components/schemas/HttpError'
                             example: { message: 'Permission not found', statusCode: 404 }
 
-    /permission/restore/:id:
+    /permissions/:id/restore:
         put:
             tags:
                 - Permission

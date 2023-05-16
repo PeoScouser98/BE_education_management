@@ -205,7 +205,7 @@ paths:
                                 $ref: '#/components/schemas/HttpResponse'
                             example: { statusCode: 400, message: Type is not valid }
 
-    /students/:classId:
+    /students/:class:
         get:
             tags:
                 - Students

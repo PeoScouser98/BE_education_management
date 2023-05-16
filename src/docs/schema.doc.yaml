@@ -134,6 +134,8 @@ components:
                     type: Date
                 deleted:
                     type: Boolean
+                deletedAt: 
+                    type: Date
 
         Permissions:
             type: object
