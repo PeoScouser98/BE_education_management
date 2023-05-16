@@ -401,6 +401,72 @@ components:
                 deleted:
                     type: boolean
                     default: false
+        TimeTable:
+            type: object
+            properties:
+                schedule:
+                    required: true
+                    type: object
+                    description: Lịch học các ngày trong tuần
+                    properties:
+                        monday:
+                            type: array
+                            required: true
+                            items: 
+                                type: object    
+                                properties:
+                                    period:
+                                        type: number
+                        tuesday:
+                            type: array
+                            required: true
+                            items: 
+                                type: object    
+                                properties:
+                                    period:
+                                        type: number
+                        wednesday:
+                            type: array
+                            required: true
+                            items: 
+                                type: object    
+                                properties:
+                                    period:
+                                        type: number
+                        thursday:
+                            type: array
+                            required: true
+                            items: 
+                                type: object    
+                                properties:
+                                    period:
+                                        type: number
+                        friday:
+                            type: array
+                            required: true
+                            items: 
+                                type: object    
+                                properties:
+                                    period:
+                                        type: number
+                        saturday:
+                            type: array
+                            required: true
+                            items: 
+                                type: object    
+                                properties:
+                                    period:
+                                        type: number
+                _id: 
+                    type: string
+                class: 
+                    required: true
+                    type: ObjectId
+                    description: 'id của class'
+                createdAt: 
+                    type: string            
+                updatedAt: 
+                    type: string
 
         HttpError:
             type: object
