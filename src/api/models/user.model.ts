@@ -16,6 +16,7 @@ const UserSchema = new mongoose.Schema<IUser>(
 		email: {
 			type: String,
 			trim: true,
+			unique: true,
 		},
 		phone: {
 			type: String,
@@ -29,6 +30,10 @@ const UserSchema = new mongoose.Schema<IUser>(
 		},
 		dateOfBirth: {
 			type: Date,
+			require: true,
+		},
+		address: {
+			type: String,
 			require: true,
 		},
 		gender: {
@@ -68,8 +73,10 @@ const UserSchema = new mongoose.Schema<IUser>(
 		timestamps: true,
 		toJSON: { virtuals: true },
 		versionKey: false,
+		autoIndex: true,
 	}
 );
+UserSchema.index({ displayName: 'text' });
 
 UserSchema.virtual('children', {
 	localField: 'phone',
@@ -102,6 +109,7 @@ UserSchema.pre('save', function (next) {
 	}
 	next();
 });
+
 UserSchema.plugin(mongooseDelete, {
 	overrideMethods: ['find', 'findOne', 'findOneAndUpdate'],
 	deletedAt: true,
@@ -109,5 +117,6 @@ UserSchema.plugin(mongooseDelete, {
 UserSchema.plugin(mongooseLeanVirtuals);
 
 const UserModel = mongoose.model<IUserDocument, ISoftDeleteUserModel>('Users', UserSchema);
+UserModel.createIndexes();
 
 export default UserModel;
