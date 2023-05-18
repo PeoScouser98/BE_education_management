@@ -44,6 +44,41 @@ components:
                 - phone
                 - dateOfBirth
 
+        SearchParentUserResponse:
+            properties:
+                _id:
+                    type: string
+                displayName:
+                    description: Tên Phụ Huynh 
+                    type: string
+                gender:
+                    type: string
+                    format: uppercase
+                    enum:
+                        - nam
+                        - nữ
+                email:
+                    type: string
+                phone:
+                    type: string
+                dateOfBirth:
+                    type: Date
+                picture:
+                    type: string
+                employmentStatus: 
+                    type: boolean
+                role: 
+                    type: string
+                isVerified:
+                    type: boolean
+                deleted: 
+                    type: boolean
+                createdAt: 
+                    type: Date
+                updatedAt: 
+                    type: Date
+                address:
+                    type: string
         Teacher:
             allOf:
                 - $ref: '#/components/schemas/User'
