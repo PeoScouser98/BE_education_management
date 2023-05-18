@@ -1,13 +1,10 @@
 import { genSaltSync, hashSync } from 'bcrypt';
 import createHttpError from 'http-errors';
 import { IUser } from '../../types/user.type';
+import StudentModel from '../models/student.model';
 import UserModel from '../models/user.model';
 import { UserRoleEnum } from './../../types/user.type';
-import StudentModel from '../models/student.model';
-import transporter from '../../configs/nodemailer.config';
-import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import { sendVerificationEmail } from './mail.service';
-import getVerificationEmailTemplate from '../emails/verifyUserEmail';
+import removeVietnameseTones from '../../helpers/vnFullTextSearch';
 
 // Add multi parents users
 const checkIsValidParentUser = async ({ email, phone }: { email: string; phone: string }) => {
@@ -167,18 +164,36 @@ export const getParentsUserByClass = async (classId: string) => {
 		const parents = await UserModel.find({ role: UserRoleEnum.PARENTS })
 			.populate({
 				path: 'children',
-				select: '_id fullName parentsPhoneNumber',
+				select: '_id fullName parentsPhoneNumber class',
 				options: {
 					id: false,
 					lean: true,
 				},
+				populate: { path: 'class', select: 'className' },
 				justOne: true,
-				match: { parentsPhoneNumber: { $exists: true } },
+				match: { $and: [{ parentsPhoneNumber: { $exists: true } }, { class: classId }] },
 			})
 			.select('_id displayName phone gender dateOfBirth')
 			.lean();
 
 		return parents;
+	} catch (error) {
+		throw error;
+	}
+};
+
+export const searchParents = async (searchTerm: string) => {
+	try {
+		// searchTerm = removeVietnameseTones(searchTerm);
+		console.log(searchTerm);
+		const pattern = new RegExp(`^${searchTerm}`, 'gi');
+		return await UserModel.find({
+			$or: [
+				{ phone: pattern, role: UserRoleEnum.PARENTS },
+				{ displayName: removeVietnameseTones(searchTerm), role: UserRoleEnum.PARENTS },
+				{ email: pattern, role: UserRoleEnum.PARENTS },
+			],
+		}).lean();
 	} catch (error) {
 		throw error;
 	}

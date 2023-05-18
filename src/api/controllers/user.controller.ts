@@ -3,11 +3,11 @@ import { Request, Response } from 'express';
 import createHttpError from 'http-errors';
 import jwt from 'jsonwebtoken';
 import { HttpStatusCode } from '../../configs/statusCode.config';
-import { HttpException } from '../../types/httpException.type';
 import { IUser, UserRoleEnum } from '../../types/user.type';
 import getVerificationEmailTemplate from '../emails/verifyUserEmail';
 import { sendVerificationEmail } from '../services/mail.service';
 import * as UserService from '../services/user.service';
+import { HttpException } from './../../types/httpException.type';
 import {
 	validateNewParentsData,
 	validateNewTeacherData,
@@ -184,6 +184,17 @@ export const getParentsUserByClass = async (req: Request, res: Response) => {
 	try {
 		const parents = await UserService.getParentsUserByClass(req.params.classId);
 		return res.status(HttpStatusCode.OK).json(parents);
+	} catch (error) {
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
+	}
+};
+
+export const searchParentsUsers = async (req: Request, res: Response) => {
+	try {
+		const result = await UserService.searchParents(req.body.searchTerm);
+		if (!result) throw createHttpError.NotFound('Cannot find any parents account!');
+		return res.status(HttpStatusCode.OK).json(result);
 	} catch (error) {
 		const httpException = new HttpException(error);
 		return res.status(httpException.statusCode).json(httpException);

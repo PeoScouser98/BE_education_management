@@ -17,8 +17,8 @@ router.post(
 
 router.post(
 	'/users/create-parents-account', //updated route name
-	// checkAuthenticated,
-	// checkIsTeacher,
+	checkAuthenticated,
+	checkIsTeacher,
 	UserController.createParentsAccount
 );
 
@@ -37,7 +37,12 @@ router.patch(
 router.patch('/update-user', checkAuthenticated, UserController.updateUserInfo); // Users update themselve information
 router.get('/users/teachers', checkAuthenticated, UserController.getTeachersByStatus);
 router.get('/users/parents/:classId', checkAuthenticated, UserController.getParentsUserByClass);
-// router.patch('/teachers/:id/update', checkAuthenticated, checkIsTeacher, UserController.updateTeacherInfo) // not yet
+router.post(
+	'/users/search-parents',
+	checkAuthenticated,
+	checkIsTeacher,
+	UserController.searchParentsUsers
+);
 // router.patch('/user/parents/:id', checkAuthenticated, checkIsTeacher, UserController.updateParentsInfo) // not yet
 
 export default router;
