@@ -47,7 +47,7 @@ components:
         SearchParentUserResponse:
             properties:
                 _id:
-                    type: string
+                    type: ObjectId
                 displayName:
                     description: Tên Phụ Huynh 
                     type: string
@@ -67,8 +67,10 @@ components:
                     type: string
                 employmentStatus: 
                     type: boolean
-                role: 
+                role:
                     type: string
+                    enum: ['Headmaster', 'Teacher', 'Parents']
+                    example: 'Headmaster'
                 isVerified:
                     type: boolean
                 deleted: 
