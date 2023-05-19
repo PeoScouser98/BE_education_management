@@ -198,3 +198,12 @@ export const searchParents = async (searchTerm: string) => {
 		throw error;
 	}
 };
+
+// Users update them self account's info
+export const getParentById = async (authId: string) => {
+	try {
+		return await UserModel.findById(authId);
+	} catch (error) {
+		throw error;
+	}
+};

@@ -200,3 +200,13 @@ export const searchParentsUsers = async (req: Request, res: Response) => {
 		return res.status(httpException.statusCode).json(httpException);
 	}
 };
+export const getParentById = async (req: Request, res: Response) => {
+	try {
+		const result = await UserService.getParentById(req.params.parentId);
+		if (!result) throw createHttpError.NotFound('Cannot find any parent account!');
+		return res.status(HttpStatusCode.OK).json(result);
+	} catch (error) {
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
+	}
+};

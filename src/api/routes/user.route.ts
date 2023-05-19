@@ -37,6 +37,7 @@ router.patch(
 router.patch('/update-user', checkAuthenticated, UserController.updateUserInfo); // Users update themselve information
 router.get('/users/teachers', checkAuthenticated, UserController.getTeachersByStatus);
 router.get('/users/parents/:classId', checkAuthenticated, UserController.getParentsUserByClass);
+router.get('/users/parent/:parentId', checkAuthenticated, UserController.getParentById);
 router.post(
 	'/users/search-parents',
 	checkAuthenticated,
