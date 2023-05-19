@@ -543,7 +543,7 @@ paths:
                                     {
                                         "_id": "6457886600b81ab326e616ab",
                                         "phone": "0123000004",
-                                        "displayName": "viet lmao",
+                                        "displayName": "viet phu huynh",
                                         "dateOfBirth": "1989-12-31T17:00:00.000Z",
                                         "gender": "Nam",
                                         "picture": "https://ui-avatars.com/api/?name=P",
@@ -559,7 +559,7 @@ paths:
                                     {
                                         "_id": "6457936dd95a044c111a2eac",
                                         "phone": "0123000005",
-                                        "displayName": "viet lmao",
+                                        "displayName": "viet phu huynh",
                                         "dateOfBirth": "1989-12-31T17:00:00.000Z",
                                         "gender": "Nam",
                                         "picture": "https://ui-avatars.com/api/?name=P",
@@ -586,5 +586,6 @@ paths:
                                     message: "Cannot find any parents account!",
                                     statusCode: 404
                                 }
+
 
 

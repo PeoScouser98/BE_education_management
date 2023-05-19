@@ -69,8 +69,10 @@ components:
                     type: boolean
                 role:
                     type: string
-                    enum: ['Headmaster', 'Teacher', 'Parents']
-                    example: 'Headmaster'
+                    enum: 
+                        - Headmaster
+                        - Teacher 
+                        - Parents
                 isVerified:
                     type: boolean
                 deleted: 
@@ -186,8 +188,10 @@ components:
                     format: uuid
                 role:
                     type: string
-                    enum: ['ADMIN', 'HEADMASTER', 'TEACHER', 'PARENTS']
-                    example: 'ADMIN'
+                    enum: 
+                        - Headmaster
+                        - Teacher 
+                        - Parents
                 type:
                     type: string
                     example: 'class'
