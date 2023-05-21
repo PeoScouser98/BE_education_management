@@ -510,3 +510,82 @@ paths:
                                             ],
                                     },
                                 ]
+
+    /users/search-parents:
+        post:
+            tags: 
+                - User 
+            summary: Tìm kiếm parents user
+            description: Tìm kiếm parents user theo số điện thoại hoặc tên hoặc email đều được (nếu tìm theo tên thì chỉ có thể tìm bằng tiếng Anh và tiếng Việt không dấu - đang chờ fix để có thể tìm bằng tiếng Việt có dấu).
+            requestBody:
+                type: object
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                searchTerm:
+                                    type: string
+                        example:
+                            {
+                                searchTerm: "viet phu huynh"
+                            }
+            responses:
+                200: 
+                    description: Tìm thấy tài khoản phụ huynh 
+                    content: 
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/SearchParentUserResponse'    
+                            example:
+                                [
+                                    {
+                                        "_id": "6457886600b81ab326e616ab",
+                                        "phone": "0123000004",
+                                        "displayName": "viet phu huynh",
+                                        "dateOfBirth": "1989-12-31T17:00:00.000Z",
+                                        "gender": "Nam",
+                                        "picture": "https://ui-avatars.com/api/?name=P",
+                                        "employmentStatus": false,
+                                        "role": "Parents",
+                                        "isVerified": false,
+                                        "deleted": false,
+                                        "createdAt": "2023-05-07T11:15:50.290Z",
+                                        "updatedAt": "2023-05-07T11:15:50.290Z",
+                                        "address": "Hải Phòng",
+                                        "email": "test4@gmail.com"
+                                    },
+                                    {
+                                        "_id": "6457936dd95a044c111a2eac",
+                                        "phone": "0123000005",
+                                        "displayName": "viet phu huynh",
+                                        "dateOfBirth": "1989-12-31T17:00:00.000Z",
+                                        "gender": "Nam",
+                                        "picture": "https://ui-avatars.com/api/?name=P",
+                                        "employmentStatus": false,
+                                        "role": "Parents",
+                                        "isVerified": false,
+                                        "deleted": false,
+                                        "createdAt": "2023-05-07T12:02:53.475Z",
+                                        "updatedAt": "2023-05-07T12:02:53.475Z",
+                                        "address": "Hải Phòng",
+                                        "email": "test5@gmail.com"
+                                    }
+                                ]
+
+
+                404: 
+                    description: Không thể tìm thấy bất kỳ tài khoản phụ huynh nào.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: 
+                                {
+                                    message: "Cannot find any parents account!",
+                                    statusCode: 404
+                                }
+
+
+
