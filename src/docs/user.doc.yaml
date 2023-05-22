@@ -714,6 +714,57 @@ paths:
                                     message: "Cannot find any parents account!",
                                     statusCode: 404
                                 }
-
+    /users/:id: 
+        get:
+            tags: 
+                - User
+            summary: Chi tiết người dùng
+            description: Lấy ra chi tiết người dùng
+            responses:
+                200: 
+                    description: Lấy ra chi tiết người dùng thành công
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    _id: 
+                                        type: ObjectId
+                                    email: 
+                                        type: string
+                                    displayName: 
+                                        type: string
+                                    role: 
+                                        type: string
+                                    phone: 
+                                        type: string
+                                    isVerified: 
+                                        type: boolean
+                                    employmentStatus: 
+                                        type: boolean
+                                    address: 
+                                        type: string 
+                            example:
+                                {
+                                    _id: "64464753502404d02cef4189",
+                                    email: "nguyenqv2002mt@gmail.com",
+                                    displayName: "Admin",
+                                    role: "Headmaster",
+                                    phone: "0965115792",
+                                    isVerified: true,
+                                    employmentStatus: true,
+                                    address: "Hà Nội"
+                                }
+                404:
+                    description: Không tìm thấy user
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    message: "User not found!",
+                                    statusCode: 404
+                                }            
+                                    
 
 
