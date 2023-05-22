@@ -47,13 +47,35 @@ paths:
             summary: Đăng xuất
             description: Đăng xuất khỏi hệ thống
             responses:
-                200:
-                    description: OK
+                202: 
+                    description: Đã đăng xuất
+                    content: 
+                        application/json:
+                            schema: 
+                                $ref: '#/components/schemas/HttpResponse'
+                            example:
+                                {
+                                    message: "Signed out!",
+                                    statusCode: 202
+                                }
+                400:
+                    description: Thu hồi token không thành công
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/HttpResponse'
-                            example: { message: 'Signed out!', statusCode: 200 }
+                                $ref: '#/components/schemas/HttpError'
+                            example: 
+                                {
+                                    message: 'Failed to revoke token',
+                                    statusCode: 400
+                                }
+                500:
+                    description: Không thể đăng xuất
+                    content: 
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example: { message: Không thể đăng xuất, statusCode: 500 }
     /auth/verify-account:
         get:
             tags:
@@ -61,8 +83,6 @@ paths:
             summary: Xác minh tài khoản hệ thống
             description:
             responses:
-                200:
-
                 401:
                     description: Mã thông báo truy cập phải được cung cấp!
                     content:
@@ -77,6 +97,137 @@ paths:
             summary: Gửi mã otp
             description: Gửi 1 mã otp đến sms
             requestBody:
+                type: object
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                phone:
+                                    type: string
+                        example:
+                            {
+                                "phone":"0965115792"
+                            }
+            responses:
+                200: 
+                    description: Gửi sms thành công 
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    messages:
+                                        type: array
+                                        items:
+                                            type: object 
+                                            properties:
+                                                to: 
+                                                    type: string
+                                                message-id: 
+                                                    type: string
+                                                status:
+                                                    type: string
+                                                remaining-balance: 
+                                                    type: string
+                                                message-price: 
+                                                    type: string
+                                                network: 
+                                                    type: string
+                                                messageId: 
+                                                    type: string
+                                                remainingBalance: 
+                                                    type: string
+                                                messagePrice: 
+                                                    type: string
+                                    message-count:
+                                        type: string
+                                    messageCount:
+                                        type: string     
+                            example:
+                                {
+                                    "messages": [
+                                        {
+                                            "to": "84965115792",
+                                            "message-id": "ee606cfa-953a-498f-be50-01e56b8f4444",
+                                            "status": "0",
+                                            "remaining-balance": "1.23583334",
+                                            "message-price": "0.08230000",
+                                            "network": "45204",
+                                            "messageId": "ee606cfa-953a-498f-be50-01e56b8f4444",
+                                            "remainingBalance": "1.23583334",
+                                            "messagePrice": "0.08230000"
+                                        }
+                                    ],
+                                    "message-count": "1",
+                                    "messageCount": "1"
+                                    }                      
+                404:        
+                    description: Số điện thoại của người dùng không tồn tại
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    message: "User's phone number does not exist!",
+                                    statusCode: 404
+                                }
+                500:
+                    description: Gửi sms thất bại
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    message: 'Failed to send sms!',
+                                    statusCode: 500
+                                }
+    /auth/refresh-token:
+        get:
+            tags:
+                - Auth
+            summary: Lấy access token mới.
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    refreshToken:
+                                        type: string
+                                    message:
+                                        type: string
+                                    statusCode:
+                                        type: number
+                            example:
+                                {
+                                    refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoIjoiMTgyYTExYzIyY2M1YmJiMWVkNjY5ZWRkYmRkZjBiNDZjMjYxMDA4YmIxZDRkMzllIiwiaWF0IjoxNjc4MjAyMzIzLCJleHAiOjE2NzgyMDU5MjN9.SsBcxJH5QN36QWvbaJl4epl7kTmzFCxUTkf1Rto683g',
+                                    message: 'ok',
+                                    statusCode: 200,
+                                }
+                400:
+                    description: Bad request - refresh token không hợp lệ
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    message: "Invalid refresh token!",
+                                    statusCode: 400
+                                }
+                403:
+                    description: payload trong token không hợp lệ
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HttpError'
+                            example:
+                                {
+                                    message: "Invalid token payload",
+                                    statusCode: 403
+                                }
     /users/create-teacher-account:
         post:
             tags:
@@ -259,30 +410,7 @@ paths:
                                     message: 'User does not exist! || dateOfBirth must be a valid date',
                                     statusCode: 400,
                                 }
-    /auth/refresh-token:
-        get:
-            tags:
-                - Auth
-            summary: Lấy access token mới.
-            responses:
-                200:
-                    description: Ok
-                    content:
-                        application/json:
-                            schema:
-                                properties:
-                                    refreshToken:
-                                        type: string
-                                    message:
-                                        type: string
-                                    statusCode:
-                                        type: number
-                            example:
-                                {
-                                    refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoIjoiMTgyYTExYzIyY2M1YmJiMWVkNjY5ZWRkYmRkZjBiNDZjMjYxMDA4YmIxZDRkMzllIiwiaWF0IjoxNjc4MjAyMzIzLCJleHAiOjE2NzgyMDU5MjN9.SsBcxJH5QN36QWvbaJl4epl7kTmzFCxUTkf1Rto683g',
-                                    message: 'ok',
-                                    statusCode: 200,
-                                }
+    
     /users/teachers:
         get:
             tags:
