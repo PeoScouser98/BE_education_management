@@ -133,7 +133,6 @@ export const createParentsAccount = async (req: Request, res: Response) => {
 // [PATCH] /
 export const updateUserInfo = async (req: Request, res: Response) => {
 	try {
-		console.log(req.profile);
 		const { error } = validateUpdateUserData(req.body);
 		if (error) {
 			throw createHttpError.BadRequest(error.message);
@@ -195,6 +194,17 @@ export const searchParentsUsers = async (req: Request, res: Response) => {
 		const result = await UserService.searchParents(req.body.searchTerm);
 		if (!result) throw createHttpError.NotFound('Cannot find any parents account!');
 		return res.status(HttpStatusCode.OK).json(result);
+	} catch (error) {
+		const httpException = new HttpException(error);
+		return res.status(httpException.statusCode).json(httpException);
+	}
+};
+
+export const getUserDetails = async (req: Request, res: Response) => {
+	try {
+		const user = await UserService.getUserDetails(req.params.id);
+		if (!user) throw createHttpError.NotFound('User not found!');
+		return res.status(HttpStatusCode.OK).json(user);
 	} catch (error) {
 		const httpException = new HttpException(error);
 		return res.status(httpException.statusCode).json(httpException);
