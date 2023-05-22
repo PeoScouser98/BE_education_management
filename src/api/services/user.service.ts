@@ -99,6 +99,14 @@ export const updateTeacherInfo = async (teacherId: string, payload: Partial<IUse
 	}
 };
 
+export const getUserDetails = async (userId: string) => {
+	try {
+		return await UserModel.findOne({ _id: userId }).lean();
+	} catch (error) {
+		throw error;
+	}
+};
+
 export const changePassword = async (userId: string, newPassword: string) => {
 	try {
 		const encryptedNewPassword = hashSync(newPassword, genSaltSync(+process.env.SALT_ROUND!));
