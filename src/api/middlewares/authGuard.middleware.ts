@@ -10,16 +10,15 @@ import { HttpException } from '../../types/httpException.type';
 
 export const checkAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		if (!req.cookies.uid) throw createHttpError.BadRequest('Invalid auth id!');
+		if (!req.cookies.uid) throw createHttpError.Unauthorized('Invalid auth id!');
 		const accessTokenKey = AuthRedisKeyPrefix.ACCESS_TOKEN + req.cookies.uid;
 		const storedAccessToken = await redisClient.get(accessTokenKey);
-		if (!storedAccessToken) throw createHttpError.Forbidden();
+		if (!storedAccessToken) throw createHttpError.Unauthorized();
 
 		const accessToken = req.cookies.access_token;
-		if (!accessToken) throw createHttpError.Forbidden();
+		if (!accessToken) throw createHttpError.Unauthorized();
 
 		const { payload } = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET!) as JwtPayload;
-
 		req.profile = payload;
 		req.role = payload.role;
 		next();
