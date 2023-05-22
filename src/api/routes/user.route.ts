@@ -28,9 +28,9 @@ router.patch(
 	UserController.deactivateTeacherAccount
 );
 
-router.get('/users/:id', checkAuthenticated, checkIsHeadmaster, UserController.getUserDetails);
 router.patch('/update-user', checkAuthenticated, UserController.updateUserInfo); // Users update themselve information
 router.get('/users/teachers', checkAuthenticated, UserController.getTeachersByStatus);
+router.get('/users/:id', checkAuthenticated, checkIsHeadmaster, UserController.getUserDetails);
 router.get('/users/parents/:classId', checkAuthenticated, UserController.getParentsUserByClass);
 router.post(
 	'/users/search-parents',
