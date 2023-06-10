@@ -36,9 +36,9 @@ export interface ISubjectTranscriptDocument
 	extends Omit<SoftDeleteDocument, '_id'>,
 		ISubjectTranscript {}
 
-export type ISubjectTranscriptModel = Model<ISubjectTranscriptDocument>;
+export type TSubjectTranscriptModel = Model<ISubjectTranscriptDocument>;
 
-export type ISoftDeleteSubjectTranscriptModel = SoftDeleteModel<
+export type TSoftDeleteSubjectTranscriptModel = SoftDeleteModel<
 	ISubjectTranscriptDocument,
-	ISubjectTranscriptModel
+	TSubjectTranscriptModel
 >;

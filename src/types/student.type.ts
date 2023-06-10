@@ -23,10 +23,10 @@ export interface IAttendance extends Document {
 	reason?: string;
 }
 
-export interface StudentDocument extends Omit<SoftDeleteDocument, '_id'>, IStudent {}
+export interface IStudentDocument extends Omit<SoftDeleteDocument, '_id'>, IStudent {}
 
-export type IStudentModel = Model<StudentDocument>;
+export type TStudentModel = Model<IStudentDocument>;
 
-export type SoftDeleteStudentModel = SoftDeleteModel<StudentDocument, IStudentModel>;
+export type TSoftDeleteStudentModel = SoftDeleteModel<IStudentDocument, TStudentModel>;
 
-export type IPaginatedStudentModel = PaginateModel<StudentDocument>;
+export type TPaginatedStudentModel = PaginateModel<IStudentDocument>;

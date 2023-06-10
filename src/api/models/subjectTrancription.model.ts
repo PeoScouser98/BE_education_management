@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
 import mongooseDelete from 'mongoose-delete';
 import {
-	ISoftDeleteSubjectTranscriptModel,
+	TSoftDeleteSubjectTranscriptModel,
 	ISubjectTranscriptDocument,
 } from '../../types/subjectTranscription.type';
 
@@ -56,7 +56,7 @@ const SubjectTranscriptSchema = new mongoose.Schema<ISubjectTranscriptDocument>(
 		},
 	},
 	{
-		collection: 'subjecttranscriptions',
+		collection: 'subject_transcriptions',
 	}
 );
 
@@ -66,9 +66,9 @@ SubjectTranscriptSchema.plugin(mongooseDelete, {
 });
 SubjectTranscriptSchema.plugin(mongooseAutoPopulate);
 
-const SubjectTranscriptionModel: ISoftDeleteSubjectTranscriptModel = mongoose.model<
+const SubjectTranscriptionModel: TSoftDeleteSubjectTranscriptModel = mongoose.model<
 	ISubjectTranscriptDocument,
-	ISoftDeleteSubjectTranscriptModel
+	TSoftDeleteSubjectTranscriptModel
 >('SubjectTranscriptions', SubjectTranscriptSchema);
 
 export default SubjectTranscriptionModel;

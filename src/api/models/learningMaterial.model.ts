@@ -4,8 +4,8 @@ import mongooseDelete from 'mongoose-delete';
 import mongoosePaginate from 'mongoose-paginate-v2';
 import {
 	ILearningMaterialDocument,
-	IPaginateModel,
-	ISoftDeleteModel,
+	TPaginateModel,
+	TSoftDeleteModel,
 } from '../../types/learningMaterial.type';
 
 const LearningMaterialSchema = new mongoose.Schema<ILearningMaterialDocument>({
@@ -55,7 +55,7 @@ LearningMaterialSchema.pre('save', function () {
 
 const LearningMaterialModel = mongoose.model<
 	ILearningMaterialDocument,
-	ISoftDeleteModel & IPaginateModel
+	TSoftDeleteModel & TPaginateModel
 >('learning_materials', LearningMaterialSchema);
 
 export default LearningMaterialModel;

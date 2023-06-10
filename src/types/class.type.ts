@@ -10,5 +10,5 @@ export interface IClass {
 }
 
 export interface IClassDocument extends Omit<SoftDeleteDocument, '_id'>, IClass {}
-export type IClassModel = Model<IClassDocument>;
-export type ISoftDeleteClassModel = SoftDeleteModel<IClassDocument, IClassModel>;
+export type TClassModel = Model<IClassDocument>;
+export type TSoftDeleteClassModel = SoftDeleteModel<IClassDocument, TClassModel>;

@@ -1,5 +1,5 @@
 /* eslint-disable no-useless-catch */
-import { SchoolYear } from '../../types/schoolYear.type';
+import { ISchoolYear } from '../../types/schoolYear.type';
 import SchoolYearModel from '../models/schoolYear.model';
 import createHttpError from 'http-errors';
 
@@ -22,7 +22,7 @@ export const getAllSchoolYear = async (limit: number, page: number) => {
 // tạo mới 1 năm học
 export const createSchoolYear = async () => {
 	try {
-		const schoolYearExist: SchoolYear | null = await SchoolYearModel.findOne({
+		const schoolYearExist: ISchoolYear | null = await SchoolYearModel.findOne({
 			startAt: new Date().getFullYear(),
 			endAt: new Date().getFullYear() + 1,
 		});
