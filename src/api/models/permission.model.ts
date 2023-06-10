@@ -4,7 +4,7 @@ import mongooseDelete from 'mongoose-delete';
 import {
 	IPermission,
 	IPermissionDocument,
-	ISoftDeletePermissionModel,
+	TSoftDeletePermissionModel,
 	PermissionActionsEnum,
 } from '../../types/permission.type';
 import { UserRoleEnum } from '../../types/user.type';
@@ -41,9 +41,9 @@ const PermissionSchema = new mongoose.Schema<IPermission>({
 PermissionSchema.plugin(mongooseAutoPopulate);
 PermissionSchema.plugin(mongooseDelete, { deletedAt: true, overrideMethods: true });
 
-const PermissionModel: ISoftDeletePermissionModel = mongoose.model<
+const PermissionModel: TSoftDeletePermissionModel = mongoose.model<
 	IPermissionDocument,
-	ISoftDeletePermissionModel
+	TSoftDeletePermissionModel
 >('Permissions', PermissionSchema);
 
 export default PermissionModel;

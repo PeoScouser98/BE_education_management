@@ -14,6 +14,6 @@ export interface ILearningMaterial {
 export interface ILearningMaterialDocument
 	extends ILearningMaterial,
 		Omit<SoftDeleteDocument, '_id'> {}
-export type ILearningMaterialModel = Model<ILearningMaterial>;
-export type ISoftDeleteModel = SoftDeleteModel<ILearningMaterialDocument, ILearningMaterialModel>;
-export type IPaginateModel = PaginateModel<ILearningMaterial>;
+export type TLearningMaterialModel = Model<ILearningMaterial>;
+export type TSoftDeleteModel = SoftDeleteModel<ILearningMaterialDocument, TLearningMaterialModel>;
+export type TPaginateModel = PaginateModel<ILearningMaterial>;

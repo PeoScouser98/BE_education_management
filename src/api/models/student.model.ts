@@ -3,12 +3,12 @@ import mongoose, { Model, ObjectId, PaginateModel } from 'mongoose';
 import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 import mongoosePaginate from 'mongoose-paginate-v2';
 import {
-	IPaginatedStudentModel,
-	SoftDeleteStudentModel,
-	StudentDocument,
+	TPaginatedStudentModel,
+	TSoftDeleteStudentModel,
+	IStudentDocument,
 } from '../../types/student.type';
 
-const StudentSchema = new mongoose.Schema<StudentDocument>(
+const StudentSchema = new mongoose.Schema<IStudentDocument>(
 	{
 		code: {
 			type: String,
@@ -83,9 +83,9 @@ StudentSchema.plugin(mongoosePaginate);
 StudentSchema.plugin(mongooseDelete, { overrideMethods: ['find', 'findOne'], deletedAt: true });
 StudentSchema.plugin(mongooseAutoPopulate);
 
-const StudentModel: SoftDeleteStudentModel & IPaginatedStudentModel = mongoose.model<
-	StudentDocument,
-	SoftDeleteStudentModel & IPaginatedStudentModel
+const StudentModel: TSoftDeleteStudentModel & TPaginatedStudentModel = mongoose.model<
+	IStudentDocument,
+	TSoftDeleteStudentModel & TPaginatedStudentModel
 >('Students', StudentSchema);
 
 export default StudentModel;

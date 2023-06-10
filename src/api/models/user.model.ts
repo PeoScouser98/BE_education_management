@@ -3,7 +3,7 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 import mongooseDelete from 'mongoose-delete';
 import {
-	ISoftDeleteUserModel,
+	TSoftDeleteUserModel,
 	IUser,
 	IUserDocument,
 	UserGenderEnum,
@@ -116,7 +116,7 @@ UserSchema.plugin(mongooseDelete, {
 });
 UserSchema.plugin(mongooseLeanVirtuals);
 
-const UserModel = mongoose.model<IUserDocument, ISoftDeleteUserModel>('Users', UserSchema);
+const UserModel = mongoose.model<IUserDocument, TSoftDeleteUserModel>('Users', UserSchema);
 UserModel.createIndexes();
 
 export default UserModel;

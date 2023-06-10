@@ -1,5 +1,4 @@
-import mongoose from 'mongoose';
-import { IScheduleSlotTime, ITimeTable } from '../../types/timeTable.type';
+import { ITimeTable } from '../../types/timeTable.type';
 import TimeTableModel from '../models/timeTable.model';
 
 export const createTimetable = async (payload: any) => {

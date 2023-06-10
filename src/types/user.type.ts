@@ -34,5 +34,5 @@ export interface IUser extends Document {
 }
 
 export interface IUserDocument extends IUser, Omit<SoftDeleteDocument, '_id'> {}
-export type IUserModel = Model<IUserDocument>;
-export type ISoftDeleteUserModel = SoftDeleteModel<IUserDocument, IUserModel>;
+export type TUserModel = Model<IUserDocument>;
+export type TSoftDeleteUserModel = SoftDeleteModel<IUserDocument, TUserModel>;

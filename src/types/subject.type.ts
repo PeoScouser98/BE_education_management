@@ -9,6 +9,6 @@ export interface ISubject extends Document {
 
 export interface ISubjectDocument extends Omit<SoftDeleteDocument, '_id'>, ISubject {}
 
-export type ISubjectModel = Model<ISubjectDocument>;
+export type TSubjectModel = Model<ISubjectDocument>;
 
-export type ISoftDeleteSubjectModel = SoftDeleteModel<ISubjectDocument, ISubjectModel>;
+export type TSoftDeleteSubjectModel = SoftDeleteModel<ISubjectDocument, TSubjectModel>;

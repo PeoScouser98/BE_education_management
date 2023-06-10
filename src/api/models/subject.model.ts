@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import MongooseDelete from 'mongoose-delete';
 import { createSlug } from '../../helpers/toolkit';
-import { ISoftDeleteSubjectModel, ISubjectDocument } from '../../types/subject.type';
+import { TSoftDeleteSubjectModel, ISubjectDocument } from '../../types/subject.type';
 
 const subjectSchema = new mongoose.Schema<ISubjectDocument>(
 	{
@@ -25,9 +25,9 @@ subjectSchema.pre('save', function (next) {
 	next();
 });
 
-const SubjectModel: ISoftDeleteSubjectModel = mongoose.model<
+const SubjectModel: TSoftDeleteSubjectModel = mongoose.model<
 	ISubjectDocument,
-	ISoftDeleteSubjectModel
+	TSoftDeleteSubjectModel
 >('Subjects', subjectSchema);
 
 export default SubjectModel;

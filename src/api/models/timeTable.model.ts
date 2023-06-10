@@ -47,7 +47,7 @@ const TimeTableSchema = new mongoose.Schema(
 	{
 		timestamps: true,
 		versionKey: false,
-		collection: 'time_table',
+		collection: 'time_tables',
 	}
 );
 

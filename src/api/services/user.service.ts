@@ -24,7 +24,7 @@ export const createUser = async ({
 	multi,
 }: {
 	payload: Partial<IUser> & Array<Partial<IUser>>;
-	multi: Boolean;
+	multi: boolean;
 }) => {
 	try {
 		if (
@@ -34,8 +34,8 @@ export const createUser = async ({
 			const newParentsUsers = await Promise.all(
 				payload.map(async (user) => {
 					const checkResult = await checkIsValidParentUser({
-						email: user?.email!,
-						phone: user?.phone!,
+						email: user.email ?? '',
+						phone: user.phone ?? '',
 					});
 					if (checkResult.isUserExisted)
 						throw createHttpError.BadRequest('Parent account already existed!');
@@ -51,8 +51,8 @@ export const createUser = async ({
 		// Add a new parents user
 		if (payload.role === UserRoleEnum.PARENTS) {
 			const checkResult = await checkIsValidParentUser({
-				email: payload?.email!,
-				phone: payload?.phone!,
+				email: payload.email ?? '',
+				phone: payload.phone ?? '',
 			});
 			if (checkResult.isUserExisted)
 				throw createHttpError.BadRequest('Parent account already existed!');
@@ -181,7 +181,7 @@ export const getParentsUserByClass = async (classId: string) => {
 				justOne: true,
 				match: { $and: [{ parentsPhoneNumber: { $exists: true } }, { class: classId }] },
 			})
-			.select('_id displayName phone gender dateOfBirth')
+			.select('_id displayName phone class gender dateOfBirth')
 			.lean();
 
 		return parents;

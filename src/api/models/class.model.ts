@@ -1,6 +1,6 @@
 import mongoose, { Model, ObjectId } from 'mongoose';
 import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
-import { IClassDocument, ISoftDeleteClassModel } from '../../types/class.type';
+import { IClassDocument, TSoftDeleteClassModel } from '../../types/class.type';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
 
 const ClassSchema = new mongoose.Schema<IClassDocument>(
@@ -37,7 +37,7 @@ ClassSchema.virtual('students', {
 	ref: 'students',
 });
 
-const ClassModel: ISoftDeleteClassModel = mongoose.model<IClassDocument, ISoftDeleteClassModel>(
+const ClassModel: TSoftDeleteClassModel = mongoose.model<IClassDocument, TSoftDeleteClassModel>(
 	'Classes',
 	ClassSchema
 );
