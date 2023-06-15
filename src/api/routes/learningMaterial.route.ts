@@ -12,12 +12,7 @@ router.post(
 	upload.any(),
 	learningMaterialController.uploadFile
 );
-router.get(
-	'/learning-materials',
-	checkAuthenticated,
-	checkIsTeacher,
-	learningMaterialController.getFiles
-);
+router.get('/learning-materials', checkAuthenticated, checkIsTeacher, learningMaterialController.getFiles);
 router.patch(
 	'/learning-materials/:fileId/edit',
 	checkAuthenticated,

@@ -29,7 +29,7 @@ export const getCurrentYear = async (req: Request, res: Response) => {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | MongooseError).message,
 			statusCode: (error as HttpError).status || 500,
-			error: (error as any).error,
+			error: (error as any).error
 		});
 	}
 };

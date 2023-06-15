@@ -11,7 +11,7 @@ import { HttpException } from './../../types/httpException.type';
 import {
 	validateNewParentsData,
 	validateNewTeacherData,
-	validateUpdateUserData,
+	validateUpdateUserData
 } from './../validations/user.validation';
 
 export const createTeacherAccount = async (req: Request, res: Response) => {
@@ -22,11 +22,11 @@ export const createTeacherAccount = async (req: Request, res: Response) => {
 		}
 		const newUser = (await UserService.createUser({
 			payload: { ...req.body, role: UserRoleEnum.TEACHER },
-			multi: false,
+			multi: false
 		})) as IUser;
 
 		const token = jwt.sign({ auth: newUser.email }, process.env.ACCESS_TOKEN_SECRET!, {
-			expiresIn: '7d',
+			expiresIn: '7d'
 		});
 		const domain = req.protocol + '://' + req.get('host');
 		await sendVerificationEmail({
@@ -35,8 +35,8 @@ export const createTeacherAccount = async (req: Request, res: Response) => {
 			template: getVerificationEmailTemplate({
 				redirectDomain: domain,
 				user: { ...req.body, role: UserRoleEnum.TEACHER },
-				token,
-			}),
+				token
+			})
 		});
 		return res.status(HttpStatusCode.CREATED).json(newUser);
 	} catch (error) {
@@ -52,7 +52,7 @@ export const createParentsAccount = async (req: Request, res: Response) => {
 
 		const { error, value } = validateNewParentsData({
 			payload: req.body,
-			multi: Boolean(isMulti),
+			multi: Boolean(isMulti)
 		});
 
 		if (error) throw createHttpError.BadRequest(error.message);
@@ -60,66 +60,58 @@ export const createParentsAccount = async (req: Request, res: Response) => {
 		const payload = Array.isArray(value)
 			? value.map((user) => ({
 					...user,
-					role: UserRoleEnum.PARENTS,
+					role: UserRoleEnum.PARENTS
 			  }))
 			: {
 					...value,
-					role: UserRoleEnum.PARENTS,
+					role: UserRoleEnum.PARENTS
 			  };
 
 		// Create multiple or single parent user depending on type of payload and multi optional value
 		const newParents = await UserService.createUser({
 			payload,
-			multi: Boolean(isMulti),
+			multi: Boolean(isMulti)
 		});
 
 		const domain = req.protocol + '://' + req.get('host');
 
 		// send verification mail to multiple users
 		if (isMulti && Array.isArray(payload)) {
-			const sendMailPromises = [];
-
-			for (let i = 0; i < payload.length; i++) {
-				sendMailPromises.push(
+			const sendMailPromises = payload.map(
+				(recipient: Partial<IUser>) =>
 					new Promise((resolve, reject) => {
-						const token = jwt.sign(
-							{ auth: payload.at(i)?.email },
-							process.env.ACCESS_TOKEN_SECRET!,
-							{
-								expiresIn: '7d',
-							}
-						);
+						const token = jwt.sign({ auth: recipient?.email }, process.env.ACCESS_TOKEN_SECRET!, {
+							expiresIn: '7d'
+						});
 						sendVerificationEmail({
-							to: payload.at(i)?.email,
-							subject:
-								'Kích hoạt tài khoản đăng nhập hệ thống quản lý giáo dục trường TH Bột Xuyên',
+							to: recipient.email as string,
+							subject: 'Kích hoạt tài khoản đăng nhập hệ thống quản lý giáo dục trường TH Bột Xuyên',
 							template: getVerificationEmailTemplate({
 								redirectDomain: domain,
 								token: token,
-								user: payload.at(i),
-							}),
+								user: recipient as Pick<IUser, 'displayName' | 'role'>
+							})
 						})
 							.then((info) => resolve(info))
-							.catch((error) => reject(error));
+							.catch((error) => resolve(error));
 					})
-				);
-			}
+			);
+
 			await Promise.all(sendMailPromises);
 		}
 		// Send mail for one user
 		else {
 			const token = jwt.sign({ auth: payload?.email }, process.env.ACCESS_TOKEN_SECRET!, {
-				expiresIn: '7d',
+				expiresIn: '7d'
 			});
 			sendVerificationEmail({
 				to: payload?.email,
-				subject:
-					'Kích hoạt tài khoản đăng nhập hệ thống quản lý giáo dục trường TH Bột Xuyên',
+				subject: 'Kích hoạt tài khoản đăng nhập hệ thống quản lý giáo dục trường TH Bột Xuyên',
 				template: getVerificationEmailTemplate({
 					redirectDomain: domain,
 					token: token,
-					user: payload,
-				}),
+					user: payload
+				})
 			});
 		}
 

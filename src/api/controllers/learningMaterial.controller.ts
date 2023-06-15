@@ -14,13 +14,13 @@ export const getFiles = async (req: Request, res: Response) => {
 	try {
 		const sort = multiFieldSortObjectParser({
 			_sort: req.query._sort as string,
-			_order: req.query.order as string,
+			_order: req.query.order as string
 		});
 
 		const query: PaginateOptions = {
 			limit: +req.query._limit! || 20,
 			page: +req.query._page!,
-			sort: sort || {},
+			sort: sort || {}
 		};
 
 		if (!req.query.grade && !req.query.subject) {
@@ -56,14 +56,14 @@ export const uploadFile = async (req: Request, res: Response) => {
 			fileName: file.originalname,
 			mimeType: file.mimetype,
 			subject: req.body.subject,
-			grade: +req.body.grade,
+			grade: +req.body.grade
 		};
 		const savedFile = await learningMaterialService.saveFile(newFile);
 		return res.status(HttpStatusCode.CREATED).json(savedFile);
 	} catch (error) {
 		return res.status((error as HttpError).status || 500).json({
 			message: (error as HttpError).message,
-			statusCode: (error as HttpError).status || 400,
+			statusCode: (error as HttpError).status || 400
 		});
 	}
 };
@@ -86,7 +86,7 @@ export const deleteFile = async (req: Request, res: Response) => {
 
 			return res.status(HttpStatusCode.NO_CONTENT).json({
 				deletedFile,
-				deletedFileInDb,
+				deletedFileInDb
 			});
 		} else {
 			const tempDeletedFile = await learningMaterialService.softDeleteFile(req.params.fileId);

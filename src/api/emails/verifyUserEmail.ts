@@ -4,7 +4,7 @@ import { IUser, UserGenderEnum } from '../../types/user.type';
 const getVerificationEmailTemplate = ({
 	redirectDomain,
 	user,
-	token,
+	token
 }: {
 	redirectDomain: string;
 	user: Pick<IUser, 'displayName' | 'role'>;

@@ -7,16 +7,16 @@ const SchoolYearSchema = new mongoose.Schema<ISchoolYear>(
 		startAt: {
 			type: Number,
 			default: new Date().getFullYear(),
-			unique: true,
+			unique: true
 		},
 		endAt: {
 			type: Number,
-			unique: true,
-		},
+			unique: true
+		}
 	},
 	{
 		collection: 'school_years',
-		timestamps: true,
+		timestamps: true
 	}
 );
 
@@ -26,9 +26,9 @@ SchoolYearSchema.pre('save', function () {
 
 SchoolYearSchema.plugin(mongoosePaginate);
 
-const SchoolYearModel: TPaginatedSchoolYearModel = mongoose.model<
-	ISchoolYear,
-	TPaginatedSchoolYearModel
->('SchoolYears', SchoolYearSchema);
+const SchoolYearModel: TPaginatedSchoolYearModel = mongoose.model<ISchoolYear, TPaginatedSchoolYearModel>(
+	'SchoolYears',
+	SchoolYearSchema
+);
 
 export default SchoolYearModel;

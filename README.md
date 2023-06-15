@@ -45,6 +45,9 @@ $ docker-compose up -d redis
 
 ## Notices
 
--   Không sử dụng online database trong quá trình phát triển product
--   Nếu API document bị lỗi CSS -> run code trên local để chạy: http://localhost:3001/api/document
+-  Không sử dụng online database trong quá trình phát triển product
+-  Nếu API document bị lỗi CSS -> run code trên local để chạy: http://localhost:3001/api/document
+
+```
+
 ```

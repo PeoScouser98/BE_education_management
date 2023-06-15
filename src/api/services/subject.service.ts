@@ -2,10 +2,7 @@ import createHttpError from 'http-errors';
 import mongoose, { ObjectId } from 'mongoose';
 import { createSlug } from '../../helpers/toolkit';
 import SubjectModel from '../models/subject.model';
-import {
-	validateSubjectRequestBody,
-	validateSubjectUpdateBody,
-} from '../validations/subject.validation';
+import { validateSubjectRequestBody, validateSubjectUpdateBody } from '../validations/subject.validation';
 import { ISubject } from '../../types/subject.type';
 
 interface ISubjectCondition {
@@ -41,7 +38,9 @@ export const createNewSubject = async (subject: Omit<ISubject, '_id'>) => {
 		}
 
 		// check tồn tại
-		const exist = await checkSubjectExist({ subjectName: subject.subjectName });
+		const exist = await checkSubjectExist({
+			subjectName: subject.subjectName
+		});
 		if (exist) {
 			throw createHttpError.Conflict('Subject already exists');
 		}
@@ -59,7 +58,7 @@ export const checkSubjectExist = async (condition: Partial<ISubjectCondition>) =
 		if ('subjectName' in condition) {
 			const slug = createSlug(condition.subjectName);
 			condition = {
-				slug,
+				slug
 			};
 		}
 		const subject: ISubject | null = await SubjectModel.findOne(condition);
@@ -101,10 +100,12 @@ export const updateSubject = async (id: string, subject: Partial<Omit<ISubject, 
 			const slug = createSlug(subject.subjectName);
 			subject = {
 				...subject,
-				slug,
+				slug
 			};
 		}
-		return await SubjectModel.findOneAndUpdate({ _id: id }, subject, { new: true });
+		return await SubjectModel.findOneAndUpdate({ _id: id }, subject, {
+			new: true
+		});
 	} catch (error) {
 		throw error;
 	}
@@ -120,7 +121,7 @@ export const deleteSoft = async (id: string) => {
 
 		return {
 			message: 'Moved the class to the trash',
-			statusCode: 200,
+			statusCode: 200
 		};
 	} catch (error) {
 		throw error;
@@ -136,7 +137,7 @@ export const deleteForce = async (id: string) => {
 		await SubjectModel.deleteOne({ _id: id });
 		return {
 			message: 'Class has been permanently deleted',
-			statusCode: 200,
+			statusCode: 200
 		};
 	} catch (error) {
 		throw error;
@@ -161,7 +162,7 @@ export const restore = async (id: string) => {
 		await SubjectModel.restore({ _id: id });
 		return {
 			message: 'Subject have been restored',
-			statusCode: 201,
+			statusCode: 201
 		};
 	} catch (error) {
 		throw error;

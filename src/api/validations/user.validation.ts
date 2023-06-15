@@ -10,15 +10,15 @@ export const validateSigninData = (payload: Pick<IUser, 'phone' & 'password'>) =
 					.email({
 						minDomainSegments: 2,
 						tlds: {
-							allow: ['com'],
-						},
+							allow: ['com']
+						}
 					}),
 				Joi.string().alphanum().min(3).max(30)
 			)
 			.required()
 			.error(new Error('Invalid email or userName')),
 
-		password: Joi.string().min(6).max(32).required(),
+		password: Joi.string().min(6).max(32).required()
 	});
 	return schema.validate(payload);
 };
@@ -30,7 +30,7 @@ export const validateNewTeacherData = (payload: Omit<IUser, '_id'>) => {
 			.regex(/^[\w.+\-]+@gmail\.com$/)
 			.required()
 			.messages({
-				'object.regex': 'Email must be a valid Gmail address !',
+				'object.regex': 'Email must be a valid Gmail address !'
 			}),
 		password: Joi.string().min(6).max(24),
 		displayName: Joi.string().required(),
@@ -42,31 +42,25 @@ export const validateNewTeacherData = (payload: Omit<IUser, '_id'>) => {
 		eduBackground: Joi.object({
 			universityName: Joi.string().required(),
 			graduatedAt: Joi.date().required(),
-			qualification: Joi.string().required(),
-		}),
+			qualification: Joi.string().required()
+		})
 	});
 	return schema.validate(payload);
 };
 
-export const validateNewParentsData = ({
-	payload,
-	multi,
-}: {
-	payload: Omit<IUser, '_id'>;
-	multi: Boolean;
-}) => {
+export const validateNewParentsData = ({ payload, multi }: { payload: Omit<IUser, '_id'>; multi: boolean }) => {
 	const schema = Joi.object({
 		email: Joi.string()
 			.email()
 			.regex(/^[\w.+\-]+@gmail\.com$/)
 			.required()
 			.messages({
-				'string.pattern.base': 'User email must be a valid Gmail address !',
+				'string.pattern.base': 'User email must be a valid Gmail address !'
 			}),
 		phone: Joi.string().length(10).required(),
 		displayName: Joi.string().required(),
 		dateOfBirth: Joi.date().required(),
-		gender: Joi.string().required(),
+		gender: Joi.string().required()
 	});
 
 	const arraySchema = Joi.array()
@@ -85,8 +79,8 @@ export const validateUpdateUserData = (payload: Partial<IUser>) => {
 		eduBackground: Joi.object({
 			universityName: Joi.string().required(),
 			graduatedAt: Joi.date().required(),
-			qualification: Joi.string().required(),
-		}).optional(),
+			qualification: Joi.string().required()
+		}).optional()
 	});
 	return schema.validate(payload);
 };

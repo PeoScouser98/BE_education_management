@@ -3,13 +3,13 @@ import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 
 export enum UserGenderEnum {
 	MALE = 'Nam',
-	FEMALE = 'Nữ',
+	FEMALE = 'Nữ'
 }
 
 export enum UserRoleEnum {
 	HEADMASTER = 'Headmaster',
 	TEACHER = 'Teacher',
-	PARENTS = 'Parents',
+	PARENTS = 'Parents'
 }
 
 export interface IUser extends Document {

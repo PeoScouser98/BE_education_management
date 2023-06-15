@@ -7,7 +7,7 @@ const AppConfig = {
 	CLIENT_URL: isProduction ? process.env.FRONTEND_URL! : process.env.LOCAL_FRONTEND_URL!,
 	MONGO_URI: isProduction ? process.env.MAIN_DB_URI! : process.env.TEST_DB_URI!,
 	TAILWIND_CDN: 'https://cdn.tailwindcss.com',
-	BOOTSTRAP_ICONS_CDN: 'https://cdn.tailwindcss.com',
+	BOOTSTRAP_ICONS_CDN: 'https://cdn.tailwindcss.com'
 };
 
 export default AppConfig;

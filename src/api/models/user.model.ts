@@ -2,13 +2,9 @@ import bcrypt, { genSaltSync } from 'bcrypt';
 import 'dotenv/config';
 import mongoose from 'mongoose';
 import mongooseDelete from 'mongoose-delete';
-import {
-	TSoftDeleteUserModel,
-	IUser,
-	IUserDocument,
-	UserGenderEnum,
-	UserRoleEnum,
-} from '../../types/user.type';
+import mongooseAutoPopulate from 'mongoose-autopopulate';
+
+import { TSoftDeleteUserModel, IUser, IUserDocument, UserGenderEnum, UserRoleEnum } from '../../types/user.type';
 import mongooseLeanVirtuals from 'mongoose-lean-virtuals';
 
 const UserSchema = new mongoose.Schema<IUser>(
@@ -16,64 +12,64 @@ const UserSchema = new mongoose.Schema<IUser>(
 		email: {
 			type: String,
 			trim: true,
-			unique: true,
+			unique: true
 		},
 		phone: {
 			type: String,
 			require: true,
-			unique: true,
+			unique: true
 		},
 		displayName: {
 			type: String,
 			require: true,
-			trim: true,
+			trim: true
 		},
 		dateOfBirth: {
 			type: Date,
-			require: true,
+			require: true
 		},
 		address: {
 			type: String,
-			require: true,
+			require: true
 		},
 		gender: {
 			type: String,
 			require: true,
-			enum: Object.values(UserGenderEnum),
+			enum: Object.values(UserGenderEnum)
 		},
 		picture: {
 			type: String,
 			trim: true,
-			require: true,
+			require: true
 		},
 		eduBackground: {
 			type: {
 				qualification: String, // học vấn
 				universityName: String, // tên trường đã tốt nghiệp
-				graduatedAt: Date,
+				graduatedAt: Date
 			},
-			_id: false,
+			_id: false
 		},
 		employmentStatus: {
 			type: Boolean,
-			default: false,
+			default: false
 		},
 		role: {
 			type: String,
 			trim: true,
 			require: true,
-			enum: Object.values(UserRoleEnum),
+			enum: Object.values(UserRoleEnum)
 		},
 		isVerified: {
 			type: Boolean,
-			default: false,
-		},
+			default: false
+		}
 	},
 	{
 		timestamps: true,
 		toJSON: { virtuals: true },
 		versionKey: false,
-		autoIndex: true,
+		autoIndex: true
 	}
 );
 UserSchema.index({ displayName: 'text' });
@@ -82,7 +78,8 @@ UserSchema.virtual('children', {
 	localField: 'phone',
 	foreignField: 'parentsPhoneNumber',
 	ref: 'Students',
-	options: { lean: true },
+	justOne: true,
+	options: { lean: true }
 });
 
 UserSchema.virtual('userStatusText').get(function () {
@@ -112,9 +109,10 @@ UserSchema.pre('save', function (next) {
 
 UserSchema.plugin(mongooseDelete, {
 	overrideMethods: ['find', 'findOne', 'findOneAndUpdate'],
-	deletedAt: true,
+	deletedAt: true
 });
 UserSchema.plugin(mongooseLeanVirtuals);
+UserSchema.plugin(mongooseAutoPopulate);
 
 const UserModel = mongoose.model<IUserDocument, TSoftDeleteUserModel>('Users', UserSchema);
 UserModel.createIndexes();

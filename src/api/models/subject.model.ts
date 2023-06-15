@@ -8,16 +8,19 @@ const subjectSchema = new mongoose.Schema<ISubjectDocument>(
 		subjectName: String,
 		slug: {
 			type: String,
-			unique: true,
-		},
+			unique: true
+		}
 	},
 	{
 		collection: 'subjects',
-		timestamps: true,
+		timestamps: true
 	}
 );
 
-subjectSchema.plugin(MongooseDelete, { overrideMethods: ['find', 'findOne'], deletedAt: true });
+subjectSchema.plugin(MongooseDelete, {
+	overrideMethods: ['find', 'findOne'],
+	deletedAt: true
+});
 
 subjectSchema.pre('save', function (next) {
 	this.slug = createSlug(this.subjectName);
@@ -25,9 +28,9 @@ subjectSchema.pre('save', function (next) {
 	next();
 });
 
-const SubjectModel: TSoftDeleteSubjectModel = mongoose.model<
-	ISubjectDocument,
-	TSoftDeleteSubjectModel
->('Subjects', subjectSchema);
+const SubjectModel: TSoftDeleteSubjectModel = mongoose.model<ISubjectDocument, TSoftDeleteSubjectModel>(
+	'Subjects',
+	subjectSchema
+);
 
 export default SubjectModel;

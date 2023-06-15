@@ -41,18 +41,7 @@ export const getStudentByClass = async (req: Request, res: Response) => {
 		const order: SortOrder = req.query._order === 'desc' ? 1 : -1;
 		const groupBy: string = req.query._sort?.toString() || 'fullName';
 		const select: string = req.query.select?.toString() || '';
-		const page = req.query.page || 1;
-		const limit = req.query.limit || 10;
-
-		const result = await StudentServices.getStudentByClass(
-			idClass,
-			Number(page),
-			Number(limit),
-			order,
-			groupBy,
-			select
-		);
-
+		const result = await StudentServices.getStudentByClass(idClass, order, groupBy, select);
 		return res.status(HttpStatusCode.OK).json(result);
 	} catch (error) {
 		const httpException = new HttpException(error);
@@ -81,7 +70,7 @@ export const serviceStudent = async (req: Request, res: Response) => {
 		const { type, date } = req.body;
 		const optionList = {
 			transferSchool: 'transferSchool',
-			dropout: 'dropout',
+			dropout: 'dropout'
 		};
 		let result: IStudent | null = null;
 
@@ -112,24 +101,16 @@ export const getStudentStop = async (req: Request, res: Response) => {
 		const year = req.query.year || new Date().getFullYear();
 		const optionList = {
 			transferSchool: 'transferSchool',
-			dropout: 'dropout',
+			dropout: 'dropout'
 		};
 		let result: any = [];
 
 		switch (type) {
 			case optionList.transferSchool:
-				result = await StudentServices.getStudentTransferSchool(
-					Number(year),
-					Number(page),
-					Number(limit)
-				);
+				result = await StudentServices.getStudentTransferSchool(Number(year), Number(page), Number(limit));
 				break;
 			case optionList.dropout:
-				result = await StudentServices.getStudentDropout(
-					Number(year),
-					Number(page),
-					Number(limit)
-				);
+				result = await StudentServices.getStudentDropout(Number(year), Number(page), Number(limit));
 				break;
 			default:
 				throw createHttpError(400, 'Type is not valid');
@@ -184,11 +165,7 @@ export const selectAttendanceByStudent = async (req: Request, res: Response) => 
 		const month = req.query.month || new Date().getMonth() + 1;
 		const year = req.query.year || new Date().getFullYear();
 
-		const result = await StudentServices.attendanceOfStudentByMonth(
-			id,
-			Number(month),
-			Number(year)
-		);
+		const result = await StudentServices.attendanceOfStudentByMonth(id, Number(month), Number(year));
 
 		return res.status(HttpStatusCode.OK).json(result);
 	} catch (error) {
@@ -224,11 +201,7 @@ export const selectAttendanceAllClass = async (req: Request, res: Response) => {
 			date = new Date(formatDate(new Date()));
 		}
 
-		const result = await StudentServices.getAttendanceAllClass(
-			Number(page),
-			Number(limit),
-			date
-		);
+		const result = await StudentServices.getAttendanceAllClass(Number(page), Number(limit), date);
 
 		return res.status(HttpStatusCode.OK).json(result);
 	} catch (error) {

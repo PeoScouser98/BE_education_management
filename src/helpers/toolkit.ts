@@ -11,9 +11,7 @@ export const compareObject = (obj1: any, obj2: any) => {
 
 	const checkValue = obj1Keys.reduce(
 		(accumulator, currentValue) =>
-			accumulator &&
-			obj2Keys.includes(currentValue) &&
-			obj2[currentValue] === obj1[currentValue],
+			accumulator && obj2Keys.includes(currentValue) && obj2[currentValue] === obj1[currentValue],
 		true
 	);
 
@@ -95,4 +93,12 @@ export const formatDate = (date: Date): string => {
 	} catch (error) {
 		throw error;
 	}
+};
+
+export const toCapitalize = (value: string) => {
+	if (!value || typeof value !== 'string') return;
+	value = value.trim().replace(/\s+/g, ' ');
+	const subString = value.split(' ');
+	const result = subString.map((str) => str.at(0)!.toUpperCase() + str.slice(1).toLowerCase()).join(' ');
+	return result;
 };

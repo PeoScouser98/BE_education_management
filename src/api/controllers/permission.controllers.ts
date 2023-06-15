@@ -13,9 +13,7 @@ export const read = async (req: Request, res: Response) => {
 		const role = req.query.role as UserRoleEnum;
 		if (!role) throw createHttpError.BadRequest('Missing parameter: role');
 		if (!Object.values(UserRoleEnum).includes(role))
-			throw createHttpError.BadRequest(
-				`User's role parameter must be one of these: ${Object.values(UserRoleEnum)}`
-			);
+			throw createHttpError.BadRequest(`User's role parameter must be one of these: ${Object.values(UserRoleEnum)}`);
 
 		const permissions = await PermissionService.getPermissionByRole(role);
 
@@ -90,7 +88,7 @@ export const restore = async (req: Request, res: Response) => {
 	} catch (error) {
 		return res.status((error as HttpError).statusCode || 500).json({
 			message: (error as HttpError | Error).message,
-			statusCode: (error as HttpError).status || 500,
+			statusCode: (error as HttpError).status || 500
 		});
 	}
 };

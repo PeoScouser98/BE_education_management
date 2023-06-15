@@ -27,5 +27,5 @@ export enum DayInWeekEnum {
 	WEDNESSDAY = 'wednesday',
 	THURSDAY = 'thursday',
 	FRIDAY = 'friday',
-	SATURDAY = 'saturday',
+	SATURDAY = 'saturday'
 }

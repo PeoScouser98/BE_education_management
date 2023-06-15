@@ -32,7 +32,7 @@ export const deletePermission = async (permissionID: string) => {
 
 		return {
 			message: 'The permission has been successfully moved to the trash',
-			statusCode: 200,
+			statusCode: 200
 		};
 	} catch (error) {
 		throw error as MongooseError;
@@ -45,7 +45,7 @@ export const forceDeletePermission = async (permissionID: string) => {
 
 		return {
 			message: 'The permission has been successfully deleted permanently',
-			statusCode: 200,
+			statusCode: 200
 		};
 	} catch (error) {
 		throw error as MongooseError;
@@ -58,20 +58,17 @@ export const restoreDeletedPermission = async (permissionID: string) => {
 
 		return {
 			message: 'The permission has been successfully restored',
-			statusCode: 200,
+			statusCode: 200
 		};
 	} catch (error) {
 		throw error as MongooseError;
 	}
 };
 
-export const updatePermission = async (
-	permissionID: string,
-	permission: IPermission & Partial<IPermission>
-) => {
+export const updatePermission = async (permissionID: string, permission: IPermission & Partial<IPermission>) => {
 	try {
 		return await PermissionModel.findOneAndUpdate({ _id: permissionID }, permission, {
-			new: true,
+			new: true
 		}).exec();
 	} catch (error) {
 		throw error as MongooseError;

@@ -6,7 +6,7 @@ import StudentModel from '../models/student.model';
 import {
 	validateAttendanceStudent,
 	validateReqBodyStudent,
-	validateUpdateReqBodyStudent,
+	validateUpdateReqBodyStudent
 } from '../validations/student.validation';
 import { selectTranscriptStudent } from './subjectTrancription.service';
 import { ISubjectTranscript } from '../../types/subjectTranscription.type';
@@ -44,7 +44,7 @@ export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent,
 		}
 
 		const check: IStudent | null = await StudentModel.findOne({
-			code: data.code,
+			code: data.code
 		});
 
 		if (check) {
@@ -61,9 +61,7 @@ const createStudentList = async (data: Omit<IStudent, '_id'>[]) => {
 	try {
 		if (data.length === 0) throw createHttpError(HttpStatusCode.NO_CONTENT);
 		if (data.length > 50) {
-			throw createHttpError.PayloadTooLarge(
-				'You are only allowed to add 50 students at a time'
-			);
+			throw createHttpError.PayloadTooLarge('You are only allowed to add 50 students at a time');
 		}
 
 		// validate
@@ -74,14 +72,14 @@ const createStudentList = async (data: Omit<IStudent, '_id'>[]) => {
 				studentErrorValidate.push({
 					fullName: item.fullName,
 					parentPhone: item.parentsPhoneNumber,
-					message: error.message,
+					message: error.message
 				});
 			}
 		});
 
 		if (studentErrorValidate.length > 0) {
 			throw createHttpError(400, 'The student does not satisfy the validation requirements', {
-				error: studentErrorValidate,
+				error: studentErrorValidate
 			});
 		}
 
@@ -90,7 +88,7 @@ const createStudentList = async (data: Omit<IStudent, '_id'>[]) => {
 		const studentCodes: string[] = data.map((item) => item.code);
 
 		const studentExistDb = await StudentModel.find({
-			code: { $in: studentCodes },
+			code: { $in: studentCodes }
 		});
 
 		let check: any = null;
@@ -100,13 +98,15 @@ const createStudentList = async (data: Omit<IStudent, '_id'>[]) => {
 			if (check) {
 				studentExists.push({
 					fullName: item.fullName,
-					parentPhone: item.parentsPhoneNumber,
+					parentPhone: item.parentsPhoneNumber
 				});
 			}
 		});
 
 		if (studentExists.length > 0) {
-			throw createHttpError(409, 'Student already exists', { error: studentExists });
+			throw createHttpError(409, 'Student already exists', {
+				error: studentExists
+			});
 		}
 
 		// save
@@ -134,7 +134,7 @@ export const updateStudent = async (id: string, data: Partial<Omit<IStudent, '_i
 
 		// check sự tồn tại
 		const student = await StudentModel.findOne({
-			_id: id,
+			_id: id
 		});
 
 		if (!student) {
@@ -153,23 +153,18 @@ export const updateStudent = async (id: string, data: Partial<Omit<IStudent, '_i
 			throw createHttpError(304);
 		}
 
-		return await StudentModel.findOneAndUpdate({ _id: id }, data, { new: true });
+		return await StudentModel.findOneAndUpdate({ _id: id }, data, {
+			new: true
+		});
 	} catch (error) {
 		throw error;
 	}
 };
 
 // get student theo class
-export const getStudentByClass = async (
-	idClass: string,
-	page: number,
-	limit: number,
-	order: SortOrder,
-	groupBy: string,
-	select: string
-) => {
+export const getStudentByClass = async (classId: string, order: SortOrder, groupBy: string, select: string) => {
 	try {
-		if (!idClass || !mongoose.Types.ObjectId.isValid(idClass)) {
+		if (!classId || !mongoose.Types.ObjectId.isValid(classId)) {
 			throw createHttpError.BadRequest('_id of the class is invalid');
 		}
 
@@ -181,7 +176,7 @@ export const getStudentByClass = async (
 			'class',
 			'parentsPhoneNumber',
 			'isPolicyBeneficiary',
-			'isGraduated',
+			'isGraduated'
 		];
 
 		if (!availableSortFields.includes(groupBy)) {
@@ -190,10 +185,13 @@ export const getStudentByClass = async (
 			);
 		}
 
-		return await StudentModel.paginate(
-			{ class: idClass, dropoutDate: null, transferSchool: null },
-			{ page: page, limit: limit, select: select, sort: { [groupBy]: order } }
-		);
+		const result = await StudentModel.find({
+			class: classId,
+			dropoutDate: null,
+			transferSchool: null
+		})
+			.sort({ [groupBy]: order })
+			.select(select);
 	} catch (error) {
 		throw error;
 	}
@@ -207,10 +205,10 @@ export const getDetailStudent = async (id: string) => {
 		}
 
 		const student: IStudent | null = await StudentModel.findOne({
-			_id: id,
+			_id: id
 		}).populate({
 			path: 'class',
-			select: 'className headTeacher',
+			select: 'className headTeacher'
 		});
 
 		const transcriptStudent: ISubjectTranscript[] = await selectTranscriptStudent(id);
@@ -221,7 +219,7 @@ export const getDetailStudent = async (id: string) => {
 
 		return {
 			info: student,
-			transcript: transcriptStudent,
+			transcript: transcriptStudent
 		};
 	} catch (error) {
 		throw error;
@@ -237,28 +235,20 @@ export const setStudentTransferSchool = async (id: string, date: string) => {
 
 		const dateCheck = new Date(date);
 		if (isNaN(dateCheck.getTime())) {
-			throw createHttpError.BadRequest(
-				'The Date you passed is not in the correct Date data type'
-			);
+			throw createHttpError.BadRequest('The Date you passed is not in the correct Date data type');
 		}
 
 		// check xem có còn học ở trường không
 		const student = await StudentModel.findOne({
 			_id: id,
 			transferSchool: null,
-			dropoutDate: null,
+			dropoutDate: null
 		});
 
 		if (!student) {
-			throw createHttpError.NotFound(
-				'The student has transferred to another school or dropped out'
-			);
+			throw createHttpError.NotFound('The student has transferred to another school or dropped out');
 		}
-		return await StudentModel.findOneAndUpdate(
-			{ _id: id },
-			{ transferSchool: date },
-			{ new: true }
-		);
+		return await StudentModel.findOneAndUpdate({ _id: id }, { transferSchool: date }, { new: true });
 	} catch (error) {
 		throw error;
 	}
@@ -273,46 +263,39 @@ export const setDropoutStudent = async (id: string, date: string) => {
 
 		const dateCheck = new Date(date);
 		if (isNaN(dateCheck.getTime())) {
-			throw createHttpError.BadRequest(
-				'The Date you passed is not in the correct Date data type'
-			);
+			throw createHttpError.BadRequest('The Date you passed is not in the correct Date data type');
 		}
 
 		// check xem có còn học ở trường không
 		const student = await StudentModel.findOne({
 			_id: id,
 			transferSchool: null,
-			dropoutDate: null,
+			dropoutDate: null
 		});
 
 		if (!student) {
-			throw createHttpError.NotFound(
-				'The student has transferred to another school or dropped out'
-			);
+			throw createHttpError.NotFound('The student has transferred to another school or dropped out');
 		}
-		return await StudentModel.findOneAndUpdate(
-			{ _id: id },
-			{ dropoutDate: date },
-			{ new: true }
-		);
+		return await StudentModel.findOneAndUpdate({ _id: id }, { dropoutDate: date }, { new: true });
 	} catch (error) {
 		throw error;
 	}
 };
 
 // Lấy ra các học sinh đã chuyển trường
-export const getStudentTransferSchool = async (
-	year: number | 'all',
-	page: number,
-	limit: number
-) => {
+export const getStudentTransferSchool = async (year: number | 'all', page: number, limit: number) => {
 	try {
-		let condition: any = { $expr: { $eq: [{ $year: '$transferSchool' }, year] } };
+		let condition: any = {
+			$expr: { $eq: [{ $year: '$transferSchool' }, year] }
+		};
 		if (year === 'all') {
 			condition = { transferSchool: { $ne: null } };
 		}
 
-		return await StudentModel.paginate(condition, { page: page, limit: limit });
+		return await StudentModel.paginate(condition, {
+			page: page,
+			limit: limit
+		});
 	} catch (error) {
 		throw error;
 	}
@@ -320,13 +303,18 @@ export const getStudentTransferSchool = async (
 
 export const getStudentDropout = async (year: 'all' | number, page: number, limit: number) => {
 	try {
-		let condition: any = { $expr: { $eq: [{ $year: '$dropoutDate' }, year] } };
+		let condition: any = {
+			$expr: { $eq: [{ $year: '$dropoutDate' }, year] }
+		};
 
 		if (year === 'all') {
 			condition = { dropoutDate: { $ne: null } };
 		}
 
-		return await StudentModel.paginate(condition, { page: page, limit: limit });
+		return await StudentModel.paginate(condition, {
+			page: page,
+			limit: limit
+		});
 	} catch (error) {
 		throw error;
 	}
@@ -345,7 +333,7 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 
 		if (absentStudents.length === 0) {
 			return {
-				message: 'Attendance has been saved!',
+				message: 'Attendance has been saved!'
 			};
 		}
 
@@ -374,7 +362,7 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 
 		if (errorValidates.length > 0) {
 			throw createHttpError(400, 'The body data does not satisfy the validation', {
-				error: errorValidates,
+				error: errorValidates
 			});
 		}
 
@@ -384,7 +372,7 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 		// Kiểm tra xem học sinh vắng có đúng học sinh của lớp không
 		const checkExist: IStudent[] = await StudentModel.find({
 			_id: { $in: absentStudentIdList },
-			class: idClass,
+			class: idClass
 		});
 
 		const studentNotExist: string[] = [];
@@ -400,7 +388,7 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 
 		if (studentNotExist.length > 0) {
 			throw createHttpError(404, 'This student does not exist in the class', {
-				error: studentNotExist,
+				error: studentNotExist
 			});
 		}
 
@@ -417,14 +405,14 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 			if (check) {
 				attendedStudents.push({
 					id: student._id.toString(),
-					name: student.fullName,
+					name: student.fullName
 				});
 			}
 		});
 
 		if (attendedStudents.length > 0) {
 			throw createHttpError(409, "Today's attendance for the student already exists", {
-				error: attendedStudents,
+				error: attendedStudents
 			});
 		}
 
@@ -441,18 +429,18 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 							absentDays: {
 								...item.absent,
 								date: new Date(),
-								schoolYear: schoolYearCurr._id,
-							},
-						},
-					},
-				},
+								schoolYear: schoolYearCurr._id
+							}
+						}
+					}
+				}
 			};
 		});
 
 		await StudentModel.bulkWrite(bulkUpdateAbsentStudents);
 
 		return {
-			message: 'Attendance has been saved!',
+			message: 'Attendance has been saved!'
 		};
 	} catch (error) {
 		throw error;
@@ -475,36 +463,34 @@ export const dailyAttendanceList = async (idClass: string, date: Date) => {
 				$elemMatch: {
 					date: {
 						$gte: date,
-						$lt: nextDay,
-					},
-				},
+						$lt: nextDay
+					}
+				}
 			},
-			class: idClass,
+			class: idClass
 		}).lean();
 
 		if (studentAbsents.length === 0) {
 			return {
 				absent: 0,
-				students: [],
+				students: []
 			};
 		}
 
 		const result = studentAbsents.map((item) => {
 			let attendanceStatus = true;
-			const check = studentAbsents.find(
-				(itemAb) => itemAb._id.toString() === item._id.toString()
-			);
+			const check = studentAbsents.find((itemAb) => itemAb._id.toString() === item._id.toString());
 
 			attendanceStatus = check ? false : true;
 			return {
 				...item,
-				attendanceStatus: attendanceStatus,
+				attendanceStatus: attendanceStatus
 			};
 		});
 
 		return {
 			absent: studentAbsents.length,
-			students: result,
+			students: result
 		};
 	} catch (error) {
 		throw error;
@@ -515,7 +501,7 @@ export const dailyAttendanceList = async (idClass: string, date: Date) => {
 export const attendanceOfStudentByMonth = async (id: string, month: number, year: number) => {
 	try {
 		const {
-			info: { absentDays },
+			info: { absentDays }
 		} = await getDetailStudent(id);
 
 		const result: IAttendance[] = [];
@@ -540,7 +526,12 @@ export const attendanceOfStudentByMonth = async (id: string, month: number, year
 export const getPolicyBeneficiary = async (page: number, limit: number) => {
 	return await StudentModel.paginate(
 		{ dropoutDate: null, transferSchool: null, isPolicyBeneficiary: true },
-		{ page: page, limit: limit, select: '-absentDays', sort: { class: 'desc' } }
+		{
+			page: page,
+			limit: limit,
+			select: '-absentDays',
+			sort: { class: 'desc' }
+		}
 	);
 };
 
@@ -557,17 +548,17 @@ export const getAttendanceAllClass = async (page: number, limit: number, date: D
 					$elemMatch: {
 						date: {
 							$gte: date,
-							$lt: nextDay,
-						},
-					},
-				},
+							$lt: nextDay
+						}
+					}
+				}
 			},
 			{
 				lean: true,
 				page: page,
 				limit: limit,
 				sort: { class: 'desc' },
-				populate: { path: 'class', select: 'className' },
+				populate: { path: 'class', select: 'className' }
 			}
 		);
 
@@ -576,7 +567,7 @@ export const getAttendanceAllClass = async (page: number, limit: number, date: D
 
 		return {
 			...studentAbsentDays,
-			classes,
+			classes
 		};
 	} catch (error) {
 		throw error;

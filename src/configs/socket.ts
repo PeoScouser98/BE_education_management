@@ -14,19 +14,12 @@ export interface InterServerEvents {}
 
 export interface SocketData {}
 
-const connectSocketIO = (
-	server: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>
-) => {
-	const io = new Server<
-		ClientToServerEvents,
-		ServerToClientEvents,
-		InterServerEvents,
-		SocketData
-	>(server, {
+const connectSocketIO = (server: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>) => {
+	const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(server, {
 		cors: {
 			// origin: "http://localhost:3000", //* base url from front end
-			methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-		},
+			methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+		}
 	});
 	io.on('connection', (socket) => {
 		console.log('User connected:>>', socket.id);

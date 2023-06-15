@@ -9,18 +9,8 @@ router.post('/permissions', permissionController.create);
 
 router.put('/permissions/:id', checkAuthenticated, checkIsHeadmaster, permissionController.update);
 
-router.put(
-	'/permissions/:id/restore',
-	checkAuthenticated,
-	checkIsHeadmaster,
-	permissionController.restore
-);
+router.put('/permissions/:id/restore', checkAuthenticated, checkIsHeadmaster, permissionController.restore);
 
-router.delete(
-	'/permissions/:id',
-	checkAuthenticated,
-	checkIsHeadmaster,
-	permissionController.remove
-);
+router.delete('/permissions/:id', checkAuthenticated, checkIsHeadmaster, permissionController.remove);
 
 export default router;

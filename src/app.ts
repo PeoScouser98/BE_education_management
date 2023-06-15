@@ -35,9 +35,9 @@ app.use(
 			directives: {
 				...helmet.contentSecurityPolicy.getDefaultDirectives(),
 				'style-src': ["'self'", "'unsafe-inline'", AppConfig.BOOTSTRAP_ICONS_CDN],
-				'script-src': ["'self'", "'unsafe-inline'", AppConfig.TAILWIND_CDN],
-			},
-		},
+				'script-src': ["'self'", "'unsafe-inline'", AppConfig.TAILWIND_CDN]
+			}
+		}
 	})
 );
 
@@ -51,7 +51,7 @@ app.use(
 		saveUninitialized: false,
 		secret: AppConfig.KEY_SESSION,
 		store: new MemoryStore(),
-		resave: true,
+		resave: true
 	})
 );
 
@@ -60,7 +60,7 @@ app.use(
 	cors({
 		origin: AppConfig.CLIENT_URL,
 		credentials: true,
-		methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+		methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']
 	})
 );
 
