@@ -1,9 +1,18 @@
 import createHttpError from 'http-errors';
 import mongoose from 'mongoose';
-import { compareObject } from '../../helpers/toolkit';
 import { IClass } from '../../types/class.type';
 import ClassModel from '../models/class.model';
 import { validateClassData, validateClassEditData } from '../validations/class.validation';
+
+export const getOneClass = async (classId: string) => {
+	try {
+		return await ClassModel.findOne({ _id: classId }).populate({
+			path: 'totalStudents'
+		});
+	} catch (error) {
+		throw error;
+	}
+};
 
 export const createClass = async (payload: Omit<IClass, '_id'>) => {
 	try {
@@ -12,7 +21,9 @@ export const createClass = async (payload: Omit<IClass, '_id'>) => {
 		if (validateCheck.error) {
 			throw createHttpError(502, validateCheck.error.message);
 		}
-		const { exists } = await checkClassesExists('', { className: payload.className });
+		const { exists } = await checkClassesExists('', {
+			className: payload.className
+		});
 
 		if (exists) {
 			throw createHttpError(409, `Class ${payload.className} already exists`);
