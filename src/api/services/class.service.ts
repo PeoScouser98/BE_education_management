@@ -1,9 +1,18 @@
 import createHttpError from 'http-errors';
 import mongoose from 'mongoose';
-import { compareObject } from '../../helpers/toolkit';
 import { IClass } from '../../types/class.type';
 import ClassModel from '../models/class.model';
 import { validateClassData, validateClassEditData } from '../validations/class.validation';
+
+export const getOneClass = async (classId: string) => {
+	try {
+		return await ClassModel.findOne({ _id: classId }).populate({
+			path: 'totalStudents'
+		});
+	} catch (error) {
+		throw error;
+	}
+};
 
 export const createClass = async (payload: Omit<IClass, '_id'>) => {
 	try {
@@ -12,7 +21,9 @@ export const createClass = async (payload: Omit<IClass, '_id'>) => {
 		if (validateCheck.error) {
 			throw createHttpError(502, validateCheck.error.message);
 		}
-		const { exists } = await checkClassesExists('', { className: payload.className });
+		const { exists } = await checkClassesExists('', {
+			className: payload.className
+		});
 
 		if (exists) {
 			throw createHttpError(409, `Class ${payload.className} already exists`);
@@ -20,7 +31,7 @@ export const createClass = async (payload: Omit<IClass, '_id'>) => {
 
 		const classResult: IClass = await new ClassModel(payload).save();
 		return {
-			classes: classResult,
+			classes: classResult
 		};
 	} catch (error) {
 		throw error;
@@ -38,17 +49,17 @@ export const checkClassesExists = async (_id: string, condition: Partial<IClass>
 
 			conditionCurr = {
 				...condition,
-				_id,
+				_id
 			};
 		}
 
 		const classes: IClass | null = await ClassModel.findOne({
-			...conditionCurr,
+			...conditionCurr
 		});
 
 		return {
 			exists: !!classes,
-			classes: classes,
+			classes: classes
 		};
 	} catch (error) {
 		throw error;
@@ -65,11 +76,7 @@ export const updateClasses = async (payload: Partial<Omit<IClass, '_id'>>, _id: 
 		const { exists, classes } = await checkClassesExists(_id);
 
 		// trường hợp className và grade không khớp nhau
-		if (
-			payload.className &&
-			!payload.grade &&
-			!payload.className.startsWith(JSON.stringify(classes?.grade))
-		) {
+		if (payload.className && !payload.grade && !payload.className.startsWith(JSON.stringify(classes?.grade))) {
 			throw createHttpError.BadRequest('Invalid Class name, classname: grade+"A|B|C|D..."');
 		}
 
@@ -95,7 +102,7 @@ export const softDeleteClass = async (id: string) => {
 
 		return {
 			message: 'Moved the class to the trash',
-			statusCode: 200,
+			statusCode: 200
 		};
 	} catch (error) {
 		throw error;
@@ -108,7 +115,7 @@ export const restoreClass = async (id: string) => {
 
 		return {
 			message: 'Class have been restored',
-			statusCode: 200,
+			statusCode: 200
 		};
 	} catch (error) {
 		throw error;
@@ -121,7 +128,7 @@ export const forceDeleteClass = async (id: string) => {
 
 		return {
 			message: 'Class has been permanently deleted',
-			statusCode: 200,
+			statusCode: 200
 		};
 	} catch (error) {
 		throw error;
