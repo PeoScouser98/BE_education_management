@@ -20,7 +20,7 @@ const rootRouters: Array<Router> = [
 	PermissionRouter,
 	LearningMaterialRouter,
 	TrancriptRouter,
-	TimeTableRouter,
+	TimeTableRouter
 ];
 const router = express.Router();
 

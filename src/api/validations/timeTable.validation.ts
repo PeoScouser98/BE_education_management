@@ -4,7 +4,7 @@ import { ITimeTable } from '../../types/timeTable.type';
 const timeSlotSchema = Joi.object({
 	period: Joi.number().integer().valid(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).required(),
 	subject: Joi.string().required(),
-	teacher: Joi.string().required(),
+	teacher: Joi.string().required()
 });
 
 export const validateNewTimeTable = (payload: Omit<ITimeTable, '_id'>) => {
@@ -16,8 +16,8 @@ export const validateNewTimeTable = (payload: Omit<ITimeTable, '_id'>) => {
 			wednesday: Joi.array().unique('period').items(timeSlotSchema).required(),
 			thursday: Joi.array().unique('period').items(timeSlotSchema).required(),
 			friday: Joi.array().unique('period').items(timeSlotSchema).required(),
-			saturday: Joi.array().unique('period').items(timeSlotSchema).required(),
-		}).required(),
+			saturday: Joi.array().unique('period').items(timeSlotSchema).required()
+		}).required()
 	}).validate(payload);
 };
 
@@ -30,7 +30,7 @@ export const validateUpdateTimeTablePayload = (payload: Partial<ITimeTable>) => 
 			wednesday: Joi.array().unique('period').items(timeSlotSchema).required(),
 			thursday: Joi.array().unique('period').items(timeSlotSchema).required(),
 			friday: Joi.array().unique('period').items(timeSlotSchema).required(),
-			saturday: Joi.array().unique('period').items(timeSlotSchema).required(),
-		}).required(),
+			saturday: Joi.array().unique('period').items(timeSlotSchema).required()
+		}).required()
 	}).validate(payload);
 };

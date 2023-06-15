@@ -6,11 +6,6 @@ const router = express.Router();
 
 router.get('/schoolYears/current', checkAuthenticated, SchoolYearController.getCurrentYear);
 router.get('/schoolYears', checkAuthenticated, SchoolYearController.schoolYearList);
-router.post(
-	'/schoolYears',
-	checkAuthenticated,
-	checkIsHeadmaster,
-	SchoolYearController.createSchoolYear
-);
+router.post('/schoolYears', checkAuthenticated, checkIsHeadmaster, SchoolYearController.createSchoolYear);
 
 export default router;

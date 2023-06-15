@@ -5,7 +5,7 @@ export enum PermissionActionsEnum {
 	GET = 'GET',
 	CREATE = 'CREATE',
 	UPDATE = 'UPDATE',
-	DELETE = 'DELETE',
+	DELETE = 'DELETE'
 }
 export interface IPermission extends Document {
 	_id: ObjectId;

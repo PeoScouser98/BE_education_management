@@ -20,7 +20,7 @@ export const createClass = async (payload: Omit<IClass, '_id'>) => {
 
 		const classResult: IClass = await new ClassModel(payload).save();
 		return {
-			classes: classResult,
+			classes: classResult
 		};
 	} catch (error) {
 		throw error;
@@ -38,17 +38,17 @@ export const checkClassesExists = async (_id: string, condition: Partial<IClass>
 
 			conditionCurr = {
 				...condition,
-				_id,
+				_id
 			};
 		}
 
 		const classes: IClass | null = await ClassModel.findOne({
-			...conditionCurr,
+			...conditionCurr
 		});
 
 		return {
 			exists: !!classes,
-			classes: classes,
+			classes: classes
 		};
 	} catch (error) {
 		throw error;
@@ -65,11 +65,7 @@ export const updateClasses = async (payload: Partial<Omit<IClass, '_id'>>, _id: 
 		const { exists, classes } = await checkClassesExists(_id);
 
 		// trường hợp className và grade không khớp nhau
-		if (
-			payload.className &&
-			!payload.grade &&
-			!payload.className.startsWith(JSON.stringify(classes?.grade))
-		) {
+		if (payload.className && !payload.grade && !payload.className.startsWith(JSON.stringify(classes?.grade))) {
 			throw createHttpError.BadRequest('Invalid Class name, classname: grade+"A|B|C|D..."');
 		}
 
@@ -95,7 +91,7 @@ export const softDeleteClass = async (id: string) => {
 
 		return {
 			message: 'Moved the class to the trash',
-			statusCode: 200,
+			statusCode: 200
 		};
 	} catch (error) {
 		throw error;
@@ -108,7 +104,7 @@ export const restoreClass = async (id: string) => {
 
 		return {
 			message: 'Class have been restored',
-			statusCode: 200,
+			statusCode: 200
 		};
 	} catch (error) {
 		throw error;
@@ -121,7 +117,7 @@ export const forceDeleteClass = async (id: string) => {
 
 		return {
 			message: 'Class has been permanently deleted',
-			statusCode: 200,
+			statusCode: 200
 		};
 	} catch (error) {
 		throw error;

@@ -9,7 +9,7 @@ router.get('/auth/google', passport.authenticate('google', { scope: ['email', 'p
 router.get(
 	'/auth/google/callback',
 	passport.authenticate('google', {
-		failureRedirect: `${AppConfig.CLIENT_URL}/signin`,
+		failureRedirect: `${AppConfig.CLIENT_URL}/signin`
 	}),
 	AuthController.signinWithGoogle
 );

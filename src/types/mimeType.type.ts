@@ -10,5 +10,5 @@ export enum AllowedMimeType {
 	RAR = 'application/vnd.rar',
 	// IMAGE
 	PNG = 'image/png',
-	JPG = 'image/jpeg',
+	JPG = 'image/jpeg'
 }

@@ -10,22 +10,22 @@ const ClassSchema = new mongoose.Schema<IClassDocument>(
 			require: true,
 			trim: true,
 			uppercase: true,
-			unique: true,
+			unique: true
 		},
 		grade: {
 			type: Number,
 			enum: [1, 2, 3, 4, 5],
-			require: true,
+			require: true
 		},
 		headTeacher: {
 			type: mongoose.Types.ObjectId,
 			ref: 'Users',
-			autopopulate: { select: '_id displayName phone email' },
-		},
+			autopopulate: { select: '_id displayName phone email' }
+		}
 	},
 	{
 		collection: 'classes',
-		timestamps: true,
+		timestamps: true
 	}
 );
 ClassSchema.plugin(mongooseAutoPopulate);
@@ -34,12 +34,9 @@ ClassSchema.plugin(mongooseDelete, { overrideMethods: ['find', 'findOne'], delet
 ClassSchema.virtual('students', {
 	localField: '_id',
 	foreignField: 'class',
-	ref: 'students',
+	ref: 'students'
 });
 
-const ClassModel: TSoftDeleteClassModel = mongoose.model<IClassDocument, TSoftDeleteClassModel>(
-	'Classes',
-	ClassSchema
-);
+const ClassModel: TSoftDeleteClassModel = mongoose.model<IClassDocument, TSoftDeleteClassModel>('Classes', ClassSchema);
 
 export default ClassModel;

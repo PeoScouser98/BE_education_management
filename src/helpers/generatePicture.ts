@@ -11,7 +11,7 @@ const generatePicureByName = (char: string) => {
 		paramsStringify({
 			// background: 'ccc',
 			// color: 'fff',
-			name: char,
+			name: char
 		})
 	);
 };

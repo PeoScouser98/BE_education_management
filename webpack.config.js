@@ -8,11 +8,11 @@ module.exports = {
 	entry: './src/server.ts',
 	output: {
 		path: path.resolve(__dirname, 'dist'),
-		filename: 'bundle.js',
+		filename: 'bundle.js'
 	},
 	target: 'node',
 	resolve: {
-		extensions: ['.ts', '.js'],
+		extensions: ['.ts', '.js']
 	},
 	module: {
 		rules: [
@@ -24,13 +24,13 @@ module.exports = {
 					options: {
 						jsc: {
 							parser: {
-								syntax: 'typescript',
-							},
-						},
-					},
-				},
-			},
-		],
+								syntax: 'typescript'
+							}
+						}
+					}
+				}
+			}
+		]
 	},
 	optimization: {
 		minimize: true,
@@ -38,13 +38,13 @@ module.exports = {
 			new TerserPlugin({
 				terserOptions: {
 					format: {
-						comments: false,
-					},
+						comments: false
+					}
 				},
-				extractComments: false,
-			}),
-		],
+				extractComments: false
+			})
+		]
 	},
 
-	externals: [nodeExternals()],
+	externals: [nodeExternals()]
 };

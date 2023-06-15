@@ -5,7 +5,7 @@ import createHttpError from 'http-errors';
 export const sendVerificationEmail = async ({
 	to,
 	subject,
-	template,
+	template
 }: {
 	to: string;
 	subject: string;
@@ -15,11 +15,11 @@ export const sendVerificationEmail = async ({
 		{
 			from: {
 				address: process.env.AUTH_EMAIL!,
-				name: 'Tiểu học Bột Xuyên',
+				name: 'Tiểu học Bột Xuyên'
 			},
 			to: to,
 			subject: subject,
-			html: template,
+			html: template
 		},
 		(err: Error | null, info: SMTPTransport.SentMessageInfo): void => {
 			console.log('recipient:>>>', to);

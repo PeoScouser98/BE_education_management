@@ -9,23 +9,23 @@ const ScheduleSlotSchema = new mongoose.Schema(
 		period: {
 			type: Number,
 			require: true,
-			enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+			enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 		},
 		subject: {
 			type: mongoose.Types.ObjectId,
 			ref: 'Subjects',
 			require: true,
-			autopopulate: { select: 'subjectName _id' },
+			autopopulate: { select: 'subjectName _id' }
 		},
 		teacher: {
 			type: mongoose.Types.ObjectId,
 			ref: 'Users',
 			require: true,
-			autopopulate: { select: 'displayName _id' },
-		},
+			autopopulate: { select: 'displayName _id' }
+		}
 	},
 	{
-		_id: false,
+		_id: false
 	}
 );
 const TimeTableSchema = new mongoose.Schema(
@@ -33,7 +33,7 @@ const TimeTableSchema = new mongoose.Schema(
 		class: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Classes',
-			required: true,
+			required: true
 		},
 		schedule: {
 			monday: [ScheduleSlotSchema],
@@ -41,13 +41,13 @@ const TimeTableSchema = new mongoose.Schema(
 			wednessday: [ScheduleSlotSchema],
 			thursday: [ScheduleSlotSchema],
 			friday: [ScheduleSlotSchema],
-			saturday: [ScheduleSlotSchema],
-		},
+			saturday: [ScheduleSlotSchema]
+		}
 	},
 	{
 		timestamps: true,
 		versionKey: false,
-		collection: 'time_tables',
+		collection: 'time_tables'
 	}
 );
 

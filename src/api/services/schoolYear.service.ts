@@ -11,7 +11,7 @@ export const getAllSchoolYear = async (limit: number, page: number) => {
 			{
 				limit: limit,
 				page: page,
-				sort: { startAt: 'asc' },
+				sort: { startAt: 'asc' }
 			}
 		);
 	} catch (error) {
@@ -24,7 +24,7 @@ export const createSchoolYear = async () => {
 	try {
 		const schoolYearExist: ISchoolYear | null = await SchoolYearModel.findOne({
 			startAt: new Date().getFullYear(),
-			endAt: new Date().getFullYear() + 1,
+			endAt: new Date().getFullYear() + 1
 		});
 
 		// schoolyear đã tồn tại
@@ -45,17 +45,11 @@ export const createSchoolYear = async () => {
 export const selectSchoolYearCurr = async () => {
 	try {
 		const schoolYear = await SchoolYearModel.findOne({
-			$and: [
-				{ startAt: { $lte: new Date().getFullYear() } },
-				{ endAt: { $gte: new Date().getFullYear() } },
-			],
+			$and: [{ startAt: { $lte: new Date().getFullYear() } }, { endAt: { $gte: new Date().getFullYear() } }]
 		});
 
 		if (!schoolYear) {
-			throw createHttpError(
-				404,
-				'The new academic year has not started yet, please come back later'
-			);
+			throw createHttpError(404, 'The new academic year has not started yet, please come back later');
 		}
 
 		return schoolYear;

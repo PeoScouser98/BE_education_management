@@ -13,7 +13,7 @@ export const validateReqBodyStudent = (data: Omit<IStudent, '_id'>) => {
 			.required()
 			.pattern(/^(?:\+84|0)(?:1\d{9}|3\d{8}|5\d{8}|7\d{8}|8\d{8}|9\d{8})$/),
 		isPolicyBeneficiary: Joi.bool().optional(),
-		isGraduated: Joi.bool().optional(),
+		isGraduated: Joi.bool().optional()
 	});
 	return schema.validate(data);
 };
@@ -21,7 +21,7 @@ export const validateReqBodyStudent = (data: Omit<IStudent, '_id'>) => {
 export const validateAttendanceStudent = (data: Omit<IAttendance, '_id' | 'date'>) => {
 	const schema = Joi.object({
 		hasPermision: Joi.bool().optional(),
-		reason: Joi.string().min(8).max(256).optional(),
+		reason: Joi.string().min(8).max(256).optional()
 	});
 
 	return schema.validate(data);
@@ -39,7 +39,7 @@ export const validateUpdateReqBodyStudent = (data: Partial<Omit<IStudent, '_id'>
 			.optional()
 			.pattern(/^(?:\+84|0)(?:1\d{9}|3\d{8}|5\d{8}|7\d{8}|8\d{8}|9\d{8})$/),
 		isPolicyBeneficiary: Joi.bool().optional(),
-		isGraduated: Joi.bool().optional(),
+		isGraduated: Joi.bool().optional()
 	});
 	return schema.validate(data);
 };

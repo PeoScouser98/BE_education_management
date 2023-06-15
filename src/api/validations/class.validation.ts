@@ -6,7 +6,7 @@ export const validateClassData = (data: Omit<IClass, '_id'>) => {
 	const schema = Joi.object({
 		className: Joi.string().required().pattern(regexClassName),
 		headTeacher: Joi.string().required(),
-		grade: Joi.number().required().valid(1, 2, 3, 4, 5),
+		grade: Joi.number().required().valid(1, 2, 3, 4, 5)
 	});
 	return schema.validate(data);
 };
@@ -17,7 +17,7 @@ export const validateArrayOfClassData = (data: Omit<IClass, '_id'>) => {
 		Joi.object({
 			className: Joi.string().required().pattern(regexClassName),
 			headTeacher: Joi.string().required(),
-			grade: Joi.number().required().valid(1, 2, 3, 4, 5),
+			grade: Joi.number().required().valid(1, 2, 3, 4, 5)
 		})
 	);
 
@@ -29,7 +29,7 @@ export const validateClassEditData = (data: Partial<Omit<IClass, '_id'>>) => {
 	const schema = Joi.object({
 		className: Joi.string().required().pattern(regexClassName).optional(),
 		headTeacher: Joi.string().required().optional(),
-		grade: Joi.number().required().valid(1, 2, 3, 4, 5).optional(),
+		grade: Joi.number().required().valid(1, 2, 3, 4, 5).optional()
 	});
 	return schema.validate(data);
 };

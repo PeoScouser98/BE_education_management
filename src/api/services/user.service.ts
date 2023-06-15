@@ -11,9 +11,12 @@ const checkIsValidParentUser = async ({ email, phone }: { email: string; phone: 
 	try {
 		const [existedUser, childrenOfExistedUser] = await Promise.all([
 			UserModel.exists({ email: email, phone: phone }),
-			StudentModel.exists({ parentsPhoneNumber: phone }),
+			StudentModel.exists({ parentsPhoneNumber: phone })
 		]);
-		return { isUserExisted: !!existedUser, hasChildren: !!childrenOfExistedUser };
+		return {
+			isUserExisted: !!existedUser,
+			hasChildren: !!childrenOfExistedUser
+		};
 	} catch (error) {
 		throw error;
 	}
@@ -21,50 +24,29 @@ const checkIsValidParentUser = async ({ email, phone }: { email: string; phone: 
 
 export const createUser = async ({
 	payload,
-	multi,
+	multi
 }: {
 	payload: Partial<IUser> & Array<Partial<IUser>>;
 	multi: boolean;
 }) => {
 	try {
-		if (
-			multi &&
-			(payload as Array<Partial<IUser>>).every((user) => user.role === UserRoleEnum.PARENTS)
-		) {
-			const newParentsUsers = await Promise.all(
-				payload.map(async (user) => {
-					const checkResult = await checkIsValidParentUser({
-						email: user.email ?? '',
-						phone: user.phone ?? '',
-					});
-					if (checkResult.isUserExisted)
-						throw createHttpError.BadRequest('Parent account already existed!');
-					if (!checkResult.hasChildren)
-						throw createHttpError.BadRequest(
-							`No student has this parent's phone number!`
-						);
-					return await new UserModel(user).save();
-				})
-			);
-			return newParentsUsers;
-		}
-		// Add a new parents user
-		if (payload.role === UserRoleEnum.PARENTS) {
-			const checkResult = await checkIsValidParentUser({
-				email: payload.email ?? '',
-				phone: payload.phone ?? '',
+		if (multi && Array.isArray(payload) && payload.every((user) => user.role === UserRoleEnum.PARENTS)) {
+			payload.forEach((user) => {
+				checkIsValidParentUser({
+					email: user.email ?? '',
+					phone: user.phone ?? ''
+				}).then((result) => {
+					if (result.isUserExisted) throw createHttpError.Conflict('Parent account already existed!');
+					if (!result.hasChildren) throw createHttpError.Conflict(`No student has this parent's phone number!`);
+				});
 			});
-			if (checkResult.isUserExisted)
-				throw createHttpError.BadRequest('Parent account already existed!');
-			if (!checkResult.hasChildren)
-				throw createHttpError.BadRequest(`No student has this parent's phone number!`);
-			return await new UserModel(payload).save();
+			return await UserModel.insertMany(payload);
 		}
 		// Add a new teacher user
 		if (payload.role === UserRoleEnum.TEACHER) {
 			const existedTeacher = await UserModel.findOne({
 				email: payload.email,
-				role: UserRoleEnum.TEACHER,
+				role: UserRoleEnum.TEACHER
 			});
 			if (existedTeacher) {
 				throw createHttpError.BadRequest('Teacher account already existed!');
@@ -80,7 +62,9 @@ export const createUser = async ({
 // Users update them self account's info
 export const updateUserInfo = async (authId: string, payload: Partial<IUser>) => {
 	try {
-		return await UserModel.findOneAndUpdate({ _id: authId }, payload, { new: true });
+		return await UserModel.findOneAndUpdate({ _id: authId }, payload, {
+			new: true
+		});
 	} catch (error) {
 		throw error;
 	}
@@ -89,11 +73,7 @@ export const updateUserInfo = async (authId: string, payload: Partial<IUser>) =>
 // Headmaster update teacher user's info
 export const updateTeacherInfo = async (teacherId: string, payload: Partial<IUser>) => {
 	try {
-		return await UserModel.findOneAndUpdate(
-			{ _id: teacherId, role: UserRoleEnum.TEACHER },
-			payload,
-			{ new: true }
-		);
+		return await UserModel.findOneAndUpdate({ _id: teacherId, role: UserRoleEnum.TEACHER }, payload, { new: true });
 	} catch (error) {
 		throw error;
 	}
@@ -110,11 +90,7 @@ export const getUserDetails = async (userId: string) => {
 export const changePassword = async (userId: string, newPassword: string) => {
 	try {
 		const encryptedNewPassword = hashSync(newPassword, genSaltSync(+process.env.SALT_ROUND!));
-		return await UserModel.findOneAndUpdate(
-			{ _id: userId },
-			{ password: encryptedNewPassword },
-			{ new: true }
-		);
+		return await UserModel.findOneAndUpdate({ _id: userId }, { password: encryptedNewPassword }, { new: true });
 	} catch (error) {
 		throw error;
 	}
@@ -126,14 +102,14 @@ export const getTeacherUsersByStatus = async (status?: string) => {
 			case 'inactive':
 				return await UserModel.find({
 					role: UserRoleEnum.TEACHER,
-					isVerified: false,
+					isVerified: false
 				});
 
 			// In working teacher
 			case 'in_working':
 				return await UserModel.find({
 					role: UserRoleEnum.TEACHER,
-					employmentStatus: true,
+					employmentStatus: true
 				});
 
 			// Inactivate user
@@ -142,12 +118,12 @@ export const getTeacherUsersByStatus = async (status?: string) => {
 					role: UserRoleEnum.TEACHER,
 					deleted: true,
 					isVerified: true,
-					employmentStatus: false,
+					employmentStatus: false
 				});
 
 			default:
 				return await UserModel.findWithDeleted({
-					role: UserRoleEnum.TEACHER,
+					role: UserRoleEnum.TEACHER
 				});
 		}
 	} catch (error) {
@@ -172,16 +148,16 @@ export const getParentsUserByClass = async (classId: string) => {
 		const parents = await UserModel.find({ role: UserRoleEnum.PARENTS })
 			.populate({
 				path: 'children',
-				select: '_id fullName parentsPhoneNumber class',
+				select: 'fullName parentsPhoneNumber class',
 				options: {
-					id: false,
-					lean: true,
+					id: false
 				},
-				populate: { path: 'class', select: 'className' },
-				justOne: true,
-				match: { $and: [{ parentsPhoneNumber: { $exists: true } }, { class: classId }] },
+				match: {
+					$and: [{ parentsPhoneNumber: { $exists: true } }, { class: classId }]
+				},
+				populate: { path: 'class', select: 'className' }
 			})
-			.select('_id displayName phone class gender dateOfBirth')
+			.select('_id displayName email phone gender dateOfBirth')
 			.lean();
 
 		return parents;
@@ -198,9 +174,12 @@ export const searchParents = async (searchTerm: string) => {
 		return await UserModel.find({
 			$or: [
 				{ phone: pattern, role: UserRoleEnum.PARENTS },
-				{ displayName: removeVietnameseTones(searchTerm), role: UserRoleEnum.PARENTS },
-				{ email: pattern, role: UserRoleEnum.PARENTS },
-			],
+				{
+					displayName: removeVietnameseTones(searchTerm),
+					role: UserRoleEnum.PARENTS
+				},
+				{ email: pattern, role: UserRoleEnum.PARENTS }
+			]
 		}).lean();
 	} catch (error) {
 		throw error;

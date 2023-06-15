@@ -4,10 +4,7 @@ import ClassModel from '../models/class.model';
 import SubjectModel from '../models/subject.model';
 import SubjectTranscriptionModel from '../models/subjectTrancription.model';
 import { getPropertieOfArray } from '../../helpers/toolkit';
-import {
-	validateSubjectTranscript,
-	validateSubjectTranscriptOne,
-} from '../validations/subjectTrancription.validation';
+import { validateSubjectTranscript, validateSubjectTranscriptOne } from '../validations/subjectTrancription.validation';
 import StudentModel from '../models/student.model';
 import { selectSchoolYearCurr } from './schoolYear.service';
 import { ISubjectTranscript } from '../../types/subjectTranscription.type';
@@ -21,13 +18,8 @@ export const newScoreList = async (
 ) => {
 	try {
 		// check xem classId và subjectId đã đúng type chưa
-		if (
-			!mongoose.Types.ObjectId.isValid(classId) ||
-			!mongoose.Types.ObjectId.isValid(subjectId)
-		) {
-			throw createHttpError.BadRequest(
-				'classId or subjectId is not in the correct ObjectId format'
-			);
+		if (!mongoose.Types.ObjectId.isValid(classId) || !mongoose.Types.ObjectId.isValid(subjectId)) {
+			throw createHttpError.BadRequest('classId or subjectId is not in the correct ObjectId format');
 		}
 
 		if (!Array.isArray(data)) {
@@ -45,15 +37,10 @@ export const newScoreList = async (
 		const studentExistQuery = ClassModel.findOne({ _id: classId });
 		const subjectExistQuery = SubjectModel.findOne({ _id: subjectId });
 
-		const [studentExist, subjectExist] = await Promise.all([
-			studentExistQuery,
-			subjectExistQuery,
-		]);
+		const [studentExist, subjectExist] = await Promise.all([studentExistQuery, subjectExistQuery]);
 
-		if (!studentExist)
-			throw createHttpError.NotFound('Class does not exist or has been deleted!');
-		if (!subjectExist)
-			throw createHttpError.NotFound('Subject does not exist or has been deleted!');
+		if (!studentExist) throw createHttpError.NotFound('Class does not exist or has been deleted!');
+		if (!subjectExist) throw createHttpError.NotFound('Subject does not exist or has been deleted!');
 
 		// validate bảng điểm của các student gửi lên
 		const transcriptStudentErrorValidates: { id: string; message: string }[] = [];
@@ -62,14 +49,14 @@ export const newScoreList = async (
 			if (error) {
 				transcriptStudentErrorValidates.push({
 					id: item.student.toString(),
-					message: error.message,
+					message: error.message
 				});
 			}
 		});
 
 		if (transcriptStudentErrorValidates.length > 0) {
 			throw createHttpError(400, 'Transcript students fails to meet validation criteria!', {
-				error: transcriptStudentErrorValidates,
+				error: transcriptStudentErrorValidates
 			});
 		}
 
@@ -80,7 +67,7 @@ export const newScoreList = async (
 			_id: { $in: idStudentList },
 			class: classId,
 			transferSchool: null,
-			dropoutDate: null,
+			dropoutDate: null
 		})
 			.select('fullName class')
 			.lean();
@@ -94,18 +81,17 @@ export const newScoreList = async (
 			});
 
 			throw createHttpError(404, 'Student do not exist in class!', {
-				error: notAClassStudent,
+				error: notAClassStudent
 			});
 		}
 
 		// Nếu bảng điểm của học sinh chưa có thì tạo mới còn có rồi thì update
 		// lọc ra các bảng điểm của môn đã tồn tại
-		const transcriptNotExists: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>[] =
-			[];
+		const transcriptNotExists: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>[] = [];
 		const transcriptExists: ISubjectTranscript[] = await SubjectTranscriptionModel.find({
 			student: { $in: idStudentList },
 			subject: subjectId,
-			schoolYear: schoolYear._id,
+			schoolYear: schoolYear._id
 		})
 			.select('_id student')
 			.lean();
@@ -113,9 +99,7 @@ export const newScoreList = async (
 		if (transcriptExists.length !== 0 && transcriptExists.length < data.length) {
 			// trường hợp có tồn tại các học sinh chưa được tạo bảng điểm
 			data.forEach((item) => {
-				const check = transcriptExists.find(
-					(exist) => exist.student.toString() === item.student.toString()
-				);
+				const check = transcriptExists.find((exist) => exist.student.toString() === item.student.toString());
 				if (!check) {
 					transcriptNotExists.push(item);
 				}
@@ -128,12 +112,10 @@ export const newScoreList = async (
 						filter: {
 							student: item.student,
 							subject: subjectId,
-							schoolYear: schoolYear._id,
+							schoolYear: schoolYear._id
 						},
-						update: data.find(
-							(dataItem) => dataItem.student.toString() === item.student.toString()
-						),
-					},
+						update: data.find((dataItem) => dataItem.student.toString() === item.student.toString())
+					}
 				};
 			});
 			const updateQuery = SubjectTranscriptionModel.bulkWrite(bulkUpdate);
@@ -142,7 +124,7 @@ export const newScoreList = async (
 			const dataCreate = transcriptNotExists.map((item) => ({
 				...item,
 				subject: subjectId,
-				schoolYear: schoolYear._id,
+				schoolYear: schoolYear._id
 			}));
 
 			const createQuery = SubjectTranscriptionModel.insertMany(dataCreate);
@@ -156,10 +138,10 @@ export const newScoreList = async (
 						filter: {
 							student: item.student,
 							subject: subjectId,
-							schoolYear: schoolYear._id,
+							schoolYear: schoolYear._id
 						},
-						update: item,
-					},
+						update: item
+					}
 				};
 			});
 
@@ -171,14 +153,14 @@ export const newScoreList = async (
 					return data.map((item) => ({
 						...item,
 						subject: subjectId,
-						schoolYear: schoolYear._id,
+						schoolYear: schoolYear._id
 					}));
 				})()
 			);
 		}
 
 		return {
-			message: `Successfully inputted scores for subject ${subjectExist.subjectName} in class ${studentExist.className}`,
+			message: `Successfully inputted scores for subject ${subjectExist.subjectName} in class ${studentExist.className}`
 		};
 	} catch (error) {
 		throw error;
@@ -193,13 +175,8 @@ export const newScore = async (
 ) => {
 	try {
 		// check xem studentId và subjectId đã đúng type chưa
-		if (
-			!mongoose.Types.ObjectId.isValid(studentId) ||
-			!mongoose.Types.ObjectId.isValid(subjectId)
-		) {
-			throw createHttpError.BadRequest(
-				'studentId or subjectId is not in the correct ObjectId format'
-			);
+		if (!mongoose.Types.ObjectId.isValid(studentId) || !mongoose.Types.ObjectId.isValid(subjectId)) {
+			throw createHttpError.BadRequest('studentId or subjectId is not in the correct ObjectId format');
 		}
 
 		if (!data || Object.keys(data).length === 0) {
@@ -213,15 +190,10 @@ export const newScore = async (
 		const studentExistQuery = StudentModel.findOne({ _id: studentId });
 		const subjectExistQuery = SubjectModel.findOne({ _id: subjectId });
 
-		const [studentExist, subjectExist] = await Promise.all([
-			studentExistQuery,
-			subjectExistQuery,
-		]);
+		const [studentExist, subjectExist] = await Promise.all([studentExistQuery, subjectExistQuery]);
 
-		if (!studentExist)
-			throw createHttpError.NotFound('Student does not exist or has been deleted!');
-		if (!subjectExist)
-			throw createHttpError.NotFound('Subject does not exist or has been deleted!');
+		if (!studentExist) throw createHttpError.NotFound('Student does not exist or has been deleted!');
+		if (!subjectExist) throw createHttpError.NotFound('Subject does not exist or has been deleted!');
 
 		// validate
 		const { error } = validateSubjectTranscriptOne(data);
@@ -233,18 +205,18 @@ export const newScore = async (
 		const transcriptExists = await SubjectTranscriptionModel.findOne({
 			student: studentId,
 			subject: subjectId,
-			schoolYear: schoolYear._id,
+			schoolYear: schoolYear._id
 		});
 
 		if (transcriptExists) {
 			// đã tồn tại (update lại)
 			return await SubjectTranscriptionModel.findOneAndUpdate(
 				{
-					_id: transcriptExists._id,
+					_id: transcriptExists._id
 				},
 				data,
 				{
-					new: true,
+					new: true
 				}
 			);
 		} else {
@@ -253,7 +225,7 @@ export const newScore = async (
 				...data,
 				student: studentId,
 				subject: subjectId,
-				schoolYear: schoolYear._id,
+				schoolYear: schoolYear._id
 			}).save();
 		}
 	} catch (error) {
@@ -270,9 +242,7 @@ export const selectSubjectTranscriptByClass = async (classId: string, subjectId:
 			!mongoose.Types.ObjectId.isValid(classId) ||
 			!mongoose.Types.ObjectId.isValid(subjectId)
 		) {
-			throw createHttpError.BadRequest(
-				'classId or subjectId is not in the correct ObjectId format'
-			);
+			throw createHttpError.BadRequest('classId or subjectId is not in the correct ObjectId format');
 		}
 
 		// lấy ra schoolYear hiện tại
@@ -282,7 +252,7 @@ export const selectSubjectTranscriptByClass = async (classId: string, subjectId:
 		const listStudent: IStudent[] = await StudentModel.find({
 			class: classId,
 			dropoutDate: null,
-			transferSchool: null,
+			transferSchool: null
 		})
 			.select('_id')
 			.lean();
@@ -292,7 +262,7 @@ export const selectSubjectTranscriptByClass = async (classId: string, subjectId:
 		const transcriptStudentList = await SubjectTranscriptionModel.find({
 			student: { $in: idStudentList },
 			schoolYear: schoolYear._id,
-			subject: subjectId,
+			subject: subjectId
 		});
 
 		return transcriptStudentList;
@@ -312,7 +282,7 @@ export const selectTranscriptStudent = async (id: string) => {
 		const student: IStudent | null = await StudentModel.findOne({
 			_id: id,
 			dropoutDate: null,
-			transferSchool: null,
+			transferSchool: null
 		});
 
 		if (!student) {
@@ -323,7 +293,7 @@ export const selectTranscriptStudent = async (id: string) => {
 
 		const transcriptStudent = await SubjectTranscriptionModel.find({
 			student: id,
-			schoolYear: schoolYear._id,
+			schoolYear: schoolYear._id
 		}).select('-student');
 
 		return transcriptStudent;

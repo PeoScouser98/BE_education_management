@@ -11,14 +11,14 @@ export const createTimetable = async (payload: any) => {
 
 export const updateTimetable = async ({
 	classId,
-	payload,
+	payload
 }: {
 	classId: string;
 	payload: Pick<ITimeTable, 'class' | 'schedule'>;
 }) => {
 	try {
 		return await TimeTableModel.findOneAndUpdate({ class: classId }, payload, {
-			new: true,
+			new: true
 		});
 	} catch (error) {
 		throw error;

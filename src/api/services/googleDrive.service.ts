@@ -10,22 +10,19 @@ const setFilePublic = async (fileId: string) => {
 			fileId,
 			requestBody: {
 				role: 'reader',
-				type: 'anyone',
-			},
+				type: 'anyone'
+			}
 		});
 		return drive.files.get({
 			fileId,
-			fields: 'webViewLink, webContentLink',
+			fields: 'webViewLink, webContentLink'
 		});
 	} catch (error) {
 		console.log(error);
 	}
 };
 
-export const uploadFile = async (
-	file: Express.Multer.File,
-	dir: string = process.env.FOLDER_ID!
-) => {
+export const uploadFile = async (file: Express.Multer.File, dir: string = process.env.FOLDER_ID!) => {
 	try {
 		/* tạo nơi lưu trữ file tạm thời (buffer) -> file sẽ được upload qua stream */
 		const bufferStream = new Stream.PassThrough();
@@ -33,13 +30,13 @@ export const uploadFile = async (
 		const createdFile = await drive.files.create({
 			requestBody: {
 				name: file.originalname,
-				parents: [dir],
+				parents: [dir]
 			},
 			media: {
-				body: bufferStream,
+				body: bufferStream
 				/* file được upload lấy từ buffer đã được lưu trữ tạm thời trước đó */
 			},
-			fields: 'id',
+			fields: 'id'
 		} as drive_v3.Params$Resource$Files$Create);
 		console.log(createdFile);
 		await setFilePublic(createdFile.data.id as string);

@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
 import * as ClassService from '../services/class.service';
-
-// class feature
 import createHttpError from 'http-errors';
 import mongoose, { SortOrder } from 'mongoose';
 import { IClass } from '../../types/class.type';
@@ -90,13 +88,11 @@ export const getClasses = async (req: Request, res: Response) => {
 		const availableSortFields = ['className', 'grade', 'createdAt', 'updatedAt'];
 
 		if (!availableSortFields.includes(groupBy as string)) {
-			throw createHttpError.BadRequest(
-				"_sort can only belong to ['className', 'grade','createdAt','updatedAt']"
-			);
+			throw createHttpError.BadRequest("_sort can only belong to ['className', 'grade','createdAt','updatedAt']");
 		}
 
 		const classes = await ClassModel.find().sort({
-			[groupBy]: order,
+			[groupBy]: order
 		});
 
 		return res.status(HttpStatusCode.OK).json(classes);
@@ -107,14 +103,14 @@ export const getClasses = async (req: Request, res: Response) => {
 };
 
 // [GET] /api/class/:id
-export const getClassOne = async (req: Request, res: Response) => {
+export const getOneClass = async (req: Request, res: Response) => {
 	try {
 		const id = req.params.id;
 		if (!id || !mongoose.Types.ObjectId.isValid(id)) {
 			throw createHttpError.BadRequest('Missing parameter');
 		}
 
-		const classResult = await ClassModel.findOne({ _id: id });
+		const classResult = await ClassService.getOneClass(id);
 
 		if (!classResult) {
 			throw createHttpError.NotFound('Class not found');
@@ -131,7 +127,7 @@ export const getClassOne = async (req: Request, res: Response) => {
 export const getClassTrash = async (req: Request, res: Response) => {
 	try {
 		const result = await ClassModel.findWithDeleted({
-			deleted: true,
+			deleted: true
 		});
 
 		return res.status(HttpStatusCode.OK).json(result);

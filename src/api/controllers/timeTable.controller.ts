@@ -2,10 +2,7 @@ import { Request, Response } from 'express';
 import createHttpError from 'http-errors';
 import { HttpException } from '../../types/httpException.type';
 import * as TimeTableService from '../services/timeTable.service';
-import {
-	validateNewTimeTable,
-	validateUpdateTimeTablePayload,
-} from '../validations/timeTable.validation';
+import { validateNewTimeTable, validateUpdateTimeTablePayload } from '../validations/timeTable.validation';
 import { HttpStatusCode } from './../../configs/statusCode.config';
 
 // [POST]: /time-table
@@ -32,7 +29,7 @@ export const updateTimeTable = async (req: Request, res: Response) => {
 		}
 		const updatedTimeTable = await TimeTableService.updateTimetable({
 			classId: req.params.classId,
-			payload: req.body,
+			payload: req.body
 		});
 		if (!updatedTimeTable) {
 			throw createHttpError.NotFound('Cannot find time table to update!');
@@ -54,7 +51,7 @@ export const deleteTimeTable = async (req: Request, res: Response) => {
 
 		return res.status(HttpStatusCode.NO_CONTENT).json({
 			message: 'Deleted!',
-			statusCode: HttpStatusCode.NO_CONTENT,
+			statusCode: HttpStatusCode.NO_CONTENT
 		});
 	} catch (error) {
 		const httpException = new HttpException(error);

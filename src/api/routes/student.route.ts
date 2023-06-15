@@ -10,7 +10,7 @@ import {
 	selectAttendanceByClass,
 	selectAttendanceByStudent,
 	selectAttendanceAllClass,
-	getPolicyBeneficiary,
+	getPolicyBeneficiary
 } from '../controllers/student.controller';
 
 const router = express.Router();
