@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 
 export enum UserGenderEnum {
@@ -13,7 +13,7 @@ export enum UserRoleEnum {
 }
 
 export interface IUser extends Document {
-	_id: string;
+	_id: string | ObjectId;
 	email: string;
 	displayName: string;
 	password?: string;
