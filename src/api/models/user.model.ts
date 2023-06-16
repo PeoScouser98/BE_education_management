@@ -84,14 +84,12 @@ UserSchema.virtual('children', {
 
 UserSchema.virtual('userStatusText').get(function () {
 	switch (true) {
-		case !this.isVerified:
+		case this.isVerified === false:
 			return 'Chưa kích hoạt';
-		case this.employmentStatus:
+		case this.employmentStatus && this.isVerified:
 			return 'Đang làm việc';
-		case !this.employmentStatus:
+		case this.employmentStatus === false:
 			return 'Đã nghỉ việc';
-		default:
-			return '';
 	}
 });
 
