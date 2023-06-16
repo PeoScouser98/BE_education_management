@@ -1,8 +1,7 @@
-import mongoose, { ObjectId } from 'mongoose';
+import mongoose from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
 
-import { ISubject } from '../../types/subject.type';
-import { IScheduleSlotTime, ITimeTable } from '../../types/timeTable.type';
+import { ITimeTable } from '../../types/timeTable.type';
 
 const ScheduleSlotSchema = new mongoose.Schema(
 	{
@@ -21,7 +20,7 @@ const ScheduleSlotSchema = new mongoose.Schema(
 			type: mongoose.Types.ObjectId,
 			ref: 'Users',
 			require: true,
-			autopopulate: { select: 'displayName _id' }
+			autopopulate: { select: 'displayName _id', options: { id: false } }
 		}
 	},
 	{
@@ -33,12 +32,13 @@ const TimeTableSchema = new mongoose.Schema(
 		class: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Classes',
-			required: true
+			required: true,
+			autopopulate: { select: 'className', options: { lean: true } }
 		},
 		schedule: {
 			monday: [ScheduleSlotSchema],
 			tuesday: [ScheduleSlotSchema],
-			wednessday: [ScheduleSlotSchema],
+			wednesday: [ScheduleSlotSchema],
 			thursday: [ScheduleSlotSchema],
 			friday: [ScheduleSlotSchema],
 			saturday: [ScheduleSlotSchema]

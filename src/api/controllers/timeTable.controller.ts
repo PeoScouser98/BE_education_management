@@ -4,6 +4,8 @@ import { HttpException } from '../../types/httpException.type';
 import * as TimeTableService from '../services/timeTable.service';
 import { validateNewTimeTable, validateUpdateTimeTablePayload } from '../validations/timeTable.validation';
 import { HttpStatusCode } from './../../configs/statusCode.config';
+import useCatchAsync from '../../helpers/useCatchAsync';
+import { isValidObjectId } from 'mongoose';
 
 // [POST]: /time-table
 export const createTimeTable = async (req: Request, res: Response) => {
@@ -72,3 +74,10 @@ export const getTimeTableByClass = async (req: Request, res: Response) => {
 		return res.status(httpException.statusCode).json(httpException);
 	}
 };
+
+export const getTeacherTimetable = useCatchAsync(async (req: Request, res: Response) => {
+	const classId = req.query._classId as string;
+	if (!classId || !isValidObjectId(classId)) throw createHttpError.BadRequest('Invalid class ID');
+	const teacherTimetable = await TimeTableService.getTeacherTimeTableByClass(req.params.teacherId, classId);
+	return res.status(HttpStatusCode.OK).json(teacherTimetable);
+});
