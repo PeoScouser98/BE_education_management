@@ -1,53 +1,47 @@
-## Deployed API
+# Bot Xuyen Education Management
 
-<a href="https://education-management-backend.vercel.app/"><img src="https://docs.google.com/uc?export=download&id=1N_85fCRgV12AiJvPHID7r4PjjjJMK4JV" style="width: 540px; height: 320px; object-fit:cover"/></a>
+## Description
+The Bot Xuyen Education Management là dự án backend (Nodejs/Typescript, Express và MongoDB), thực thi các API phục vụ cho việc quản lý hệ thống giáo dục trường tiểu học Bột Xuyên
 
-#### **API Document**
+## Technologies Used
+- Node.js
+- Express
+- MongoDB
+- Redis
+- Webpack
 
-https://education-management-backend.vercel.app/api/document
+## Setup and Installation
+Cách setup dự án dưới local
+1. Clone the repository:
+```bash
+git clone https://github.com/PeoScouser98/BE_education_management.git <folder_name>
+```
+2. Chuyển đến folder sau khi clone
+```bash
+cd <folder_name>
+```
 
-<br/>
- 
- ---
-## Usage
-
-### 1. Install
-
+3. Cài đặt các packages
 ```bash
 $ npm install
 ```
 
-### 2. Dev command
-
+4. Run project
 ```bash
 $ npm run dev
 ```
 
-### 3. Build command
-
+5. Build project
 ```bash
 $ npm run build
 ```
 
-### 4. Run application trên môi trường Production
+6. Mở trình duyệt và truy cập vào http://localhost:3001/api/document/ để check API document
 
-```bash
-$ npm start
-```
+## Features:
+- Quản lý học sinh (thành tích học tập, điểm danh, lịch học, ...)
+- Quản lý giáo viên (hồ sơ giáo viên, lịch giảng dạy, điểm danh học sinh,...)
+- Quản lý học liệu của nhà trường
+- Hệ thống gửi mail và SMS tự động
 
-### 5. Run redis
 
-```bash
-$ docker-compose up -d redis
-```
-
----
-
-## Notices
-
--  Không sử dụng online database trong quá trình phát triển product
--  Nếu API document bị lỗi CSS -> run code trên local để chạy: http://localhost:3001/api/document
-
-```
-
-```
