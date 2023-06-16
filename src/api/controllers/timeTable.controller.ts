@@ -4,6 +4,7 @@ import { HttpException } from '../../types/httpException.type';
 import * as TimeTableService from '../services/timeTable.service';
 import { validateNewTimeTable, validateUpdateTimeTablePayload } from '../validations/timeTable.validation';
 import { HttpStatusCode } from './../../configs/statusCode.config';
+import useCatchAsync from '../../helpers/useCatchAsync';
 
 // [POST]: /time-table
 export const createTimeTable = async (req: Request, res: Response) => {
@@ -72,3 +73,9 @@ export const getTimeTableByClass = async (req: Request, res: Response) => {
 		return res.status(httpException.statusCode).json(httpException);
 	}
 };
+
+export const getTeacherTimetable = useCatchAsync(async (req: Request, res: Response) => {
+	console.log('req.params.teacherId :>> ', req.params.teacherId);
+	const teacherTimetable = await TimeTableService.getTeacherTimeTable(req.params.teacherId);
+	return res.status(HttpStatusCode.OK).json(teacherTimetable);
+});
