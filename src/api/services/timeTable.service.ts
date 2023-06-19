@@ -2,13 +2,7 @@ import { ITimeTable } from '../../types/timeTable.type';
 import { IUser } from '../../types/user.type';
 import TimeTableModel from '../models/timeTable.model';
 
-export const createTimetable = async (payload: any) => {
-	try {
-		return await new TimeTableModel(payload).save();
-	} catch (error) {
-		throw error;
-	}
-};
+export const createTimetable = async (payload: any) => await new TimeTableModel(payload).save();
 
 export const updateTimetable = async ({
 	classId,
@@ -16,32 +10,11 @@ export const updateTimetable = async ({
 }: {
 	classId: string;
 	payload: Pick<ITimeTable, 'class' | 'schedule'>;
-}) => {
-	try {
-		return await TimeTableModel.findOneAndUpdate({ class: classId }, payload, {
-			new: true
-		});
-	} catch (error) {
-		throw error;
-	}
-};
+}) => await TimeTableModel.findOneAndUpdate({ class: classId }, payload, { new: true });
 
-export const deleteTimeTable = async (classId: string) => {
-	try {
-		return await TimeTableModel.findOneAndDelete({ class: classId });
-	} catch (error) {
-		throw error;
-	}
-};
+export const deleteTimeTable = async (classId: string) => await TimeTableModel.findOneAndDelete({ class: classId });
 
-export const getTimetableByClass = async (classId: string) => {
-	try {
-		const data = await TimeTableModel.findOne({ class: classId });
-		return data;
-	} catch (error) {
-		throw error;
-	}
-};
+export const getTimetableByClass = async (classId: string) => await TimeTableModel.findOne({ class: classId });
 
 export const getTeacherTimeTableByClass = async (teacherId: string, classId: string) => {
 	const result = await TimeTableModel.findOne({
