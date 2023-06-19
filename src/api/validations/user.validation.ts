@@ -48,7 +48,7 @@ export const validateNewTeacherData = (payload: Omit<IUser, '_id'>) => {
 	return schema.validate(payload);
 };
 
-export const validateNewParentsData = ({ payload, multi }: { payload: Omit<IUser, '_id'>; multi: boolean }) => {
+export const validateNewParentsData = (payload: Omit<IUser, '_id'>) => {
 	const schema = Joi.object({
 		email: Joi.string()
 			.email()
@@ -60,14 +60,15 @@ export const validateNewParentsData = ({ payload, multi }: { payload: Omit<IUser
 		phone: Joi.string().length(10).required(),
 		displayName: Joi.string().required(),
 		dateOfBirth: Joi.date().required(),
-		gender: Joi.string().required()
+		gender: Joi.string().required(),
+		address: Joi.string().required()
 	});
 
 	const arraySchema = Joi.array()
 		.items(schema)
 		.unique((user1, user2) => user1.phone === user2.phone);
 
-	return multi ? arraySchema.validate(payload) : schema.validate(payload);
+	return Array.isArray(payload) ? arraySchema.validate(payload) : schema.validate(payload);
 };
 
 export const validateUpdateUserData = (payload: Partial<IUser>) => {

@@ -2,20 +2,19 @@ import Joi from 'joi';
 import { IAttendance, IStudent } from '../../types/student.type';
 
 // validate
-export const validateReqBodyStudent = (data: Omit<IStudent, '_id'>) => {
+export const validateReqBodyStudent = (data: Omit<IStudent, '_id'>[] | Omit<IStudent, '_id'>) => {
 	const schema = Joi.object({
 		class: Joi.string().required(),
 		code: Joi.string().required(),
-		fullName: Joi.string().required().min(6).max(100),
+		fullName: Joi.string().required().min(6).max(255),
 		gender: Joi.bool().required(),
 		dateOfBirth: Joi.date().required(),
-		parentsPhoneNumber: Joi.string()
-			.required()
-			.pattern(/^(?:\+84|0)(?:1\d{9}|3\d{8}|5\d{8}|7\d{8}|8\d{8}|9\d{8})$/),
+		parents: Joi.string().required(),
 		isPolicyBeneficiary: Joi.bool().optional(),
 		isGraduated: Joi.bool().optional()
 	});
-	return schema.validate(data);
+	const arraySchema = Joi.array().items(schema);
+	return Array.isArray(data) ? arraySchema.validate(data) : schema.validate(data);
 };
 
 export const validateAttendanceStudent = (data: Omit<IAttendance, '_id' | 'date'>) => {
