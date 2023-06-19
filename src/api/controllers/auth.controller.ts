@@ -23,7 +23,6 @@ export const signinWithGoogle = async (req: Request, res: Response) => {
 		if (!user) {
 			return res.redirect(AppConfig.CLIENT_URL + '/signin');
 		}
-		// const userPermissions =await  getPermissionByRole(user.role!);
 		const accessToken = jwt.sign({ payload: req.user }, process.env.ACCESS_TOKEN_SECRET!, {
 			expiresIn: '1h'
 		});

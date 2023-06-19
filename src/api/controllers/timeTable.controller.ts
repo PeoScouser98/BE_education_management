@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import createHttpError from 'http-errors';
-import { HttpException } from '../../types/httpException.type';
 import * as TimeTableService from '../services/timeTable.service';
 import { validateNewTimeTable, validateUpdateTimeTablePayload } from '../validations/timeTable.validation';
 import { HttpStatusCode } from './../../configs/statusCode.config';
@@ -8,76 +7,54 @@ import useCatchAsync from '../../helpers/useCatchAsync';
 import { isValidObjectId } from 'mongoose';
 
 // [POST]: /time-table
-export const createTimeTable = async (req: Request, res: Response) => {
-	try {
-		const { error } = validateNewTimeTable(req.body);
-		if (error) {
-			throw createHttpError.BadRequest(error.message);
-		}
-		const newTimeTable = await TimeTableService.createTimetable(req.body);
-		return res.status(HttpStatusCode.CREATED).json(newTimeTable);
-	} catch (error) {
-		const httpException = new HttpException(error);
-		return res.status(httpException.statusCode).json(httpException);
-	}
-};
+export const createTimeTable = useCatchAsync(async (req: Request, res: Response) => {
+	const { error } = validateNewTimeTable(req.body);
+	if (error) throw createHttpError.BadRequest(error.message);
+	const newTimeTable = await TimeTableService.createTimetable(req.body);
+
+	return res.status(HttpStatusCode.CREATED).json(newTimeTable);
+});
 
 // [PATCH] /time-table/:classId
-export const updateTimeTable = async (req: Request, res: Response) => {
-	try {
-		const { error } = validateUpdateTimeTablePayload(req.body);
-		if (error) {
-			throw createHttpError.BadRequest(error.message);
-		}
-		const updatedTimeTable = await TimeTableService.updateTimetable({
-			classId: req.params.classId,
-			payload: req.body
-		});
-		if (!updatedTimeTable) {
-			throw createHttpError.NotFound('Cannot find time table to update!');
-		}
-		return res.status(HttpStatusCode.CREATED).json(updatedTimeTable);
-	} catch (error) {
-		const httpException = new HttpException(error);
-		return res.status(httpException.statusCode).json(httpException);
+export const updateTimeTable = useCatchAsync(async (req: Request, res: Response) => {
+	const { error } = validateUpdateTimeTablePayload(req.body);
+	if (error) throw createHttpError.BadRequest(error.message);
+	const updatedTimeTable = await TimeTableService.updateTimetable({
+		classId: req.params.classId,
+		payload: req.body
+	});
+	if (!updatedTimeTable) {
+		throw createHttpError.NotFound('Cannot find time table to update!');
 	}
-};
+
+	return res.status(HttpStatusCode.CREATED).json(updatedTimeTable);
+});
 
 // [DELETE] /time-table/:classId
-export const deleteTimeTable = async (req: Request, res: Response) => {
-	try {
-		const deletedTimeTable = await TimeTableService.deleteTimeTable(req.params.classId);
-		if (!deletedTimeTable) {
-			throw createHttpError.NotFound('Cannot find time table to delete!');
-		}
-
-		return res.status(HttpStatusCode.NO_CONTENT).json({
-			message: 'Deleted!',
-			statusCode: HttpStatusCode.NO_CONTENT
-		});
-	} catch (error) {
-		const httpException = new HttpException(error);
-		return res.status(httpException.statusCode).json(httpException);
+export const deleteTimeTable = useCatchAsync(async (req: Request, res: Response) => {
+	const deletedTimeTable = await TimeTableService.deleteTimeTable(req.params.classId);
+	if (!deletedTimeTable) {
+		throw createHttpError.NotFound('Cannot find time table to delete!');
 	}
-};
+
+	return res.status(HttpStatusCode.NO_CONTENT).json({
+		message: 'Deleted!',
+		statusCode: HttpStatusCode.NO_CONTENT
+	});
+});
 
 // [GET] /time-table/:classId
-export const getTimeTableByClass = async (req: Request, res: Response) => {
-	try {
-		const timeTable = await TimeTableService.getTimetableByClass(req.params.classId);
-		if (!timeTable) {
-			throw createHttpError.NotFound('Time table not found!');
-		}
-		return res.status(HttpStatusCode.OK).json(timeTable);
-	} catch (error) {
-		const httpException = new HttpException(error);
-		return res.status(httpException.statusCode).json(httpException);
-	}
-};
+export const getTimeTableByClass = useCatchAsync(async (req: Request, res: Response) => {
+	const timeTable = await TimeTableService.getTimetableByClass(req.params.classId);
+	if (!timeTable) throw createHttpError.NotFound('Time table not found!');
+
+	return res.status(HttpStatusCode.OK).json(timeTable);
+});
 
 export const getTeacherTimetable = useCatchAsync(async (req: Request, res: Response) => {
 	const classId = req.query._classId as string;
 	if (!classId || !isValidObjectId(classId)) throw createHttpError.BadRequest('Invalid class ID');
 	const teacherTimetable = await TimeTableService.getTeacherTimeTableByClass(req.params.teacherId, classId);
+
 	return res.status(HttpStatusCode.OK).json(teacherTimetable);
 });
