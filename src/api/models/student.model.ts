@@ -1,9 +1,9 @@
+import mongoose from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
-import mongoose, { Model, ObjectId, PaginateModel } from 'mongoose';
-import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
+import mongooseDelete from 'mongoose-delete';
 import mongoosePaginate from 'mongoose-paginate-v2';
-import { TPaginatedStudentModel, TSoftDeleteStudentModel, IStudentDocument } from '../../types/student.type';
 import { toCapitalize } from '../../helpers/toolkit';
+import { IStudentDocument, TPaginatedStudentModel, TSoftDeleteStudentModel } from '../../types/student.type';
 
 const StudentSchema = new mongoose.Schema<IStudentDocument>(
 	{
@@ -22,16 +22,17 @@ const StudentSchema = new mongoose.Schema<IStudentDocument>(
 			trim: true,
 			minLength: 6
 		},
+		parents: {
+			type: mongoose.Types.ObjectId,
+			ref: 'Users',
+			autopopulate: { options: { lean: true } }
+		},
 		gender: {
 			type: Boolean,
 			require: true
 		},
 		dateOfBirth: {
 			type: Date,
-			require: true
-		},
-		parentsPhoneNumber: {
-			type: String,
 			require: true
 		},
 		isPolicyBeneficiary: {

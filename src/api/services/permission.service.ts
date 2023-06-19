@@ -2,7 +2,8 @@ import { MongooseError } from 'mongoose';
 import PermissionModel from '../models/permission.model';
 import { IPermission } from '../../types/permission.type';
 
-export const createPermission = async (permission: IPermission & Partial<IPermission>) => await new PermissionModel(permission).save();
+export const createPermission = async (permission: IPermission & Partial<IPermission>) =>
+	await new PermissionModel(permission).save();
 
 export const getPermissions = async () => await PermissionModel.find().exec();
 

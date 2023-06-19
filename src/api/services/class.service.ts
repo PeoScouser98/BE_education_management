@@ -4,9 +4,10 @@ import { IClass } from '../../types/class.type';
 import ClassModel from '../models/class.model';
 import { validateClassData, validateClassEditData } from '../validations/class.validation';
 
-export const getOneClass = async (classId: string) => await ClassModel.findOne({ _id: classId }).populate({
-	path: 'totalStudents'
-});
+export const getOneClass = async (classId: string) =>
+	await ClassModel.findOne({ _id: classId }).populate({
+		path: 'totalStudents'
+	});
 
 export const createClass = async (payload: Omit<IClass, '_id'>) => {
 	const validateCheck = validateClassData(payload);
@@ -26,7 +27,6 @@ export const createClass = async (payload: Omit<IClass, '_id'>) => {
 	return {
 		classes: classResult
 	};
-
 };
 
 export const checkClassesExists = async (_id: string, condition: Partial<IClass> = {}) => {
@@ -77,7 +77,6 @@ export const updateClasses = async (payload: Partial<Omit<IClass, '_id'>>, _id: 
 	}
 
 	return await ClassModel.findOneAndUpdate({ _id }, payload, { new: true });
-
 };
 
 export const softDeleteClass = async (id: string) => {
@@ -87,7 +86,6 @@ export const softDeleteClass = async (id: string) => {
 		message: 'Moved the class to the trash',
 		statusCode: 200
 	};
-
 };
 
 export const restoreClass = async (id: string) => {
@@ -97,7 +95,6 @@ export const restoreClass = async (id: string) => {
 		message: 'Class have been restored',
 		statusCode: 200
 	};
-
 };
 
 export const forceDeleteClass = async (id: string) => {

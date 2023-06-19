@@ -14,7 +14,6 @@ export const createClass = useCatchAsync(async (req: Request, res: Response) => 
 	return res.status(HttpStatusCode.CREATED).json(classes);
 });
 
-
 // [PUT] /api/classes/:id (edit classes)
 export const updateClass = useCatchAsync(async (req: Request, res: Response) => {
 	const _id: unknown = req.params.id;
@@ -22,7 +21,7 @@ export const updateClass = useCatchAsync(async (req: Request, res: Response) => 
 
 	const updatedClass = await ClassService.updateClasses(data, _id as string);
 	return res.status(HttpStatusCode.CREATED).json(updatedClass);
-})
+});
 
 // [DELETE] /api/classes/:id?option= (delete classes)
 export const removeClass = useCatchAsync(async (req: Request, res: Response) => {
@@ -45,7 +44,7 @@ export const removeClass = useCatchAsync(async (req: Request, res: Response) => 
 	}
 
 	return res.status(result.statusCode).json(result);
-})
+});
 
 // [PUT] /api/class/restore/:id
 export const restoreClass = useCatchAsync(async (req: Request, res: Response) => {
@@ -58,7 +57,6 @@ export const restoreClass = useCatchAsync(async (req: Request, res: Response) =>
 	const result = await ClassService.restoreClass(id);
 
 	return res.status(HttpStatusCode.CREATED).json(result);
-
 });
 
 // [GET] /api/classes?_sort=className&_order=desc
@@ -76,7 +74,7 @@ export const getClasses = useCatchAsync(async (req: Request, res: Response) => {
 	});
 
 	return res.status(HttpStatusCode.OK).json(classes);
-})
+});
 
 // [GET] /api/class/:id
 export const getOneClass = useCatchAsync(async (req: Request, res: Response) => {
@@ -101,4 +99,4 @@ export const getClassTrash = useCatchAsync(async (req: Request, res: Response) =
 	});
 
 	return res.status(HttpStatusCode.OK).json(result);
-})
+});

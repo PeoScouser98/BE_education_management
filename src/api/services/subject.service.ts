@@ -47,7 +47,7 @@ export const checkSubjectExist = async (condition: Partial<ISubjectCondition>) =
 	}
 	const subject: ISubject | null = await SubjectModel.findOne(condition);
 
-	return !!subject
+	return !!subject;
 };
 
 // update
@@ -123,7 +123,7 @@ export const restore = async (id: string) => {
 		throw createHttpError.BadRequest('_id of the subject is invalid');
 	}
 	await SubjectModel.restore({ _id: id });
-	
+
 	return {
 		message: 'Subject have been restored',
 		statusCode: 201
