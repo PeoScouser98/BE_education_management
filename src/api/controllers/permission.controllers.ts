@@ -32,7 +32,7 @@ export const create = useCatchAsync(async (req: Request, res: Response) => {
 	if (!newPermission) throw createHttpError.BadRequest('Permission not created!');
 
 	return res.status(HttpStatusCode.CREATED).json(newPermission);
-})
+});
 
 //* [DELETE] /api/permission/:id?option='Option' (delete permission)
 export const remove = useCatchAsync(async (req: Request, res: Response) => {
@@ -67,7 +67,7 @@ export const restore = useCatchAsync(async (req: Request, res: Response) => {
 	if (!result) throw createHttpError.NotFound('Permission not found');
 
 	return res.status(HttpStatusCode.CREATED).json(result);
-})
+});
 
 ///* [PUT] /api/permission/:id (update permission)
 export const update = useCatchAsync(async (req: Request, res: Response) => {
@@ -85,4 +85,4 @@ export const update = useCatchAsync(async (req: Request, res: Response) => {
 	if (!updatedPermission) throw createHttpError.NotFound('Permission not found');
 
 	return res.status(HttpStatusCode.OK).json(updatedPermission);
-})
+});

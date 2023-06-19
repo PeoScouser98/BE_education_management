@@ -124,7 +124,7 @@ export const selectAttendanceByStudent = useCatchAsync(async (req: Request, res:
 	const result = await StudentServices.attendanceOfStudentByMonth(id, Number(month), Number(year));
 
 	return res.status(HttpStatusCode.OK).json(result);
-})
+});
 
 // [GET] /api/students/policyBeneficiary?page=1&limit=10
 export const getPolicyBeneficiary = useCatchAsync(async (req: Request, res: Response) => {
@@ -133,7 +133,7 @@ export const getPolicyBeneficiary = useCatchAsync(async (req: Request, res: Resp
 	const result = await StudentServices.getPolicyBeneficiary(Number(page), Number(limit));
 
 	return res.status(HttpStatusCode.OK).json(result);
-})
+});
 
 // [GET] /students/attendance?page=1&limit=10&date='03-28-2023' MM-DD-YYYY
 export const selectAttendanceAllClass = useCatchAsync(async (req: Request, res: Response) => {

@@ -27,85 +27,26 @@ interface IAbsentStudent {
 
 // create new student using form
 export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
-	// thêm nhiều học sinh cùng lúc
-	if (Array.isArray(data)) {
-		return await createStudentList(data);
-	}
-
-	// thêm 1 học sinh
-	if (!data) {
-		throw createHttpError(HttpStatusCode.NO_CONTENT);
-	}
-
 	const { error } = validateReqBodyStudent(data);
 	if (error) {
 		throw createHttpError.BadRequest(error.message);
 	}
 
-	const check: IStudent | null = await StudentModel.findOne({
+	if (Array.isArray(data)) {
+		const hasExistedStudent = await StudentModel.exists({ code: { $in: data.map((student) => student.code) } });
+		if (hasExistedStudent) throw createHttpError(409, 'Some students already exists ');
+		return await StudentModel.insertMany(data);
+	}
+
+	const hasExistedStudent = await StudentModel.exists({
 		code: data.code
 	});
 
-	if (check) {
+	if (hasExistedStudent) {
 		throw createHttpError(409, 'Student already exists ');
 	}
 
 	return await new StudentModel(data).save();
-};
-
-const createStudentList = async (data: Omit<IStudent, '_id'>[]) => {
-	if (data.length === 0) throw createHttpError(HttpStatusCode.NO_CONTENT);
-	if (data.length > 50) {
-		throw createHttpError.PayloadTooLarge('You are only allowed to add 50 students at a time');
-	}
-
-	// validate
-	const studentErrorValidate: IStudentErrorRes[] = [];
-	data.forEach((item) => {
-		const { error } = validateReqBodyStudent(item);
-		if (error) {
-			studentErrorValidate.push({
-				fullName: item.fullName,
-				parentPhone: item.parentsPhoneNumber,
-				message: error.message
-			});
-		}
-	});
-
-	if (studentErrorValidate.length > 0) {
-		throw createHttpError(400, 'The student does not satisfy the validation requirements', {
-			error: studentErrorValidate
-		});
-	}
-
-	// check exist
-	const studentExists: IStudentErrorRes[] = [];
-	const studentCodes: string[] = data.map((item) => item.code);
-
-	const studentExistDb = await StudentModel.find({
-		code: { $in: studentCodes }
-	});
-
-	let check: any = null;
-	studentExistDb.forEach((item) => {
-		check = data.find((itemData) => itemData.code === item.code);
-
-		if (check) {
-			studentExists.push({
-				fullName: item.fullName,
-				parentPhone: item.parentsPhoneNumber
-			});
-		}
-	});
-
-	if (studentExists.length > 0) {
-		throw createHttpError(409, 'Student already exists', {
-			error: studentExists
-		});
-	}
-
-	// save
-	return await StudentModel.insertMany(data);
 };
 
 // update
@@ -147,7 +88,6 @@ export const updateStudent = async (id: string, data: Partial<Omit<IStudent, '_i
 	return await StudentModel.findOneAndUpdate({ _id: id }, data, {
 		new: true
 	});
-
 };
 
 // get student theo class
@@ -207,7 +147,6 @@ export const getDetailStudent = async (id: string) => {
 		info: student,
 		transcript: transcriptStudent
 	};
-
 };
 
 // h/s chuyển trường
@@ -232,7 +171,6 @@ export const setStudentTransferSchool = async (id: string, date: string) => {
 		throw createHttpError.NotFound('The student has transferred to another school or dropped out');
 	}
 	return await StudentModel.findOneAndUpdate({ _id: id }, { transferSchool: date }, { new: true });
-
 };
 
 // hs nghỉ học

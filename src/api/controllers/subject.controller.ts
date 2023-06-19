@@ -10,7 +10,7 @@ export const list = useCatchAsync(async (req: Request, res: Response) => {
 	if (!subjects) throw createHttpError.NotFound('Cannot get subjects!');
 
 	return res.status(HttpStatusCode.OK).json(subjects);
-})
+});
 
 export const read = useCatchAsync(async (req: Request, res: Response) => {
 	const subject = await SubjectServices.getOneSubject(req.params.id);
@@ -40,7 +40,7 @@ export const deleted = useCatchAsync(async (req: Request, res: Response) => {
 	const option = req.query.option || 'soft';
 
 	if (!id) throw createHttpError(HttpStatusCode.NO_CONTENT);
-	
+
 	let result;
 	switch (option) {
 		case 'soft':
@@ -68,6 +68,6 @@ export const restore = useCatchAsync(async (req: Request, res: Response) => {
 // [GET] /api/subjects/trash
 export const getTrash = useCatchAsync(async (req: Request, res: Response) => {
 	const result = await SubjectServices.getTrash();
-	
+
 	return res.status(HttpStatusCode.OK).json(result);
 });

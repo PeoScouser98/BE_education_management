@@ -8,6 +8,7 @@ export interface IStudent extends Document {
 	gender: boolean;
 	dateOfBirth: Date;
 	class: ObjectId;
+	parents: ObjectId;
 	parentsPhoneNumber: string;
 	isPolicyBeneficiary?: boolean;
 	isGraduated?: boolean;

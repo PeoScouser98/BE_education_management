@@ -67,20 +67,11 @@ const UserSchema = new mongoose.Schema<IUser>(
 	},
 	{
 		timestamps: true,
-		toJSON: { virtuals: true },
 		versionKey: false,
 		autoIndex: true
 	}
 );
 UserSchema.index({ displayName: 'text' });
-
-UserSchema.virtual('children', {
-	localField: 'phone',
-	foreignField: 'parentsPhoneNumber',
-	ref: 'Students',
-	justOne: true,
-	options: { lean: true }
-});
 
 UserSchema.virtual('userStatusText').get(function () {
 	switch (true) {

@@ -1,6 +1,6 @@
-import mongoose, { ObjectId, PaginateModel } from 'mongoose';
+import mongoose from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
-import { TPaginatedSchoolYearModel, ISchoolYear } from '../../types/schoolYear.type';
+import { ISchoolYear, TPaginatedSchoolYearModel } from '../../types/schoolYear.type';
 
 const SchoolYearSchema = new mongoose.Schema<ISchoolYear>(
 	{
