@@ -285,3 +285,36 @@ export const selectTranscriptStudent = async (id: string) => {
 
 	return transcriptStudent;
 };
+
+// lấy điểm tất cả học sinh / tất cả các môn / lớp
+export const selectTranscriptAllSubjectByClass = async (classId: string) => {
+	try {
+		if (mongoose.Types.ObjectId.isValid('classId')) {
+			throw createHttpError.BadRequest('ClassId không phải type objectId. ClassId: ' + classId);
+		}
+
+		// lấy ra schoolYear hiện tại
+		const schoolYear = await selectSchoolYearCurr();
+
+		// lấy ra tất cả học sinh của lớp
+		const listStudent: IStudent[] = await StudentModel.find({
+			class: classId,
+			dropoutDate: null,
+			transferSchool: null
+		})
+			.select('_id')
+			.lean();
+
+		const idStudentList = getPropertieOfArray(listStudent, '_id');
+
+		// lấy ra bảng điểm
+		const transcriptStudentList = await SubjectTranscriptionModel.find({
+			student: { $in: idStudentList },
+			schoolYear: schoolYear._id
+		}).sort({ student: 1 });
+
+		return transcriptStudentList;
+	} catch (error) {
+		throw error;
+	}
+};

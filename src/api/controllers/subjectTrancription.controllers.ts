@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { HttpException } from '../../types/httpException.type';
 import * as TransactionService from '../services/subjectTrancription.service';
 import { HttpStatusCode } from '../../configs/statusCode.config';
 import useCatchAsync from '../../helpers/useCatchAsync';
@@ -37,6 +36,15 @@ export const getTranscriptByClass = useCatchAsync(async (req: Request, res: Resp
 export const getTranscriptByStudent = useCatchAsync(async (req: Request, res: Response) => {
 	const id = req.params.id;
 	const result = await TransactionService.selectTranscriptStudent(id);
+
+	return res.status(HttpStatusCode.OK).json(result);
+});
+
+// [GET] /api/transcript/subjectAll/:classId
+export const selectTranscriptAllSubjectByClass = useCatchAsync(async (req: Request, res: Response) => {
+	const id = req.params.classId;
+
+	const result = await TransactionService.selectTranscriptAllSubjectByClass(id);
 
 	return res.status(HttpStatusCode.OK).json(result);
 });
