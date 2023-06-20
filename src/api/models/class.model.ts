@@ -20,7 +20,7 @@ const ClassSchema = new mongoose.Schema<IClassDocument>(
 		headTeacher: {
 			type: mongoose.Types.ObjectId,
 			ref: 'Users',
-			autopopulate: { select: '_id displayName phone email' }
+			autopopulate: { select: '_id displayName phone email', options: { lean: true } }
 		}
 	},
 	{
