@@ -13,7 +13,7 @@ export const schoolYearList = useCatchAsync(async (req: Request, res: Response) 
 
 // [GET] /api/schoolYears/current
 export const getCurrentYear = useCatchAsync(async (req: Request, res: Response) => {
-	const result = await SchoolYearServices.selectSchoolYearCurr();
+	const result = await SchoolYearServices.getCurrentSchoolYear();
 	return res.status(200).json(result);
 });
 

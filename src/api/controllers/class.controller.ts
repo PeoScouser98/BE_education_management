@@ -10,7 +10,6 @@ import * as ClassService from '../services/class.service';
 // [POST] /api/classes (create classes)
 export const createClass = useCatchAsync(async (req: Request, res: Response) => {
 	const { classes } = await ClassService.createClass(req.body);
-
 	return res.status(HttpStatusCode.CREATED).json(classes);
 });
 
@@ -18,7 +17,6 @@ export const createClass = useCatchAsync(async (req: Request, res: Response) => 
 export const updateClass = useCatchAsync(async (req: Request, res: Response) => {
 	const _id: unknown = req.params.id;
 	const data: Partial<Omit<IClass, '_id'>> = req.body;
-
 	const updatedClass = await ClassService.updateClass(data, _id as string);
 	return res.status(HttpStatusCode.CREATED).json(updatedClass);
 });
@@ -27,9 +25,7 @@ export const updateClass = useCatchAsync(async (req: Request, res: Response) => 
 export const removeClass = useCatchAsync(async (req: Request, res: Response) => {
 	const id = req.params.id;
 	const option = req.query._option || 'soft';
-
 	if (!id) throw createHttpError(HttpStatusCode.NO_CONTENT);
-
 	let result;
 	switch (option) {
 		case 'soft':
@@ -38,7 +34,6 @@ export const removeClass = useCatchAsync(async (req: Request, res: Response) => 
 		case 'force':
 			result = await ClassService.forceDeleteClass(id);
 			break;
-
 		default:
 			throw createHttpError.InternalServerError('InternalServerError');
 	}

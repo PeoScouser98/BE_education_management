@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import { HttpStatusCode } from '../../configs/statusCode.config';
 import useCatchAsync from '../../helpers/useCatchAsync';
 import { IUser, UserRoleEnum } from '../../types/user.type';
-import getVerificationEmailTemplate from '../emails/verifyUserEmail';
+import getVerificationEmailTemplate from '../../helpers/verifyUserEmail';
 import { sendVerificationEmail } from '../services/mail.service';
 import * as UserService from '../services/user.service';
 import {

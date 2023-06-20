@@ -20,7 +20,6 @@ export const getOneSubject = useCatchAsync(async (req: Request, res: Response) =
 export const createSubject = useCatchAsync(async (req: Request, res: Response) => {
 	const newSubject = await SubjectServices.createNewSubject(req.body);
 	if (!newSubject) throw createHttpError.BadRequest('Cannot create new subject!');
-
 	return res.status(HttpStatusCode.CREATED).json(newSubject);
 });
 
@@ -28,7 +27,6 @@ export const createSubject = useCatchAsync(async (req: Request, res: Response) =
 export const updateSubject = useCatchAsync(async (req: Request, res: Response) => {
 	const id = req.params.id;
 	const newSubject = await SubjectServices.updateSubject(id, req.body);
-
 	return res.status(HttpStatusCode.CREATED).json(newSubject);
 });
 
@@ -36,9 +34,7 @@ export const updateSubject = useCatchAsync(async (req: Request, res: Response) =
 export const deleteSubject = useCatchAsync(async (req: Request, res: Response) => {
 	const id = req.params.id;
 	const option = req.query._option || 'soft';
-
 	if (!id) throw createHttpError(HttpStatusCode.NO_CONTENT);
-
 	let result;
 	switch (option) {
 		case 'soft':
@@ -51,21 +47,18 @@ export const deleteSubject = useCatchAsync(async (req: Request, res: Response) =
 		default:
 			throw createHttpError.InternalServerError('InternalServerError');
 	}
-
-	return res.status(result.statusCode).json(result);
+	return res.status(HttpStatusCode.NO_CONTENT).json(result);
 });
 
 // [PUT] /api/subject/restore/:id
 export const restore = useCatchAsync(async (req: Request, res: Response) => {
 	const id: string = req.params.id;
 	const result = await SubjectServices.restore(id);
-
 	return res.status(result.statusCode).json(result);
 });
 
 // [GET] /api/subjects/trash
 export const getTrash = useCatchAsync(async (req: Request, res: Response) => {
 	const result = await SubjectServices.getTrash();
-
 	return res.status(HttpStatusCode.OK).json(result);
 });

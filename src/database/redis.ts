@@ -1,4 +1,3 @@
-import { refreshToken } from './../api/controllers/auth.controller';
 import 'dotenv/config';
 import * as redis from 'redis';
 import { redisOptions } from '../configs/redis.config';

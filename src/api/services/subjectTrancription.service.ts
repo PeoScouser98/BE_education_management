@@ -1,14 +1,13 @@
 import createHttpError from 'http-errors';
-import mongoose from 'mongoose';
+import { isValidObjectId } from 'mongoose';
+import { IStudent } from '../../types/student.type';
+import { ISubjectTranscript } from '../../types/subjectTranscription.type';
 import ClassModel from '../models/class.model';
+import StudentModel from '../models/student.model';
 import SubjectModel from '../models/subject.model';
 import SubjectTranscriptionModel from '../models/subjectTrancription.model';
-import { getPropertieOfArray } from '../../helpers/toolkit';
 import { validateSubjectTranscript, validateSubjectTranscriptOne } from '../validations/subjectTrancription.validation';
-import StudentModel from '../models/student.model';
-import { selectSchoolYearCurr } from './schoolYear.service';
-import { ISubjectTranscript } from '../../types/subjectTranscription.type';
-import { IStudent } from '../../types/student.type';
+import { getCurrentSchoolYear } from './schoolYear.service';
 
 // Nhập điểm nhiều học sinh 1 lúc / môn / lớp
 export const newScoreList = async (
@@ -17,7 +16,7 @@ export const newScoreList = async (
 	data: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>[]
 ) => {
 	// check xem classId và subjectId đã đúng type chưa
-	if (!mongoose.Types.ObjectId.isValid(classId) || !mongoose.Types.ObjectId.isValid(subjectId)) {
+	if (!isValidObjectId(classId) || !isValidObjectId(subjectId)) {
 		throw createHttpError.BadRequest('classId or subjectId is not in the correct ObjectId format');
 	}
 
@@ -30,7 +29,7 @@ export const newScoreList = async (
 	}
 
 	// lấy ra schoolYear của hiện tại
-	const schoolYear = await selectSchoolYearCurr();
+	const schoolYear = await getCurrentSchoolYear();
 
 	// check xem môn học và class có tồn tại hay không
 	const studentExistQuery = ClassModel.findOne({ _id: classId });
@@ -61,7 +60,7 @@ export const newScoreList = async (
 
 	// check xem data gửi lên có phải học sinh lớp học không
 	const notAClassStudent: { id: string }[] = [];
-	const idStudentList: string[] = getPropertieOfArray(data, 'student');
+	const idStudentList = data.map((v) => v.student.toString());
 	const students: IStudent[] = await StudentModel.find({
 		_id: { $in: idStudentList },
 		class: classId,
@@ -170,7 +169,7 @@ export const newScore = async (
 	data: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear' | 'student'>
 ) => {
 	// check xem studentId và subjectId đã đúng type chưa
-	if (!mongoose.Types.ObjectId.isValid(studentId) || !mongoose.Types.ObjectId.isValid(subjectId)) {
+	if (!isValidObjectId(studentId) || !isValidObjectId(subjectId)) {
 		throw createHttpError.BadRequest('studentId or subjectId is not in the correct ObjectId format');
 	}
 
@@ -179,14 +178,13 @@ export const newScore = async (
 	}
 
 	// lấy ra schoolYear của hiện tại
-	const schoolYear = await selectSchoolYearCurr();
+	const schoolYear = await getCurrentSchoolYear();
 
 	// check xem môn học và student có tồn tại hay không
 	const studentExistQuery = StudentModel.findOne({ _id: studentId });
 	const subjectExistQuery = SubjectModel.findOne({ _id: subjectId });
 
 	const [studentExist, subjectExist] = await Promise.all([studentExistQuery, subjectExistQuery]);
-
 	if (!studentExist) throw createHttpError.NotFound('Student does not exist or has been deleted!');
 	if (!subjectExist) throw createHttpError.NotFound('Subject does not exist or has been deleted!');
 
@@ -227,17 +225,12 @@ export const newScore = async (
 
 // lấy bảng điểm học sinh / lớp / môn
 export const selectSubjectTranscriptByClass = async (classId: string, subjectId: string) => {
-	if (
-		!classId ||
-		!subjectId ||
-		!mongoose.Types.ObjectId.isValid(classId) ||
-		!mongoose.Types.ObjectId.isValid(subjectId)
-	) {
+	if (!classId || !subjectId || !isValidObjectId(classId) || !isValidObjectId(subjectId)) {
 		throw createHttpError.BadRequest('classId or subjectId is not in the correct ObjectId format');
 	}
 
 	// lấy ra schoolYear hiện tại
-	const schoolYear = await selectSchoolYearCurr();
+	const schoolYear = await getCurrentSchoolYear();
 
 	// lấy ra list học sinh của lớp
 	const listStudent: IStudent[] = await StudentModel.find({
@@ -248,7 +241,7 @@ export const selectSubjectTranscriptByClass = async (classId: string, subjectId:
 		.select('_id')
 		.lean();
 
-	const idStudentList = getPropertieOfArray(listStudent, '_id');
+	const idStudentList = listStudent.map((student) => student._id);
 	// lấy ra bảng điểm của những học sinh đó
 	const transcriptStudentList = await SubjectTranscriptionModel.find({
 		student: { $in: idStudentList },
@@ -261,7 +254,7 @@ export const selectSubjectTranscriptByClass = async (classId: string, subjectId:
 
 // lấy ra bảng điểm học sinh / tất cả môn
 export const selectTranscriptStudent = async (id: string) => {
-	if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+	if (!id || !isValidObjectId(id)) {
 		throw createHttpError.BadRequest('id student is not in the correct ObjectId format');
 	}
 
@@ -276,7 +269,7 @@ export const selectTranscriptStudent = async (id: string) => {
 		throw createHttpError.NotFound('Student does not exist');
 	}
 
-	const schoolYear = await selectSchoolYearCurr();
+	const schoolYear = await getCurrentSchoolYear();
 
 	const transcriptStudent = await SubjectTranscriptionModel.find({
 		student: id,
@@ -289,12 +282,12 @@ export const selectTranscriptStudent = async (id: string) => {
 // lấy điểm tất cả học sinh / tất cả các môn / lớp
 export const selectTranscriptAllSubjectByClass = async (classId: string) => {
 	try {
-		if (mongoose.Types.ObjectId.isValid('classId')) {
+		if (isValidObjectId('classId')) {
 			throw createHttpError.BadRequest('ClassId không phải type objectId. ClassId: ' + classId);
 		}
 
 		// lấy ra schoolYear hiện tại
-		const schoolYear = await selectSchoolYearCurr();
+		const schoolYear = await getCurrentSchoolYear();
 
 		// lấy ra tất cả học sinh của lớp
 		const listStudent: IStudent[] = await StudentModel.find({
@@ -305,7 +298,7 @@ export const selectTranscriptAllSubjectByClass = async (classId: string) => {
 			.select('_id')
 			.lean();
 
-		const idStudentList = getPropertieOfArray(listStudent, '_id');
+		const idStudentList = listStudent.map((student) => student._id);
 
 		// lấy ra bảng điểm
 		const transcriptStudentList = await SubjectTranscriptionModel.find({

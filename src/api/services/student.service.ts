@@ -1,6 +1,9 @@
 import createHttpError from 'http-errors';
-import mongoose, { SortOrder } from 'mongoose';
-import { compareDates, compareObject, getPropertieOfArray } from '../../helpers/toolkit';
+import mongoose, { SortOrder, isValidObjectId } from 'mongoose';
+import { HttpStatusCode } from '../../configs/statusCode.config';
+import { compareDates } from '../../helpers/toolkit';
+import { IAttendance, IStudent } from '../../types/student.type';
+import { ISubjectTranscript } from '../../types/subjectTranscription.type';
 import ClassModel from '../models/class.model';
 import StudentModel from '../models/student.model';
 import {
@@ -8,11 +11,8 @@ import {
 	validateReqBodyStudent,
 	validateUpdateReqBodyStudent
 } from '../validations/student.validation';
+import { getCurrentSchoolYear } from './schoolYear.service';
 import { selectTranscriptStudent } from './subjectTrancription.service';
-import { ISubjectTranscript } from '../../types/subjectTranscription.type';
-import { IAttendance, IStudent } from '../../types/student.type';
-import { selectSchoolYearCurr } from './schoolYear.service';
-import { HttpStatusCode } from '../../configs/statusCode.config';
 
 interface IStudentErrorRes {
 	fullName: string;
@@ -201,11 +201,9 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 	if (!absentStudents) {
 		throw createHttpError(HttpStatusCode.NO_CONTENT);
 	}
-
 	if (!Array.isArray(absentStudents)) {
 		throw createHttpError(400, 'The list of absent students is not an array type');
 	}
-
 	if (absentStudents.length === 0) {
 		return {
 			message: 'Attendance has been saved!'
@@ -219,7 +217,7 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 
 	let message = '';
 	absentStudents.forEach((item) => {
-		if (!item.idStudent || !mongoose.Types.ObjectId.isValid(item.idStudent)) {
+		if (!item.idStudent || !isValidObjectId(item.idStudent)) {
 			message = 'idStudent of the student is invalid';
 		}
 
@@ -242,7 +240,7 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 	}
 
 	// Lấy ra các id học sinh nghỉ
-	const absentStudentIdList: string[] = getPropertieOfArray(absentStudents, 'idStudent');
+	const absentStudentIdList: string[] = absentStudents.map((student) => student.idStudent);
 
 	// Kiểm tra xem học sinh vắng có đúng học sinh của lớp không
 	const checkExist: IStudent[] = await StudentModel.find({
@@ -292,7 +290,7 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 	}
 
 	// lấy ra học kỳ hiện tại
-	const schoolYearCurr = await selectSchoolYearCurr();
+	const schoolYearCurr = await getCurrentSchoolYear();
 
 	// Thời gian điểm danh sẽ được server  tự động lấy là thời gian hiện tại
 	const bulkUpdateAbsentStudents: any = absentStudents.map((item) => {

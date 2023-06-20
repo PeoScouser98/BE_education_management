@@ -12,6 +12,7 @@ const SubjectSchema = new mongoose.Schema<ISubjectDocument>(
 		subjectCode: {
 			type: String,
 			unique: true,
+			uppercase: true,
 			required: true
 		}
 	},

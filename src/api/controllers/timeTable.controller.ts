@@ -11,7 +11,6 @@ export const createTimeTable = useCatchAsync(async (req: Request, res: Response)
 	const { error } = validateNewTimeTable(req.body);
 	if (error) throw createHttpError.BadRequest(error.message);
 	const newTimeTable = await TimeTableService.createTimetable(req.body);
-
 	return res.status(HttpStatusCode.CREATED).json(newTimeTable);
 });
 
@@ -26,7 +25,6 @@ export const updateTimeTable = useCatchAsync(async (req: Request, res: Response)
 	if (!updatedTimeTable) {
 		throw createHttpError.NotFound('Cannot find time table to update!');
 	}
-
 	return res.status(HttpStatusCode.CREATED).json(updatedTimeTable);
 });
 
@@ -55,6 +53,5 @@ export const getTeacherTimetable = useCatchAsync(async (req: Request, res: Respo
 	const classId = req.query._classId as string;
 	if (!classId || !isValidObjectId(classId)) throw createHttpError.BadRequest('Invalid class ID');
 	const teacherTimetable = await TimeTableService.getTeacherTimeTableByClass(req.params.teacherId, classId);
-
 	return res.status(HttpStatusCode.OK).json(teacherTimetable);
 });

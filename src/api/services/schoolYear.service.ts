@@ -34,7 +34,7 @@ export const createSchoolYear = async () => {
 };
 
 // lấy ra schoolYear hiện tại
-export const selectSchoolYearCurr = async () => {
+export const getCurrentSchoolYear = async () => {
 	const schoolYear = await SchoolYearModel.findOne({
 		$and: [{ startAt: { $lte: new Date().getFullYear() } }, { endAt: { $gte: new Date().getFullYear() } }]
 	});

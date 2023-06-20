@@ -9,8 +9,6 @@ const generatePicureByName = (char: string) => {
 	return (
 		'https://ui-avatars.com/api/' +
 		paramsStringify({
-			// background: 'ccc',
-			// color: 'fff',
 			name: char
 		})
 	);
