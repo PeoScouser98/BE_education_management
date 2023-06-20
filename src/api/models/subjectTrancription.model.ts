@@ -9,12 +9,12 @@ const SubjectTranscriptSchema = new mongoose.Schema<ISubjectTranscriptDocument>(
 			type: mongoose.Types.ObjectId,
 			require: true,
 			ref: 'Students',
-			autopopulate: { select: 'fullName _id class' }
+			autopopulate: { select: 'fullName -parents' }
 		},
 		schoolYear: {
 			type: mongoose.Types.ObjectId,
 			ref: 'SchoolYears',
-			autopopulate: true,
+			autopopulate: { select: 'startAt endAt' },
 			require: true
 		},
 		subject: {

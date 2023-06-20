@@ -23,19 +23,10 @@ export const scoreTableInputOne = useCatchAsync(async (req: Request, res: Respon
 	return res.status(HttpStatusCode.CREATED).json(result);
 });
 
-// [GET] /api/transcript/class/:classId/:subjectId
-export const getTranscriptByClass = useCatchAsync(async (req: Request, res: Response) => {
-	const subjectId = req.params.subjectId;
-	const classId = req.params.classId;
-	const result = await TransactionService.selectSubjectTranscriptByClass(classId, subjectId);
-
-	return res.status(HttpStatusCode.OK).json(result);
-});
-
 // [GET] /api/transcript/student/:id
 export const getTranscriptByStudent = useCatchAsync(async (req: Request, res: Response) => {
 	const id = req.params.id;
-	const result = await TransactionService.selectTranscriptStudent(id);
+	const result = await TransactionService.getStudentTranscript(id);
 
 	return res.status(HttpStatusCode.OK).json(result);
 });

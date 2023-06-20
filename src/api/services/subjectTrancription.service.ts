@@ -8,6 +8,7 @@ import SubjectModel from '../models/subject.model';
 import SubjectTranscriptionModel from '../models/subjectTrancription.model';
 import { validateSubjectTranscript, validateSubjectTranscriptOne } from '../validations/subjectTrancription.validation';
 import { getCurrentSchoolYear } from './schoolYear.service';
+import mongoose from 'mongoose';
 
 // Nhập điểm nhiều học sinh 1 lúc / môn / lớp
 export const newScoreList = async (
@@ -241,10 +242,9 @@ export const selectSubjectTranscriptByClass = async (classId: string, subjectId:
 		.select('_id')
 		.lean();
 
-	const idStudentList = listStudent.map((student) => student._id);
 	// lấy ra bảng điểm của những học sinh đó
 	const transcriptStudentList = await SubjectTranscriptionModel.find({
-		student: { $in: idStudentList },
+		student: { $group: listStudent },
 		schoolYear: schoolYear._id,
 		subject: subjectId
 	});
@@ -253,7 +253,7 @@ export const selectSubjectTranscriptByClass = async (classId: string, subjectId:
 };
 
 // lấy ra bảng điểm học sinh / tất cả môn
-export const selectTranscriptStudent = async (id: string) => {
+export const getStudentTranscript = async (id: string) => {
 	if (!id || !isValidObjectId(id)) {
 		throw createHttpError.BadRequest('id student is not in the correct ObjectId format');
 	}
@@ -271,43 +271,159 @@ export const selectTranscriptStudent = async (id: string) => {
 
 	const schoolYear = await getCurrentSchoolYear();
 
-	const transcriptStudent = await SubjectTranscriptionModel.find({
-		student: id,
-		schoolYear: schoolYear._id
-	}).select('-student');
+	const transcriptStudent = await SubjectTranscriptionModel.aggregate([
+		{
+			$match: {
+				student: new mongoose.Types.ObjectId(id),
+				schoolYear: schoolYear._id
+			}
+		},
+		{
+			$lookup: {
+				from: 'students',
+				foreignField: '_id',
+				localField: 'student',
+				as: 'studentInfo',
+				pipeline: [
+					{
+						$project: {
+							fullName: 1
+						}
+					}
+				]
+			}
+		},
+		{
+			$unwind: '$studentInfo'
+		},
+		{
+			$lookup: {
+				from: 'subjects',
+				foreignField: '_id',
+				localField: 'subject',
+				as: 'subject',
+				pipeline: [
+					{
+						$project: {
+							subjectName: 1
+						}
+					}
+				]
+			}
+		},
+		{
+			$unwind: '$subject'
+		},
+		{
+			$group: {
+				_id: '$student', // group transcript by student
+				student: { $first: '$studentInfo' },
+				transcript: {
+					// add student's subject, student's firstSemeter, student's secondSemester fields to transcript
+					$push: {
+						subject: '$subject',
+						firstSemester: '$firstSemester',
+						secondSemester: '$secondSemester'
+					}
+				}
+			}
+		},
+		{
+			$project: {
+				_id: 0,
+				student: '$student',
+				transcript: 1
+			}
+		}
+	]);
 
-	return transcriptStudent;
+	return transcriptStudent.at(0);
 };
 
 // lấy điểm tất cả học sinh / tất cả các môn / lớp
 export const selectTranscriptAllSubjectByClass = async (classId: string) => {
-	try {
-		if (isValidObjectId('classId')) {
-			throw createHttpError.BadRequest('ClassId không phải type objectId. ClassId: ' + classId);
-		}
-
-		// lấy ra schoolYear hiện tại
-		const schoolYear = await getCurrentSchoolYear();
-
-		// lấy ra tất cả học sinh của lớp
-		const listStudent: IStudent[] = await StudentModel.find({
-			class: classId,
-			dropoutDate: null,
-			transferSchool: null
-		})
-			.select('_id')
-			.lean();
-
-		const idStudentList = listStudent.map((student) => student._id);
-
-		// lấy ra bảng điểm
-		const transcriptStudentList = await SubjectTranscriptionModel.find({
-			student: { $in: idStudentList },
-			schoolYear: schoolYear._id
-		}).sort({ student: 1 });
-
-		return transcriptStudentList;
-	} catch (error) {
-		throw error;
+	if (isValidObjectId('classId')) {
+		throw createHttpError.BadRequest('ClassId không phải type objectId. ClassId: ' + classId);
 	}
+
+	// lấy ra schoolYear hiện tại
+	const schoolYear = await getCurrentSchoolYear();
+
+	// lấy ra tất cả học sinh của lớp
+	const listStudent: IStudent[] = await StudentModel.find({
+		class: classId,
+		dropoutDate: null,
+		transferSchool: null
+	})
+		.select('_id')
+		.lean();
+
+	// lấy ra bảng điểm
+	const transcriptStudentList = await SubjectTranscriptionModel.aggregate([
+		{
+			$match: {
+				student: { $in: listStudent.map((student) => student._id) },
+				schoolYear: schoolYear._id
+			}
+		},
+		{
+			$lookup: {
+				from: 'students',
+				foreignField: '_id',
+				localField: 'student',
+				as: 'studentInfo',
+				pipeline: [
+					{
+						$project: {
+							fullName: 1
+						}
+					}
+				]
+			}
+		},
+		{
+			$unwind: '$studentInfo'
+		},
+		{
+			$lookup: {
+				from: 'subjects',
+				foreignField: '_id',
+				localField: 'subject',
+				as: 'subject',
+				pipeline: [
+					{
+						$project: {
+							subjectName: 1
+						}
+					}
+				]
+			}
+		},
+		{
+			$unwind: '$subject'
+		},
+		{
+			$group: {
+				_id: '$student', // group transcript by student
+				student: { $first: '$studentInfo' },
+				transcript: {
+					// add student's subject, student's firstSemeter, student's secondSemester fields to transcript
+					$push: {
+						subject: '$subject',
+						firstSemester: '$firstSemester',
+						secondSemester: '$secondSemester'
+					}
+				}
+			}
+		},
+		{
+			$project: {
+				_id: 0,
+				student: '$student',
+				transcript: 1
+			}
+		}
+	]);
+
+	return transcriptStudentList;
 };
