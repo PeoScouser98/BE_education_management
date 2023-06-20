@@ -93,7 +93,7 @@ paths:
                         ]
 
    /subjects/:id:
-      put:
+      patch:
          tags:
             - Subjects
          description: Update lại 1 subject
@@ -195,7 +195,7 @@ paths:
                            'deletedAt': '2023-05-07T06:46:47.603Z'
                         }
    /subjects/restore/:id:
-      put:
+      patch:
          tags:
             - Subjects
          description: Khôi phục 1 subject đã xóa mềm

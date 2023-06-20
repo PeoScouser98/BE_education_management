@@ -24,9 +24,8 @@ router.get('/students/stop/:type', getStudentStop);
 router.get('/students/detail/:id', getStudentDetail);
 router.get('/students/:class', getStudentByClass);
 router.post('/students', createStudent);
-
-router.put('/students/attendance/:classId', attendanceStudentByClass);
-router.put('/students/services/:id', serviceStudent);
-router.put('/students/:id', updateStudent);
+router.patch('/students/attendance/:classId', attendanceStudentByClass);
+router.patch('/students/services/:id', serviceStudent);
+router.patch('/students/:id', updateStudent);
 
 export default router;

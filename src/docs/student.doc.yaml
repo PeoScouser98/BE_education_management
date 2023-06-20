@@ -471,7 +471,7 @@ paths:
                         }
 
    /students/attendance/:classId:
-      put:
+      patch:
          tags:
             - Students
          summary: Đăng nhập với vai trò là giáo viên
@@ -695,7 +695,7 @@ paths:
                description: Các lỗi có thể xảy ra trong api get student detail
 
    /students/services/:id:
-      put:
+      patch:
          tags:
             - Students
          description: Chuyển trạng thái 1 học sinh thành đã nghỉ học hoặc chuyển trường
@@ -764,7 +764,7 @@ paths:
                         { statusCode: 400, message: 'The student has transferred to another school or dropped out' }
 
    /students/:id:
-      put:
+      patch:
          tags:
             - Students
          description: Cập nhập lại thông tin của 1 học sinh

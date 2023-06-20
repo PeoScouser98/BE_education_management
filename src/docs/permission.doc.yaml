@@ -75,7 +75,7 @@ paths:
                      example: { message: 'Cannot get permissions!', statusCode: 404 }
 
    /permissions/:id:
-      put:
+      patch:
          tags:
             - Permission
          description: Cập nhật permission
@@ -163,7 +163,7 @@ paths:
                      example: { message: 'Permission not found', statusCode: 404 }
 
    /permissions/:id/restore:
-      put:
+      patch:
          tags:
             - Permission
          description: Khôi phục 1 permission đã xóa mềm
