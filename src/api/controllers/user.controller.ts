@@ -3,17 +3,16 @@ import { Request, Response } from 'express';
 import createHttpError from 'http-errors';
 import jwt from 'jsonwebtoken';
 import { HttpStatusCode } from '../../configs/statusCode.config';
+import useCatchAsync from '../../helpers/useCatchAsync';
 import { IUser, UserRoleEnum } from '../../types/user.type';
 import getVerificationEmailTemplate from '../emails/verifyUserEmail';
 import { sendVerificationEmail } from '../services/mail.service';
 import * as UserService from '../services/user.service';
-import { HttpException } from './../../types/httpException.type';
 import {
 	validateNewParentsData,
 	validateNewTeacherData,
 	validateUpdateUserData
 } from './../validations/user.validation';
-import useCatchAsync from '../../helpers/useCatchAsync';
 
 export const createTeacherAccount = useCatchAsync(async (req: Request, res: Response) => {
 	const { error } = validateNewTeacherData(req.body);
