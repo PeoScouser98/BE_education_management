@@ -22,9 +22,7 @@ export const sendVerificationEmail = async ({
 			html: template
 		},
 		(err: Error | null, info: SMTPTransport.SentMessageInfo): void => {
-			console.log('recipient:>>>', to);
-			console.log('err:>>>', err);
-			if (err) throw createHttpError.InternalServerError('Failed to send mail');
+			if (err) console.log('Failed to send mail.\nError: ', err.message);
 			else console.log(info.response);
 		}
 	);
