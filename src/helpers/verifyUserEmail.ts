@@ -1,5 +1,5 @@
-import { paramsStringify } from '../../helpers/queryParams';
-import { IUser } from '../../types/user.type';
+import { paramsStringify } from './queryParams';
+import { IUser } from '../types/user.type';
 
 const getVerificationEmailTemplate = ({
 	redirectDomain,
