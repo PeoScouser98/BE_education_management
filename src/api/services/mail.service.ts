@@ -1,6 +1,5 @@
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import transporter from '../../configs/nodemailer.config';
-import createHttpError from 'http-errors';
 
 export const sendVerificationEmail = async ({
 	to,
