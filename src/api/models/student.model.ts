@@ -25,7 +25,7 @@ const StudentSchema = new mongoose.Schema<IStudentDocument>(
 		parents: {
 			type: mongoose.Types.ObjectId,
 			ref: 'Users',
-			autopopulate: { options: { lean: true } }
+			autopopulate: { select: '_id displayName phone', options: { lean: true } }
 		},
 		gender: {
 			type: Boolean,
@@ -73,6 +73,7 @@ const StudentSchema = new mongoose.Schema<IStudentDocument>(
 		]
 	},
 	{
+		versionKey: false,
 		timestamps: true,
 		collection: 'students'
 	}

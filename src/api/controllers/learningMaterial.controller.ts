@@ -13,7 +13,7 @@ import useCatchAsync from '../../helpers/useCatchAsync';
 export const getFiles = useCatchAsync(async (req: Request, res: Response) => {
 	const sort = multiFieldSortObjectParser({
 		_sort: req.query._sort as string,
-		_order: req.query.order as string
+		_order: req.query._order as string
 	});
 
 	const query: PaginateOptions = {
@@ -22,12 +22,12 @@ export const getFiles = useCatchAsync(async (req: Request, res: Response) => {
 		sort: sort || {}
 	};
 
-	if (!req.query.grade && !req.query.subject) {
+	if (!req.query._grade && !req.query._subject) {
 		const allFiles = await learningMaterialService.getFiles({ deleted: false }, query);
 		return res.status(HttpStatusCode.OK).json(allFiles);
 	} else {
 		const files = await learningMaterialService.getFiles(
-			{ subject: req.query.subject, grade: req.query.grade },
+			{ subject: req.query._subject, grade: req.query._grade },
 			query
 		);
 		return res.status(HttpStatusCode.OK).json(files);

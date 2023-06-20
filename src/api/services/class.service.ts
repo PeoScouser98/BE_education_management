@@ -1,6 +1,5 @@
 import createHttpError from 'http-errors';
-import mongoose from 'mongoose';
-import { IClass } from '../../types/class.type';
+import { IClass, TClassSortOption } from '../../types/class.type';
 import ClassModel from '../models/class.model';
 import { validateClassData, validateClassEditData } from '../validations/class.validation';
 
@@ -9,79 +8,42 @@ export const getOneClass = async (classId: string) =>
 		path: 'totalStudents'
 	});
 
+export const getAllClass = async (sortOption: TClassSortOption) =>
+	await ClassModel.find().populate({ path: 'totalStudents' }).sort(sortOption);
+
 export const createClass = async (payload: Omit<IClass, '_id'>) => {
-	const validateCheck = validateClassData(payload);
-
-	if (validateCheck.error) {
-		throw createHttpError(502, validateCheck.error.message);
-	}
-	const { exists } = await checkClassesExists('', {
-		className: payload.className
+	const { error } = validateClassData(payload);
+	if (error) throw createHttpError.BadRequest(error.message);
+	const existedClass = await ClassModel.exists({
+		className: payload.className.toUpperCase()
 	});
-
-	if (exists) {
-		throw createHttpError(409, `Class ${payload.className} already exists`);
-	}
-
+	if (existedClass) throw createHttpError.Conflict(`Class ${payload.className} already exists`);
 	const classResult: IClass = await new ClassModel(payload).save();
 	return {
 		classes: classResult
 	};
 };
 
-export const checkClassesExists = async (_id: string, condition: Partial<IClass> = {}) => {
-	let conditionCurr: any = { ...condition };
-	if (_id) {
-		// kiểm tra xem _id gửi lên đúng kiểu objectId
-		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw createHttpError.BadRequest('_id of the classes is invalid');
-		}
-
-		conditionCurr = {
-			...condition,
-			_id
-		};
-	}
-
-	const classes: IClass | null = await ClassModel.findOne({
-		...conditionCurr
-	});
-
-	return {
-		exists: !!classes,
-		classes: classes
-	};
-};
-
-export const updateClasses = async (payload: Partial<Omit<IClass, '_id'>>, _id: string) => {
-	// trường hợp data rỗng
-	if (Object.keys(payload).length === 0) {
-		throw createHttpError(304);
-	}
-
-	const { exists, classes } = await checkClassesExists(_id);
-
+export const updateClass = async (payload: Partial<Omit<IClass, '_id'>>, classId: string) => {
+	const existedClass = await ClassModel.findOne({ _id: classId });
+	if (!existedClass) throw createHttpError.NotFound('Classes does not exist');
 	// trường hợp className và grade không khớp nhau
-	if (payload.className && !payload.grade && !payload.className.startsWith(JSON.stringify(classes?.grade))) {
-		throw createHttpError.BadRequest('Invalid Class name, classname: grade+"A|B|C|D..."');
-	}
-
-	if (!exists) {
-		throw createHttpError.NotFound('Classes does not exist');
-	}
-
+	if (payload.className && !payload.grade && !payload.className.startsWith(JSON.stringify(existedClass?.grade)))
+		throw createHttpError.BadRequest(`Invalid Class name, class's name: grade+"A|B|C|D...`);
 	// check validate data gửi lên
 	const { error } = validateClassEditData(payload);
 	if (error) {
 		throw createHttpError.BadRequest(error.message);
 	}
-
-	return await ClassModel.findOneAndUpdate({ _id }, payload, { new: true });
+	return await ClassModel.findOneAndUpdate({ _id: classId }, payload, { new: true });
 };
 
-export const softDeleteClass = async (id: string) => {
-	await ClassModel.delete({ _id: id });
-
+export const softDeleteClass = async (classId: string) => {
+	const existedClass = await ClassModel.findOne({ _id: classId }).populate('totalStudents');
+	if (!existedClass) throw createHttpError.NotFound('Cannot find class to delete');
+	if (existedClass.totalStudents! > 0)
+		throw createHttpError.Conflict('Cannot delete class due to there are students in this class !');
+	await ClassModel.delete({ _id: classId });
 	return {
 		message: 'Moved the class to the trash',
 		statusCode: 200
@@ -90,16 +52,18 @@ export const softDeleteClass = async (id: string) => {
 
 export const restoreClass = async (id: string) => {
 	await ClassModel.restore({ _id: id });
-
 	return {
 		message: 'Class have been restored',
 		statusCode: 200
 	};
 };
 
-export const forceDeleteClass = async (id: string) => {
-	await ClassModel.deleteOne({ _id: id });
-
+export const forceDeleteClass = async (classId: string) => {
+	const existedClass = await ClassModel.findOne({ _id: classId }).populate('totalStudents');
+	if (!existedClass) throw createHttpError.NotFound('Cannot find class to delete');
+	if (existedClass.totalStudents! > 0)
+		throw createHttpError.Conflict('Cannot delete class due to there are students in this class !');
+	await ClassModel.deleteOne({ _id: classId });
 	return {
 		message: 'Class has been permanently deleted',
 		statusCode: 200

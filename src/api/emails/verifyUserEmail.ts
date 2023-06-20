@@ -1,5 +1,5 @@
 import { paramsStringify } from '../../helpers/queryParams';
-import { IUser, UserGenderEnum } from '../../types/user.type';
+import { IUser } from '../../types/user.type';
 
 const getVerificationEmailTemplate = ({
 	redirectDomain,
@@ -16,9 +16,7 @@ const getVerificationEmailTemplate = ({
 					Thân gửi ${user.displayName}!
 					<p>
 						Người dùng nhận được mail vui lòng click vào <a href='${
-							redirectDomain +
-							'/api/auth/verify-account' +
-							paramsStringify({ user_type: user.role, token: token })
+							redirectDomain + '/api/auth/verify-account' + paramsStringify({ _role: user.role, _token: token })
 						}'>link</a> này để xác thực tài khoản.
 					</p>
 					<i>Lưu ý: Mail xác thực này có hiệu lực trong vòng 7 ngày</i>

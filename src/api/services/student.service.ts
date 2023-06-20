@@ -51,52 +51,21 @@ export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent,
 
 // update
 export const updateStudent = async (id: string, data: Partial<Omit<IStudent, '_id' | 'code'>>) => {
-	if (!data || Object.keys(data).length === 0) {
-		throw createHttpError(HttpStatusCode.NO_CONTENT);
-	}
-	if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-		throw createHttpError.BadRequest('_id of the student is invalid');
-	}
-
 	// validate
 	const { error } = validateUpdateReqBodyStudent(data);
 	if (error) {
 		throw createHttpError.BadRequest(error.message);
 	}
-
-	// check sự tồn tại
-	const student = await StudentModel.findOne({
-		_id: id
-	});
-
+	const student = await StudentModel.exists({ _id: id });
 	if (!student) {
 		throw createHttpError.NotFound('Student does not exist!');
 	}
-
-	// check xem dữ liệu sửa có giống với dữ liệu cũ hay không
-	if (
-		(() => {
-			const classOld = { ...JSON.parse(JSON.stringify(student)) };
-			delete classOld._id;
-
-			return compareObject({ ...classOld, ...data }, classOld);
-		})()
-	) {
-		throw createHttpError(304);
-	}
-
-	return await StudentModel.findOneAndUpdate({ _id: id }, data, {
-		new: true
-	});
+	return await StudentModel.findOneAndUpdate({ _id: id }, data, { new: true });
 };
 
 // get student theo class
 export const getStudentByClass = async (classId: string, order: SortOrder, groupBy: string, select: string) => {
-	if (!classId || !mongoose.Types.ObjectId.isValid(classId)) {
-		throw createHttpError.BadRequest('_id of the class is invalid');
-	}
-
-	const availableSortFields = [
+	const sortableFields = [
 		'code',
 		'fullName',
 		'gender',
@@ -107,7 +76,7 @@ export const getStudentByClass = async (classId: string, order: SortOrder, group
 		'isGraduated'
 	];
 
-	if (!availableSortFields.includes(groupBy)) {
+	if (!sortableFields.includes(groupBy)) {
 		throw createHttpError.BadRequest(
 			"_sort can only belong to ['code','fullName','gender','dateOfBirth','class','parentsPhoneNumber','isPolicyBeneficiary','isGraduated']"
 		);

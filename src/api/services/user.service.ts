@@ -1,40 +1,14 @@
 import { genSaltSync, hashSync } from 'bcrypt';
 import createHttpError from 'http-errors';
+import removeVietnameseTones from '../../helpers/vnFullTextSearch';
 import { IUser } from '../../types/user.type';
-import StudentModel from '../models/student.model';
 import UserModel from '../models/user.model';
 import { UserRoleEnum } from './../../types/user.type';
-import removeVietnameseTones from '../../helpers/vnFullTextSearch';
 
-// Add multi parents users
-const checkIsValidParentUser = async ({ email, phone }: { email: string; phone: string }) => {
-	const [existedUser, childrenOfExistedUser] = await Promise.all([
-		UserModel.exists({ email: email, phone: phone }),
-		StudentModel.exists({ parentsPhoneNumber: phone })
-	]);
-	return {
-		isUserExisted: !!existedUser,
-		hasChildren: !!childrenOfExistedUser
-	};
-};
-
-export const createUser = async ({
-	payload,
-	multi
-}: {
-	payload: Partial<IUser> & Array<Partial<IUser>>;
-	multi: boolean;
-}) => {
-	if (multi && Array.isArray(payload) && payload.every((user) => user.role === UserRoleEnum.PARENTS)) {
-		payload.forEach((user) => {
-			checkIsValidParentUser({
-				email: user.email ?? '',
-				phone: user.phone ?? ''
-			}).then((result) => {
-				if (result.isUserExisted) throw createHttpError.Conflict('Parent account already existed!');
-				if (!result.hasChildren) throw createHttpError.Conflict(`No student has this parent's phone number!`);
-			});
-		});
+export const createUser = async (payload: Partial<IUser> & Array<Partial<IUser>>) => {
+	if (Array.isArray(payload) && payload.every((user) => user.role === UserRoleEnum.PARENTS)) {
+		const hasExistedUser = await UserModel.exists({ email: { $in: payload.map((user) => user.email) } });
+		if (hasExistedUser) throw createHttpError.Conflict('Parent account already existed!');
 		return await UserModel.insertMany(payload);
 	}
 	// Add a new teacher user
@@ -49,7 +23,6 @@ export const createUser = async ({
 
 		return await new UserModel(payload).save();
 	}
-
 };
 
 // Users update them self account's info
@@ -115,17 +88,12 @@ export const getParentsUserByClass = async (classId: string) => {
 	const parents = await UserModel.find({ role: UserRoleEnum.PARENTS })
 		.populate({
 			path: 'children',
-			select: 'fullName parentsPhoneNumber class',
-			options: {
-				id: false
-			},
-			match: {
-				$and: [{ parentsPhoneNumber: { $exists: true } }, { class: classId }]
-			},
+			select: 'fullName class -parents',
+			match: { class: classId },
 			populate: { path: 'class', select: 'className' }
 		})
-		.select('_id displayName email phone gender dateOfBirth')
-		.lean();
+		.lean()
+		.transform((documents) => documents.filter((doc) => doc.children.length > 0));
 
 	return parents;
 };
@@ -133,7 +101,7 @@ export const getParentsUserByClass = async (classId: string) => {
 export const searchParents = async (searchTerm: string) => {
 	// searchTerm = removeVietnameseTones(searchTerm);
 	const pattern = new RegExp(`^${searchTerm}`, 'gi');
-	
+
 	return await UserModel.find({
 		$or: [
 			{ phone: pattern, role: UserRoleEnum.PARENTS },

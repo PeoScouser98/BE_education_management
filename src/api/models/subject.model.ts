@@ -1,36 +1,40 @@
 import mongoose from 'mongoose';
 import MongooseDelete from 'mongoose-delete';
-import { createSlug } from '../../helpers/toolkit';
-import { TSoftDeleteSubjectModel, ISubjectDocument } from '../../types/subject.type';
+import { toCapitalize } from '../../helpers/toolkit';
+import { ISubjectDocument, TSoftDeleteSubjectModel } from '../../types/subject.type';
 
-const subjectSchema = new mongoose.Schema<ISubjectDocument>(
+const SubjectSchema = new mongoose.Schema<ISubjectDocument>(
 	{
-		subjectName: String,
-		slug: {
+		subjectName: {
 			type: String,
-			unique: true
+			required: true
+		},
+		subjectCode: {
+			type: String,
+			unique: true,
+			required: true
 		}
 	},
 	{
+		versionKey: false,
 		collection: 'subjects',
 		timestamps: true
 	}
 );
 
-subjectSchema.plugin(MongooseDelete, {
+SubjectSchema.plugin(MongooseDelete, {
 	overrideMethods: ['find', 'findOne'],
 	deletedAt: true
 });
 
-subjectSchema.pre('save', function (next) {
-	this.slug = createSlug(this.subjectName);
-
+SubjectSchema.pre('save', function (next) {
+	this.subjectName = toCapitalize(this.subjectName)!;
 	next();
 });
 
 const SubjectModel: TSoftDeleteSubjectModel = mongoose.model<ISubjectDocument, TSoftDeleteSubjectModel>(
 	'Subjects',
-	subjectSchema
+	SubjectSchema
 );
 
 export default SubjectModel;
