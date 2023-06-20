@@ -2,7 +2,7 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import 'dotenv/config';
-import express, { Request, Response } from 'express';
+import express from 'express';
 import session, { MemoryStore } from 'express-session';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -74,9 +74,6 @@ app.use('/api', rootRouter);
 // app.use('/public', express.static(path.join(SRC_FOLDER, 'public')));
 app.use('/api/document', swaggerUI.serve, swaggerUI.setup(swaggerOptions));
 
-// Default response
-app.get('*', async (req: Request, res: Response) => {
-	return res.redirect('/api/document');
-});
+app.get('/', (req, res) => res.json({ message: 'Server now is running.', status: HttpStatusCode.OK }));
 
 export default app;
