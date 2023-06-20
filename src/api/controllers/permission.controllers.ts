@@ -9,7 +9,7 @@ import useCatchAsync from '../../helpers/useCatchAsync';
 
 //* [GET] /api/permission?role="Role" (get permissions by role)
 export const read = useCatchAsync(async (req: Request, res: Response) => {
-	const role = req.query.role as UserRoleEnum;
+	const role = req.query._role as UserRoleEnum;
 	if (!role) throw createHttpError.BadRequest('Missing parameter: role');
 	if (!Object.values(UserRoleEnum).includes(role))
 		throw createHttpError.BadRequest(`User's role parameter must be one of these: ${Object.values(UserRoleEnum)}`);
@@ -38,7 +38,7 @@ export const create = useCatchAsync(async (req: Request, res: Response) => {
 export const remove = useCatchAsync(async (req: Request, res: Response) => {
 	let result;
 	const { id } = req.params;
-	const option = req.query.option || 'soft'; //default option is soft
+	const option = req.query._option || 'soft'; //default option is soft
 
 	if (!isValidObjectId(id)) throw createHttpError.BadRequest('Invalid ID!');
 
