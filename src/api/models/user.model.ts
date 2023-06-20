@@ -68,10 +68,16 @@ const UserSchema = new mongoose.Schema<IUser>(
 	{
 		timestamps: true,
 		versionKey: false,
+		toJSON: { virtuals: true },
 		autoIndex: true
 	}
 );
 UserSchema.index({ displayName: 'text' });
+UserSchema.virtual('children', {
+	localField: '_id',
+	foreignField: 'parents',
+	ref: 'Students'
+});
 
 UserSchema.virtual('userStatusText').get(function () {
 	switch (true) {

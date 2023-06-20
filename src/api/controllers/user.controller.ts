@@ -13,17 +13,14 @@ import {
 	validateNewTeacherData,
 	validateUpdateUserData
 } from './../validations/user.validation';
+import useCatchAsync from '../../helpers/useCatchAsync';
 
-export const createTeacherAccount = async (req: Request, res: Response) => {
+export const createTeacherAccount = useCatchAsync(async (req: Request, res: Response) => {
 	const { error } = validateNewTeacherData(req.body);
 	if (error) {
 		throw createHttpError.BadRequest(error.message);
 	}
-	const newUser = (await UserService.createUser({
-		payload: { ...req.body, role: UserRoleEnum.TEACHER },
-		multi: false
-	})) as IUser;
-
+	const newUser = (await UserService.createUser({ ...req.body, role: UserRoleEnum.TEACHER })) as IUser;
 	const token = jwt.sign({ auth: newUser.email }, process.env.ACCESS_TOKEN_SECRET!, {
 		expiresIn: '7d'
 	});
@@ -38,34 +35,28 @@ export const createTeacherAccount = async (req: Request, res: Response) => {
 		})
 	});
 	return res.status(HttpStatusCode.CREATED).json(newUser);
-};
+});
 
 // [POST] /users/create-parents-account
-export const createParentsAccount = async (req: Request, res: Response) => {
+export const createParentsAccount = useCatchAsync(async (req: Request, res: Response) => {
 	const isMulti = req.query.multi || false;
 
-	const { error, value } = validateNewParentsData({
-		payload: req.body,
-		multi: Boolean(isMulti)
-	});
+	const { error, value } = validateNewParentsData(req.body);
 
 	if (error) throw createHttpError.BadRequest(error.message);
 
 	const payload = Array.isArray(value)
 		? value.map((user) => ({
-			...user,
-			role: UserRoleEnum.PARENTS
-		}))
+				...user,
+				role: UserRoleEnum.PARENTS
+		  }))
 		: {
-			...value,
-			role: UserRoleEnum.PARENTS
-		};
+				...value,
+				role: UserRoleEnum.PARENTS
+		  };
 
 	// Create multiple or single parent user depending on type of payload and multi optional value
-	const newParents = await UserService.createUser({
-		payload,
-		multi: Boolean(isMulti)
-	});
+	const newParents = await UserService.createUser(payload);
 
 	const domain = req.protocol + '://' + req.get('host');
 
@@ -73,7 +64,7 @@ export const createParentsAccount = async (req: Request, res: Response) => {
 	if (isMulti && Array.isArray(payload)) {
 		const sendMailPromises = payload.map(
 			(recipient: Partial<IUser>) =>
-				new Promise((resolve, reject) => {
+				new Promise((resolve) => {
 					const token = jwt.sign({ auth: recipient?.email }, process.env.ACCESS_TOKEN_SECRET!, {
 						expiresIn: '7d'
 					});
@@ -110,10 +101,10 @@ export const createParentsAccount = async (req: Request, res: Response) => {
 	}
 
 	return res.status(HttpStatusCode.CREATED).json(newParents);
-};
+});
 
 // [PATCH] /
-export const updateUserInfo = async (req: Request, res: Response) => {
+export const updateUserInfo = useCatchAsync(async (req: Request, res: Response) => {
 	const { error } = validateUpdateUserData(req.body);
 	if (error) {
 		throw createHttpError.BadRequest(error.message);
@@ -125,18 +116,17 @@ export const updateUserInfo = async (req: Request, res: Response) => {
 	}
 
 	return res.status(HttpStatusCode.CREATED).json(updatedUser);
-};
+});
 
 // [GET] /users/teachers?is_verified=true&employment_status=false
-export const getTeachersByStatus = async (req: Request, res: Response) => {
+export const getTeachersByStatus = useCatchAsync(async (req: Request, res: Response) => {
 	const { status } = req.query;
 	const teachers = await UserService.getTeacherUsersByStatus(status as string | undefined);
 	if (!teachers) {
 		throw createHttpError.NotFound('Không thể tìm thấy giáo viên nào!');
 	}
-
 	return res.status(HttpStatusCode.OK).json(teachers);
-};
+});
 
 // [PATCH] /
 export const deactivateTeacherAccount = async (req: Request, res: Response) => {
@@ -148,22 +138,22 @@ export const deactivateTeacherAccount = async (req: Request, res: Response) => {
 	return res.status(HttpStatusCode.CREATED).json(deactivatedTeacher);
 };
 
-export const getParentsUserByClass = async (req: Request, res: Response) => {
+export const getParentsUserByClass = useCatchAsync(async (req: Request, res: Response) => {
 	const parents = await UserService.getParentsUserByClass(req.params.classId);
 
 	return res.status(HttpStatusCode.OK).json(parents);
-};
+});
 
-export const searchParentsUsers = async (req: Request, res: Response) => {
+export const searchParentsUsers = useCatchAsync(async (req: Request, res: Response) => {
 	const result = await UserService.searchParents(req.body.searchTerm);
 	if (!result) throw createHttpError.NotFound('Cannot find any parents account!');
 
 	return res.status(HttpStatusCode.OK).json(result);
-};
+});
 
-export const getUserDetails = async (req: Request, res: Response) => {
+export const getUserDetails = useCatchAsync(async (req: Request, res: Response) => {
 	const user = await UserService.getUserDetails(req.params.id);
 	if (!user) throw createHttpError.NotFound('User not found!');
-	
+
 	return res.status(HttpStatusCode.OK).json(user);
-};
+});
