@@ -15,7 +15,6 @@ import {
 
 const router = express.Router();
 
-// *** Chú ý ***: có 2 path student: students và student (có s và không s)
 router.get('/students/attendance', selectAttendanceAllClass);
 router.get('/students/attendance/:classId', selectAttendanceByClass);
 router.get('/students/attendance/student/:id', selectAttendanceByStudent);

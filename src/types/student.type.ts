@@ -5,7 +5,7 @@ export interface IStudent extends Document {
 	_id: ObjectId;
 	code: string;
 	fullName: string;
-	gender: boolean;
+	gender: string;
 	dateOfBirth: Date;
 	class: ObjectId;
 	parents: ObjectId;
