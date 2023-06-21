@@ -12,13 +12,7 @@ import {
 	validateUpdateReqBodyStudent
 } from '../validations/student.validation';
 import { getCurrentSchoolYear } from './schoolYear.service';
-import { selectTranscriptStudent } from './subjectTrancription.service';
-
-interface IStudentErrorRes {
-	fullName: string;
-	parentPhone: string;
-	message?: string;
-}
+import { getStudentTranscript } from './subjectTrancription.service';
 
 interface IAbsentStudent {
 	idStudent: string;
@@ -106,7 +100,7 @@ export const getDetailStudent = async (id: string) => {
 		select: 'className headTeacher'
 	});
 
-	const transcriptStudent: ISubjectTranscript[] = await selectTranscriptStudent(id);
+	const transcriptStudent: ISubjectTranscript[] = await getStudentTranscript(id);
 
 	if (!student) {
 		throw createHttpError.NotFound('Student does not exist!');

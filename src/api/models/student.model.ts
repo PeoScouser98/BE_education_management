@@ -4,6 +4,7 @@ import mongooseDelete from 'mongoose-delete';
 import mongoosePaginate from 'mongoose-paginate-v2';
 import { toCapitalize } from '../../helpers/toolkit';
 import { IStudentDocument, TPaginatedStudentModel, TSoftDeleteStudentModel } from '../../types/student.type';
+import { UserGenderEnum } from '../../types/user.type';
 
 const StudentSchema = new mongoose.Schema<IStudentDocument>(
 	{
@@ -28,8 +29,9 @@ const StudentSchema = new mongoose.Schema<IStudentDocument>(
 			autopopulate: { select: '_id displayName phone', options: { lean: true } }
 		},
 		gender: {
-			type: Boolean,
-			require: true
+			type: String,
+			require: true,
+			enum: Object.values(UserGenderEnum)
 		},
 		dateOfBirth: {
 			type: Date,
@@ -51,26 +53,29 @@ const StudentSchema = new mongoose.Schema<IStudentDocument>(
 			type: Date,
 			default: null
 		},
-		absentDays: [
-			{
-				date: {
-					type: Date,
-					default: new Date()
-				},
-				schoolYear: {
-					type: mongoose.Types.ObjectId,
-					ref: 'SchoolYears',
-					autopopulate: true
-				},
-				hasPermision: { type: Boolean, default: false },
-				reason: {
-					type: String,
-					minlength: 8,
-					maxLength: 256,
-					default: 'Không có lý do'
+		absentDays: {
+			type: [
+				{
+					date: {
+						type: Date,
+						default: new Date()
+					},
+					schoolYear: {
+						type: mongoose.Types.ObjectId,
+						ref: 'SchoolYears'
+						// autopopulate: true
+					},
+					hasPermision: { type: Boolean, default: false },
+					reason: {
+						type: String,
+						minlength: 8,
+						maxLength: 256,
+						default: 'Không có lý do'
+					}
 				}
-			}
-		]
+			],
+			default: []
+		}
 	},
 	{
 		versionKey: false,

@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import { IAttendance, IStudent } from '../../types/student.type';
+import { UserGenderEnum } from '../../types/user.type';
 
 // validate
 export const validateReqBodyStudent = (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
@@ -7,7 +8,9 @@ export const validateReqBodyStudent = (data: Omit<IStudent, '_id'> | Omit<IStude
 		class: Joi.string().required(),
 		code: Joi.string().required(),
 		fullName: Joi.string().required().min(6).max(100),
-		gender: Joi.bool().required(),
+		gender: Joi.string()
+			.valid(...Object.values(UserGenderEnum))
+			.required(),
 		dateOfBirth: Joi.date().required(),
 		parents: Joi.string().required(),
 		isPolicyBeneficiary: Joi.bool().optional(),
@@ -31,12 +34,12 @@ export const validateUpdateReqBodyStudent = (data: Partial<Omit<IStudent, '_id'>
 		class: Joi.string().required().optional(),
 		code: Joi.string().required().optional(),
 		fullName: Joi.string().required().min(6).max(100).optional(),
-		gender: Joi.bool().required().optional(),
-		dateOfBirth: Joi.date().required().optional(),
-		parentsPhoneNumber: Joi.string()
+		gender: Joi.string()
+			.valid(...Object.values(UserGenderEnum))
 			.required()
-			.optional()
-			.pattern(/^(?:\+84|0)(?:1\d{9}|3\d{8}|5\d{8}|7\d{8}|8\d{8}|9\d{8})$/),
+			.optional(),
+		dateOfBirth: Joi.date().required().optional(),
+		parents: Joi.string().required().optional(),
 		isPolicyBeneficiary: Joi.bool().optional(),
 		isGraduated: Joi.bool().optional()
 	});
