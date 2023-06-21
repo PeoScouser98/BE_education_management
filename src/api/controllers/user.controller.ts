@@ -4,8 +4,8 @@ import createHttpError from 'http-errors';
 import jwt from 'jsonwebtoken';
 import { HttpStatusCode } from '../../configs/statusCode.config';
 import useCatchAsync from '../../helpers/useCatchAsync';
-import { IUser, UserRoleEnum } from '../../types/user.type';
 import getVerificationEmailTemplate from '../../helpers/verifyUserEmail';
+import { IUser, UserRoleEnum } from '../../types/user.type';
 import { sendVerificationEmail } from '../services/mail.service';
 import * as UserService from '../services/user.service';
 import {
@@ -14,6 +14,7 @@ import {
 	validateUpdateUserData
 } from './../validations/user.validation';
 
+// [POST] /users/create-teacher-account
 export const createTeacherAccount = useCatchAsync(async (req: Request, res: Response) => {
 	const { error } = validateNewTeacherData(req.body);
 	if (error) {
@@ -98,19 +99,24 @@ export const createParentsAccount = useCatchAsync(async (req: Request, res: Resp
 	return res.status(HttpStatusCode.CREATED).json(newParents);
 });
 
-// [PATCH] /
+// [PATCH] /user-update
 export const updateUserInfo = useCatchAsync(async (req: Request, res: Response) => {
-	const { error } = validateUpdateUserData(req.body);
-	if (error) {
-		throw createHttpError.BadRequest(error.message);
-	}
-
-	const updatedUser = await UserService.updateUserInfo(req.profile?._id as string, req.body);
-	if (!updatedUser) {
-		throw createHttpError.BadRequest('User does not exist!');
-	}
-
+	const { error, value } = validateUpdateUserData(req.body);
+	if (error) throw createHttpError.BadRequest(error.message);
+	const profile = req.profile as Pick<IUser, '_id'>;
+	const updatedUser = await UserService.updateUserInfo(profile, value);
+	if (!updatedUser) throw createHttpError.BadRequest('User does not exist!');
 	return res.status(HttpStatusCode.CREATED).json(updatedUser);
+});
+
+// [PATCH] /users/:id/update-teacher
+export const updateTeacherInfo = useCatchAsync(async (req: Request, res: Response) => {
+	const teacherId: string = req.params.teacherId;
+	const { error, value } = validateUpdateUserData(req.body);
+	if (error) throw createHttpError.BadRequest(error.message);
+	const updatedTeacher = await UserService.updateTeacherInfo(teacherId, value);
+	if (!updatedTeacher) throw createHttpError.NotFound('Cannot find teacher to update!');
+	return res.status(HttpStatusCode.CREATED).json(updatedTeacher);
 });
 
 // [GET] /users/teachers?is_verified=true&employment_status=false
@@ -123,22 +129,23 @@ export const getTeachersByStatus = useCatchAsync(async (req: Request, res: Respo
 	return res.status(HttpStatusCode.OK).json(teachers);
 });
 
-// [PATCH] /
-export const deactivateTeacherAccount = async (req: Request, res: Response) => {
+// [PATCH] /users/:userId
+export const deactivateTeacherAccount = useCatchAsync(async (req: Request, res: Response) => {
 	const deactivatedTeacher = await UserService.deactivateTeacherUser(req.params.userId);
 	if (!deactivatedTeacher) {
 		throw createHttpError.NotFound('Cannot find teacher to deactivate!');
 	}
-
 	return res.status(HttpStatusCode.CREATED).json(deactivatedTeacher);
-};
+});
 
+// [GET] /users/parents/:classId
 export const getParentsUserByClass = useCatchAsync(async (req: Request, res: Response) => {
 	const parents = await UserService.getParentsUserByClass(req.params.classId);
 
 	return res.status(HttpStatusCode.OK).json(parents);
 });
 
+// [GET] /users/search-parents
 export const searchParentsUsers = useCatchAsync(async (req: Request, res: Response) => {
 	const result = await UserService.searchParents(req.body.searchTerm);
 	if (!result) throw createHttpError.NotFound('Cannot find any parents account!');
@@ -146,9 +153,19 @@ export const searchParentsUsers = useCatchAsync(async (req: Request, res: Respon
 	return res.status(HttpStatusCode.OK).json(result);
 });
 
+// [GET] /users/:userId
 export const getUserDetails = useCatchAsync(async (req: Request, res: Response) => {
-	const user = await UserService.getUserDetails(req.params.id);
+	const user = await UserService.getUserDetails(req.params.userId);
 	if (!user) throw createHttpError.NotFound('User not found!');
-
 	return res.status(HttpStatusCode.OK).json(user);
+});
+
+// [PATCH] /users/parents/:userId
+export const updateParentsInfo = useCatchAsync(async (req: Request, res: Response) => {
+	const { parentsId } = req.params;
+	const { error, value } = validateUpdateUserData(req.body);
+	if (error) throw createHttpError.BadRequest(error.message);
+	const updatedParentsUser = await UserService.updateParentsUserInfo(parentsId, value);
+	if (!updatedParentsUser) throw createHttpError.NotFound('Cannot find parents user to update !');
+	return res.status(HttpStatusCode.CREATED).json(updatedParentsUser);
 });

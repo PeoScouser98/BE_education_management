@@ -6,6 +6,7 @@ import mongooseAutoPopulate from 'mongoose-autopopulate';
 
 import { TSoftDeleteUserModel, IUser, IUserDocument, UserGenderEnum, UserRoleEnum } from '../../types/user.type';
 import mongooseLeanVirtuals from 'mongoose-lean-virtuals';
+import { toCapitalize } from '../../helpers/toolkit';
 
 const UserSchema = new mongoose.Schema<IUser>(
 	{
@@ -48,7 +49,8 @@ const UserSchema = new mongoose.Schema<IUser>(
 				universityName: String, // tên trường đã tốt nghiệp
 				graduatedAt: Date
 			},
-			_id: false
+			_id: false,
+			default: null
 		},
 		employmentStatus: {
 			type: Boolean,
@@ -99,6 +101,7 @@ UserSchema.pre('save', function (next) {
 	if (this.password) {
 		this.password = bcrypt.hashSync(this.password, genSaltSync(+process.env.SALT_ROUND!));
 	}
+	this.displayName = toCapitalize(this.displayName)!;
 	next();
 });
 

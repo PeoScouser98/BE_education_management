@@ -3,7 +3,7 @@ import { IUser, UserGenderEnum } from '../../types/user.type';
 
 export const validateSigninData = (payload: Pick<IUser, 'phone' & 'password'>) => {
 	const schema = Joi.object({
-		phone: Joi.alternatives()
+		phoneOrEmail: Joi.alternatives()
 			.try(
 				Joi.string()
 					.lowercase()
@@ -27,7 +27,7 @@ export const validateNewTeacherData = (payload: Omit<IUser, '_id'>) => {
 	const schema = Joi.object({
 		email: Joi.string()
 			.email({ tlds: { allow: true } })
-			.regex(/^[\w.+\-]+@gmail\.com$/)
+			.regex(/^[\w.+\-]+@gmail\.com$/, { name: 'email' })
 			.required()
 			.messages({
 				'object.regex': 'Email must be a valid Gmail address !'
@@ -36,7 +36,9 @@ export const validateNewTeacherData = (payload: Omit<IUser, '_id'>) => {
 		displayName: Joi.string().required(),
 		address: Joi.string().required(),
 		dateOfBirth: Joi.date().required(),
-		phone: Joi.string().min(10).max(11).required(),
+		phone: Joi.string()
+			.pattern(/^\d{10,11}$/, { name: 'phone number' })
+			.required(),
 		gender: Joi.string()
 			.required()
 			.valid(...Object.values(UserGenderEnum)),
@@ -53,12 +55,14 @@ export const validateNewParentsData = (payload: Omit<IUser, '_id'> | Omit<IUser,
 	const schema = Joi.object({
 		email: Joi.string()
 			.email()
-			.regex(/^[\w.+\-]+@gmail\.com$/)
+			.regex(/^[\w.+\-]+@gmail\.com$/, { name: 'email' })
 			.required()
 			.messages({
 				'string.pattern.base': 'User email must be a valid Gmail address !'
 			}),
-		phone: Joi.string().length(10).required(),
+		phone: Joi.string()
+			.pattern(/^\d{10,11}$/, { name: 'phone number' })
+			.required(),
 		displayName: Joi.string().required(),
 		address: Joi.string().required(),
 		dateOfBirth: Joi.date().required(),
@@ -67,17 +71,30 @@ export const validateNewParentsData = (payload: Omit<IUser, '_id'> | Omit<IUser,
 
 	const arraySchema = Joi.array()
 		.items(schema)
-		.unique((user1, user2) => user1.phone === user2.phone);
+		.unique((user1, user2) => user1.phone === user2.phone)
+		.unique((user1, user2) => user1.email.toLowerCase() === user2.email.toLowerCase());
 
 	return Array.isArray(payload) ? arraySchema.validate(payload) : schema.validate(payload);
 };
 
 export const validateUpdateUserData = (payload: Partial<IUser>) => {
 	const schema = Joi.object({
+		email: Joi.string()
+			.email()
+			.regex(/^[\w.+\-]+@gmail\.com$/, { name: 'email' })
+			.optional()
+			.messages({
+				'string.pattern.base': 'User email must be a valid Gmail address !'
+			}),
+		address: Joi.string().optional(),
 		displayName: Joi.string().optional(),
 		dateOfBirth: Joi.date().optional(),
-		gender: Joi.string().optional(),
-		picture: Joi.string().optional(),
+		phone: Joi.string()
+			.pattern(/^\d{10,11}$/, { name: 'phone number' })
+			.optional(),
+		gender: Joi.string()
+			.valid(...Object.values(UserGenderEnum))
+			.optional(),
 		eduBackground: Joi.object({
 			universityName: Joi.string().required(),
 			graduatedAt: Joi.date().required(),
