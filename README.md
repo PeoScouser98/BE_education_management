@@ -5,10 +5,11 @@ The Bot Xuyen Education Management là dự án backend (Nodejs/Typescript, Expr
 
 ## Technologies Used
 - Node.js
-- Express
+- Expressjs
 - MongoDB
 - Redis
-- Webpack
+- Webpack/swc
+- Google APIs
 
 ## Setup and Installation
 Cách setup dự án dưới local
