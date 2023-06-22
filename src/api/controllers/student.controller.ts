@@ -140,3 +140,12 @@ export const selectAttendanceAllClass = useCatchAsync(async (req: Request, res: 
 	const result = await StudentServices.getAttendanceAllClass(Number(page), Number(limit), date);
 	return res.status(HttpStatusCode.OK).json(result);
 });
+
+// [PATCH] /student/:studentId/deactivate
+export const deactivateStudent = useCatchAsync(async (req: Request, res: Response) => {
+	const deactivatedTeacher = await StudentServices.deactivateStudent(req.params.studentId);
+	if (!deactivatedTeacher) {
+		throw createHttpError.NotFound('Cannot find parent to deactivate!');
+	}
+	return res.status(HttpStatusCode.CREATED).json(deactivatedTeacher);
+});

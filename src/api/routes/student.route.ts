@@ -10,7 +10,8 @@ import {
 	selectAttendanceByClass,
 	selectAttendanceByStudent,
 	selectAttendanceAllClass,
-	getPolicyBeneficiary
+	getPolicyBeneficiary,
+	deactivateStudent
 } from '../controllers/student.controller';
 
 const router = express.Router();
@@ -26,5 +27,6 @@ router.post('/students', createStudent);
 router.patch('/students/attendance/:classId', attendanceStudentByClass);
 router.patch('/students/services/:id', serviceStudent);
 router.patch('/students/:id', updateStudent);
+router.patch('/students/:studentId/deactivate', deactivateStudent);
 
 export default router;

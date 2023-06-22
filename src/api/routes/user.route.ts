@@ -29,6 +29,7 @@ router.patch(
 	UserController.updateTeacherInfo
 );
 router.patch('/users/parents/:parentsId', checkAuthenticated, checkIsTeacher, UserController.updateParentsInfo);
+router.patch('/users/parents/:parentsId/deactivate', checkAuthenticated, checkIsTeacher, UserController.deactivateParentAccount);
 router.get('/users/teachers', checkAuthenticated, UserController.getTeachersByStatus);
 router.get('/users/:userId', checkAuthenticated, UserController.getUserDetails);
 router.get('/users/parents/:classId', checkAuthenticated, UserController.getParentsUserByClass);

@@ -169,3 +169,12 @@ export const updateParentsInfo = useCatchAsync(async (req: Request, res: Respons
 	if (!updatedParentsUser) throw createHttpError.NotFound('Cannot find parents user to update !');
 	return res.status(HttpStatusCode.CREATED).json(updatedParentsUser);
 });
+
+// [PATCH] /parents/:parentsId/deactivate
+export const deactivateParentAccount = useCatchAsync(async (req: Request, res: Response) => {
+	const deactivatedTeacher = await UserService.deactivateParent(req.params.parentsId);
+	if (!deactivatedTeacher) {
+		throw createHttpError.NotFound('Cannot find parent to deactivate!');
+	}
+	return res.status(HttpStatusCode.CREATED).json(deactivatedTeacher);
+});

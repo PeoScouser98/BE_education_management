@@ -58,6 +58,7 @@ export const updateTeacherInfo = async (teacherId: string, payload: Partial<IUse
 
 export const updateParentsUserInfo = async (parentsId: string, payload: Partial<IUser>) => {
 	const existedUser = await UserModel.findOne({
+		_id: { $ne: parentsId },
 		$or: [{ phone: payload.phone }, { email: payload.email }]
 	});
 	if (existedUser) throw createHttpError.Conflict('User having this email or phone number already existed !');
@@ -107,6 +108,14 @@ export const getTeacherUsersByStatus = async (status?: string) => {
 export const deactivateTeacherUser = async (userId: string) => {
 	return await UserModel.findOneAndUpdate(
 		{ _id: userId, role: UserRoleEnum.TEACHER },
+		{ employmentStatus: false, deleted: true },
+		{ new: true }
+	).lean();
+};
+
+export const deactivateParent = async (userId: string) => {
+	return await UserModel.findOneAndUpdate(
+		{ _id: userId, role: UserRoleEnum.PARENTS },
 		{ employmentStatus: false, deleted: true },
 		{ new: true }
 	).lean();

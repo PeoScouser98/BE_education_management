@@ -13,6 +13,7 @@ import {
 } from '../validations/student.validation';
 import { getCurrentSchoolYear } from './schoolYear.service';
 import { getStudentTranscript } from './subjectTrancription.service';
+import { UserRoleEnum } from '../../types/user.type';
 
 interface IAbsentStudent {
 	idStudent: string;
@@ -55,6 +56,14 @@ export const updateStudent = async (id: string, data: Partial<Omit<IStudent, '_i
 		throw createHttpError.NotFound('Student does not exist!');
 	}
 	return await StudentModel.findOneAndUpdate({ _id: id }, data, { new: true });
+};
+
+export const deactivateStudent = async (userId: string) => {
+	return await StudentModel.findOneAndUpdate(
+		{ _id: userId },
+		{ employmentStatus: false, deleted: true },
+		{ new: true }
+	).lean();
 };
 
 // get student theo class
