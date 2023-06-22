@@ -5,19 +5,22 @@ import { IUser } from '../../types/user.type';
 import { MongooseError } from 'mongoose';
 
 passport.use(
-	new LocalStrategy({ usernameField: 'email', passReqToCallback: true }, function (req, phone, password, done) {
-		UserModel.findOne({ phone: phone }, function (err: MongooseError, user: IUser) {
-			if (err) {
-				return done(err);
+	new LocalStrategy({ usernameField: 'email', passReqToCallback: true }, function (req, phoneOrEmail, password, done) {
+		UserModel.findOne(
+			{ $or: [{ phone: phoneOrEmail }, { email: phoneOrEmail }] },
+			function (err: MongooseError, user: IUser) {
+				if (err) {
+					return done(err);
+				}
+				if (!user) {
+					return done(null, false);
+				}
+				if (!user.verifyPassword(password)) {
+					return done(null, false);
+				}
+				return done(null, user);
 			}
-			if (!user) {
-				return done(null, false);
-			}
-			if (!user.verifyPassword(password)) {
-				return done(null, false);
-			}
-			return done(null, user);
-		});
+		);
 	})
 );
 

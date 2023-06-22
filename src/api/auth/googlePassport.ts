@@ -16,7 +16,6 @@ passport.use(
 		},
 		function (req, accessToken, refreshToken, profile, done) {
 			UserModel.findOne({ email: profile.email }).exec((err, user) => {
-				console.log(user);
 				if (err) {
 					return done(err, false);
 				}
