@@ -57,15 +57,15 @@ const SubjectTranscriptSchema = new mongoose.Schema<ISubjectTranscriptDocument>(
 	}
 );
 
-SubjectTranscriptSchema.plugin(mongooseDelete, {
-	overrideMethods: ['find', 'findOne'],
-	deletedAt: true
-});
+// SubjectTranscriptSchema.plugin(mongooseDelete, {
+// 	overrideMethods: ['find', 'findOne'],
+// 	deletedAt: true
+// });
 SubjectTranscriptSchema.plugin(mongooseAutoPopulate);
 
-const SubjectTranscriptionModel: TSoftDeleteSubjectTranscriptModel = mongoose.model<
-	ISubjectTranscriptDocument,
-	TSoftDeleteSubjectTranscriptModel
->('SubjectTranscriptions', SubjectTranscriptSchema);
+const SubjectTranscriptionModel = mongoose.model<ISubjectTranscriptDocument>(
+	'SubjectTranscriptions',
+	SubjectTranscriptSchema
+);
 
 export default SubjectTranscriptionModel;
