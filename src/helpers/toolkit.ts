@@ -44,3 +44,8 @@ export const toCapitalize = (value: string) => {
 	const result = subString.map((str) => str.at(0)!.toUpperCase() + str.slice(1).toLowerCase()).join(' ');
 	return result;
 };
+
+export const toUpperCase = (value: string) => {
+	if (!value || typeof value !== 'string') return;
+	return value.trim().replace(/\s+/g, ' ').toUpperCase();
+};
