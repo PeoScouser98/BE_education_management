@@ -4,8 +4,8 @@
 The Bot Xuyen Education Management là dự án backend (Nodejs/Typescript, Express và MongoDB), thực thi các API phục vụ cho việc quản lý hệ thống giáo dục trường tiểu học Bột Xuyên
 
 ## Technologies Used
-- Node.js
-- Expressjs
+- Nodejs/Typescript
+- Express
 - MongoDB
 - Redis
 - Webpack/swc
