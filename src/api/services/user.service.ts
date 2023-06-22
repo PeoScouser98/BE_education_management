@@ -37,6 +37,7 @@ export const createUser = async (payload: Partial<IUser> & Array<Partial<IUser>>
 // Users update them self account's info
 export const updateUserInfo = async (authId: Pick<IUser, '_id'>, payload: Partial<IUser>) => {
 	const existedUser = await UserModel.findOne({
+		_id: { $ne: authId },
 		$or: [{ phone: payload.phone }, { email: payload.email }]
 	});
 	if (existedUser) throw createHttpError.Conflict('User having this email or phone number already existed !');
@@ -48,6 +49,7 @@ export const updateUserInfo = async (authId: Pick<IUser, '_id'>, payload: Partia
 // Headmaster update teacher user's info
 export const updateTeacherInfo = async (teacherId: string, payload: Partial<IUser>) => {
 	const existedUser = await UserModel.findOne({
+		_id: { $ne: teacherId },
 		$or: [{ phone: payload.phone }, { email: payload.email }]
 	});
 	if (existedUser) throw createHttpError.Conflict('User having this email or phone number already existed !');
@@ -58,6 +60,7 @@ export const updateTeacherInfo = async (teacherId: string, payload: Partial<IUse
 
 export const updateParentsUserInfo = async (parentsId: string, payload: Partial<IUser>) => {
 	const existedUser = await UserModel.findOne({
+		_id: { $ne: parentsId },
 		$or: [{ phone: payload.phone }, { email: payload.email }]
 	});
 	if (existedUser) throw createHttpError.Conflict('User having this email or phone number already existed !');
