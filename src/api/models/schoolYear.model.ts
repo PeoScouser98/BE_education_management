@@ -1,30 +1,35 @@
 import mongoose from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
 import { ISchoolYear, TPaginatedSchoolYearModel } from '../../types/schoolYear.type';
+import { toUpperCase } from '../../helpers/toolkit';
 
 const SchoolYearSchema = new mongoose.Schema<ISchoolYear>(
 	{
+		name: {
+			type: String,
+			required: true,
+			uppercase: true,
+			trim: true
+		},
 		startAt: {
-			type: Number,
-			default: new Date().getFullYear(),
-			unique: true
+			type: Date
 		},
 		endAt: {
-			type: Number,
-			unique: true
+			type: Date
 		}
 	},
 	{
 		collection: 'school_years',
-		timestamps: true
+		timestamps: true,
+		versionKey: false
 	}
 );
 
-SchoolYearSchema.pre('save', function () {
-	this.endAt = this.startAt + 1;
-});
-
 SchoolYearSchema.plugin(mongoosePaginate);
+SchoolYearSchema.pre('save', function (next) {
+	if (this.name && typeof this.name === 'string') this.name = toUpperCase(this.name)!;
+	next();
+});
 
 const SchoolYearModel: TPaginatedSchoolYearModel = mongoose.model<ISchoolYear, TPaginatedSchoolYearModel>(
 	'SchoolYears',

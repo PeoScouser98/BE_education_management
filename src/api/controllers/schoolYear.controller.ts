@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import * as SchoolYearServices from '../services/schoolYear.service';
 import { HttpStatusCode } from '../../configs/statusCode.config';
 import useCatchAsync from '../../helpers/useCatchAsync';
+import * as SchoolYearServices from '../services/schoolYear.service';
 
 // [GET] /api/schoolYears?limit=10&page=1
 export const schoolYearList = useCatchAsync(async (req: Request, res: Response) => {
@@ -19,6 +19,11 @@ export const getCurrentYear = useCatchAsync(async (req: Request, res: Response) 
 
 // [POST] /api/schoolYear
 export const createSchoolYear = useCatchAsync(async (req: Request, res: Response) => {
-	const result = await SchoolYearServices.createSchoolYear();
+	const result = await SchoolYearServices.createSchoolYear(req.body);
 	return res.status(HttpStatusCode.CREATED).json(result);
+});
+
+export const updateSchoolYear = useCatchAsync(async (req: Request, res: Response) => {
+	const updatedSchoolYear = await SchoolYearServices.updateSchoolYear(req.params.id, req.body);
+	return res.status(HttpStatusCode.CREATED).json(updatedSchoolYear);
 });
