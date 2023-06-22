@@ -1,7 +1,11 @@
 import Joi from 'joi';
 import { ISubjectTranscript } from '../../types/subjectTranscription.type';
 
-export const validateSubjectTranscript = (data: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>) => {
+export const validateSubjectTranscript = (
+	data:
+		| Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>
+		| Array<Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>>
+) => {
 	const schema = Joi.object({
 		student: Joi.string().required(),
 		firstSemester: Joi.object({
@@ -13,7 +17,8 @@ export const validateSubjectTranscript = (data: Omit<ISubjectTranscript, '_id' |
 			finalTest: Joi.number().required().min(0).max(10)
 		}).optional()
 	});
-	return schema.validate(data);
+	const arraySchema = Joi.array().items(schema);
+	return Array.isArray(data) ? arraySchema.validate(data) : schema.validate(data);
 };
 
 export const validateSubjectTranscriptOne = (

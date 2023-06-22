@@ -16,12 +16,8 @@ router.post(
 	checkIsTeacher,
 	TrancriptionController.scoreTableInputOne
 );
-// router.get('/transcripts/class/:classId/:subjectId', TrancriptionController.getTranscriptByClass);
+router.get('/transcripts/class/:classId/:subjectId', checkAuthenticated, TrancriptionController.getTranscriptByClass);
 router.get('/transcripts/student/:id', checkAuthenticated, TrancriptionController.getTranscriptByStudent);
-router.get(
-	'/transcript/subjectAll/:classId',
-	checkAuthenticated,
-	TrancriptionController.selectTranscriptAllSubjectByClass
-);
+router.get('/transcripts/:classId', checkAuthenticated, TrancriptionController.selectTranscriptAllSubjectByClass);
 
 export default router;

@@ -1,5 +1,5 @@
 import createHttpError from 'http-errors';
-import { isValidObjectId } from 'mongoose';
+import { ObjectId, isValidObjectId } from 'mongoose';
 import { IStudent } from '../../types/student.type';
 import { ISubjectTranscript } from '../../types/subjectTranscription.type';
 import ClassModel from '../models/class.model';
@@ -17,150 +17,42 @@ export const newScoreList = async (
 	data: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>[]
 ) => {
 	// check xem classId và subjectId đã đúng type chưa
-	if (!isValidObjectId(classId) || !isValidObjectId(subjectId)) {
+	if (!isValidObjectId(classId) || !isValidObjectId(subjectId))
 		throw createHttpError.BadRequest('classId or subjectId is not in the correct ObjectId format');
-	}
 
-	if (!Array.isArray(data)) {
-		throw createHttpError.BadRequest('Body data must be an array');
-	}
+	if (!Array.isArray(data) || data.length === 0)
+		throw createHttpError.BadRequest('Body data must be an array and cannot be empty!');
 
-	if (data.length === 0) {
-		throw createHttpError(304);
-	}
+	const [schoolYear, existedClass, existedSubject, isAllStudentInClass] = await Promise.all([
+		getCurrentSchoolYear(),
+		ClassModel.exists({ _id: classId }),
+		SubjectModel.exists({ _id: subjectId }),
+		StudentModel.exists({
+			$and: [{ _id: { $in: data.map((std) => std.student) } }, { class: classId }]
+		})
+	]);
 
-	// lấy ra schoolYear của hiện tại
-	const schoolYear = await getCurrentSchoolYear();
-
-	// check xem môn học và class có tồn tại hay không
-	const studentExistQuery = ClassModel.findOne({ _id: classId });
-	const subjectExistQuery = SubjectModel.findOne({ _id: subjectId });
-
-	const [studentExist, subjectExist] = await Promise.all([studentExistQuery, subjectExistQuery]);
-
-	if (!studentExist) throw createHttpError.NotFound('Class does not exist or has been deleted!');
-	if (!subjectExist) throw createHttpError.NotFound('Subject does not exist or has been deleted!');
+	if (!existedClass) throw createHttpError.NotFound('Class does not exist or has been deleted!'); // check if class exists
+	if (!existedSubject) throw createHttpError.NotFound('Subject does not exist or has been deleted!'); // check if subject exists
+	if (!isAllStudentInClass) throw createHttpError.Conflict('Some students do not exist in this class !'); // check if all student are in class to request
 
 	// validate bảng điểm của các student gửi lên
-	const transcriptStudentErrorValidates: { id: string; message: string }[] = [];
-	data.forEach((item) => {
-		const { error } = validateSubjectTranscript(item);
-		if (error) {
-			transcriptStudentErrorValidates.push({
-				id: item.student.toString(),
-				message: error.message
-			});
+	const { error, value } = validateSubjectTranscript(data);
+	if (error) throw createHttpError.BadRequest(error.message);
+
+	const bulkWriteOption = value.map((item: ISubjectTranscript) => ({
+		updateOne: {
+			filter: {
+				student: item.student,
+				subject: subjectId,
+				schoolYear: schoolYear
+			},
+			update: item,
+			upsert: true
 		}
-	});
+	}));
 
-	if (transcriptStudentErrorValidates.length > 0) {
-		throw createHttpError(400, 'Transcript students fails to meet validation criteria!', {
-			error: transcriptStudentErrorValidates
-		});
-	}
-
-	// check xem data gửi lên có phải học sinh lớp học không
-	const notAClassStudent: { id: string }[] = [];
-	const idStudentList = data.map((v) => v.student.toString());
-	const students: IStudent[] = await StudentModel.find({
-		_id: { $in: idStudentList },
-		class: classId,
-		transferSchool: null,
-		dropoutDate: null
-	})
-		.select('fullName class')
-		.lean();
-
-	if (idStudentList.length > students.length) {
-		idStudentList.forEach((idStudent) => {
-			const check = students.find((student) => student._id.toString() === idStudent);
-			if (!check) {
-				notAClassStudent.push({ id: idStudent });
-			}
-		});
-
-		throw createHttpError(404, 'Student do not exist in class!', {
-			error: notAClassStudent
-		});
-	}
-
-	// Nếu bảng điểm của học sinh chưa có thì tạo mới còn có rồi thì update
-	// lọc ra các bảng điểm của môn đã tồn tại
-	const transcriptNotExists: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>[] = [];
-	const transcriptExists: ISubjectTranscript[] = await SubjectTranscriptionModel.find({
-		student: { $in: idStudentList },
-		subject: subjectId,
-		schoolYear: schoolYear._id
-	})
-		.select('_id student')
-		.lean();
-
-	if (transcriptExists.length !== 0 && transcriptExists.length < data.length) {
-		// trường hợp có tồn tại các học sinh chưa được tạo bảng điểm
-		data.forEach((item) => {
-			const check = transcriptExists.find((exist) => exist.student.toString() === item.student.toString());
-			if (!check) {
-				transcriptNotExists.push(item);
-			}
-		});
-
-		// update
-		const bulkUpdate: any = transcriptExists.map((item) => {
-			return {
-				updateOne: {
-					filter: {
-						student: item.student,
-						subject: subjectId,
-						schoolYear: schoolYear._id
-					},
-					update: data.find((dataItem) => dataItem.student.toString() === item.student.toString())
-				}
-			};
-		});
-		const updateQuery = SubjectTranscriptionModel.bulkWrite(bulkUpdate);
-
-		// create
-		const dataCreate = transcriptNotExists.map((item) => ({
-			...item,
-			subject: subjectId,
-			schoolYear: schoolYear._id
-		}));
-
-		const createQuery = SubjectTranscriptionModel.insertMany(dataCreate);
-
-		await Promise.all([updateQuery, createQuery]);
-	} else if (transcriptExists.length !== 0 && transcriptExists.length === data.length) {
-		// trường hợp tất cả học sinh đều đã có bảng điểm
-		const bulkUpdate: any = data.map((item) => {
-			return {
-				updateOne: {
-					filter: {
-						student: item.student,
-						subject: subjectId,
-						schoolYear: schoolYear._id
-					},
-					update: item
-				}
-			};
-		});
-
-		await SubjectTranscriptionModel.bulkWrite(bulkUpdate);
-	} else if (transcriptExists.length === 0) {
-		// trường hợp các học sinh đều chưa có bảng điểm
-		await SubjectTranscriptionModel.insertMany(
-			(() => {
-				return data.map((item) => ({
-					...item,
-					subject: subjectId,
-					schoolYear: schoolYear._id
-				}));
-			})()
-		);
-	}
-
-	return {
-		message: `Successfully inputted scores for subject ${subjectExist.subjectName} in class ${studentExist.className}`
-	};
+	return await SubjectTranscriptionModel.bulkWrite(bulkWriteOption);
 };
 
 // nhập điểm 1 học sinh / môn / lớp
@@ -244,10 +136,13 @@ export const selectSubjectTranscriptByClass = async (classId: string, subjectId:
 
 	// lấy ra bảng điểm của những học sinh đó
 	const transcriptStudentList = await SubjectTranscriptionModel.find({
-		student: { $group: listStudent },
+		student: { $in: listStudent },
 		schoolYear: schoolYear._id,
 		subject: subjectId
-	});
+	})
+		.populate({ path: 'student', select: '-absentDays' })
+		.populate({ path: 'schoolYear', select: 'startAt endAt' })
+		.select('-_id');
 
 	return transcriptStudentList;
 };
@@ -341,13 +236,9 @@ export const getStudentTranscript = async (id: string) => {
 };
 
 // lấy điểm tất cả học sinh / tất cả các môn / lớp
-export const selectTranscriptAllSubjectByClass = async (classId: string) => {
-	if (isValidObjectId('classId')) {
+export const selectTranscriptAllSubjectByClass = async (classId: string, schoolYear: ObjectId) => {
+	if (isValidObjectId('classId'))
 		throw createHttpError.BadRequest('ClassId không phải type objectId. ClassId: ' + classId);
-	}
-
-	// lấy ra schoolYear hiện tại
-	const schoolYear = await getCurrentSchoolYear();
 
 	// lấy ra tất cả học sinh của lớp
 	const listStudent: IStudent[] = await StudentModel.find({
@@ -363,7 +254,7 @@ export const selectTranscriptAllSubjectByClass = async (classId: string) => {
 		{
 			$match: {
 				student: { $in: listStudent.map((student) => student._id) },
-				schoolYear: schoolYear._id
+				schoolYear: schoolYear
 			}
 		},
 		{
@@ -416,6 +307,7 @@ export const selectTranscriptAllSubjectByClass = async (classId: string) => {
 				}
 			}
 		},
+		{ $sort: { student: 1 } },
 		{
 			$project: {
 				_id: 0,
