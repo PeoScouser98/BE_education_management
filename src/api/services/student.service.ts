@@ -4,6 +4,7 @@ import { HttpStatusCode } from '../../configs/statusCode.config';
 import { compareDates } from '../../helpers/toolkit';
 import { IAttendance, IStudent } from '../../types/student.type';
 import { ISubjectTranscript } from '../../types/subjectTranscription.type';
+import { IUser } from '../../types/user.type';
 import ClassModel from '../models/class.model';
 import StudentModel from '../models/student.model';
 import {
@@ -12,7 +13,8 @@ import {
 	validateUpdateReqBodyStudent
 } from '../validations/student.validation';
 import { getCurrentSchoolYear } from './schoolYear.service';
-import { getStudentTranscript } from './subjectTrancription.service';
+import { getStudentTranscript, selectTranscriptAllSubjectByClass } from './subjectTrancription.service';
+import { deactivateParentsUser } from './user.service';
 
 interface IAbsentStudent {
 	idStudent: string;
@@ -114,25 +116,21 @@ export const getDetailStudent = async (id: string) => {
 
 // h/s chuyển trường
 export const setStudentTransferSchool = async (id: string, date: string) => {
-	if (!id) {
-		throw createHttpError.BadRequest('_id of the student is invalid');
-	}
-
+	if (!id || !isValidObjectId(id)) throw createHttpError.BadRequest('Invalid student ID');
 	const dateCheck = new Date(date);
-	if (isNaN(dateCheck.getTime())) {
+	if (isNaN(dateCheck.getTime()))
 		throw createHttpError.BadRequest('The Date you passed is not in the correct Date data type');
-	}
-
 	// check xem có còn học ở trường không
 	const student = await StudentModel.findOne({
 		_id: id,
 		transferSchool: null,
 		dropoutDate: null
 	});
-
 	if (!student) {
 		throw createHttpError.NotFound('The student has transferred to another school or dropped out');
 	}
+	const parentsOfStudent = student.parents as unknown as Pick<IUser, '_id' | 'email'>;
+	if (parentsOfStudent) await deactivateParentsUser(parentsOfStudent);
 	return await StudentModel.findOneAndUpdate({ _id: id }, { transferSchool: date }, { new: true });
 };
 
@@ -155,21 +153,21 @@ export const setDropoutStudent = async (id: string, date: string) => {
 	});
 
 	if (!student) {
-		throw createHttpError.NotFound('The student has transferred to another school or dropped out');
+		throw createHttpError.NotFound('Student has transferred to another school or dropped out');
 	}
+	await deactivateParentsUser(student.parents as unknown as Pick<IUser, '_id' | 'email'>);
 	return await StudentModel.findOneAndUpdate({ _id: id }, { dropoutDate: date }, { new: true });
 };
 
 // Lấy ra các học sinh đã chuyển trường
 export const getStudentTransferSchool = async (year: number | 'all', page: number, limit: number) => {
-	let condition: any = {
-		$expr: { $eq: [{ $year: '$transferSchool' }, year] }
-	};
-	if (year === 'all') {
-		condition = { transferSchool: { $ne: null } };
-	}
-
-	return await StudentModel.paginate(condition, {
+	const filter =
+		year === 'all'
+			? { transferSchool: { $ne: null } }
+			: {
+					$expr: { $eq: [{ $year: '$transferSchool' }, year] }
+			  };
+	return await StudentModel.paginate(filter, {
 		page: page,
 		limit: limit
 	});
@@ -424,4 +422,21 @@ export const getAttendanceAllClass = async (page: number, limit: number, date: D
 		...studentAbsentDays,
 		classes
 	};
+};
+
+export const setStudentsAsGraduatedByClass = async (classId: string) => {
+	// const students = await StudentModel.find({ class: classId, dropoutDate: null, transferSchool: null });
+	const currentClass = await ClassModel.findOne({ _id: classId });
+	if (!currentClass) throw createHttpError.NotFound('Invalid class');
+
+	if (currentClass.grade != 5)
+		throw createHttpError.BadRequest('Only students is in grade 5 is qualified to be marked as graduated !');
+
+	const currentSchoolYear = await getCurrentSchoolYear();
+	const unqualifiedStudents = await selectTranscriptAllSubjectByClass(currentClass._id, currentSchoolYear._id);
+	const gradutatedStudentsList = await StudentModel.updateMany({}, { isGraduated: true, class: null }, { new: true });
+
+	// const parentsList = students.map((student: IStudent) => student.parents) as Array<Pick<IUser, '_id' | 'email'>>;
+	// const deactivatedParents = await deactivateParentsUser(parentsList);
+	// return { gradutatedStudentsList, deactivatedParents };
 };
