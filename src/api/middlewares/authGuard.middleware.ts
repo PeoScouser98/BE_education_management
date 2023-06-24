@@ -40,7 +40,8 @@ export const checkIsHeadmaster = async (req: Request, res: Response, next: NextF
 
 export const checkIsTeacher = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		if (req.role !== UserRoleEnum.HEADMASTER || req.role !== UserRoleEnum.HEADMASTER) {
+		const teacherRoles = Object.values(UserRoleEnum).filter((role) => role !== UserRoleEnum.PARENTS);
+		if (teacherRoles.indexOf(req.role) === -1) {
 			return res.status(HttpStatusCode.FORBIDDEN).json({
 				message: 'Only teacher/headmaster allowed to access!',
 				statusCode: HttpStatusCode.FORBIDDEN
