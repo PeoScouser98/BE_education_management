@@ -6,6 +6,7 @@ export interface ISubjectTranscript extends Document {
 	student: ObjectId;
 	schoolYear: ObjectId;
 	subject: ObjectId;
+	isPassed?: boolean;
 	firstSemester?: {
 		midtermTest?: {
 			type: number;

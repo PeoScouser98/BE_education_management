@@ -166,79 +166,66 @@ export const getStudentTranscript = async (id: string) => {
 
 	const schoolYear = await getCurrentSchoolYear();
 
-	const transcriptStudent = await SubjectTranscriptionModel.aggregate([
-		{
-			$match: {
-				student: new mongoose.Types.ObjectId(id),
-				schoolYear: schoolYear._id
-			}
-		},
-		{
-			$lookup: {
-				from: 'students',
-				foreignField: '_id',
-				localField: 'student',
-				as: 'studentInfo',
-				pipeline: [
-					{
-						$project: {
-							fullName: 1
-						}
-					}
-				]
-			}
-		},
-		{
-			$unwind: '$studentInfo'
-		},
-		{
-			$lookup: {
-				from: 'subjects',
-				foreignField: '_id',
-				localField: 'subject',
-				as: 'subject',
-				pipeline: [
-					{
-						$project: {
-							subjectName: 1
-						}
-					}
-				]
-			}
-		},
-		{
-			$unwind: '$subject'
-		},
-		{
-			$group: {
-				_id: '$student', // group transcript by student
-				student: { $first: '$studentInfo' },
-				transcript: {
-					// add student's subject, student's firstSemeter, student's secondSemester fields to transcript
-					$push: {
-						subject: '$subject',
-						firstSemester: '$firstSemester',
-						secondSemester: '$secondSemester'
+	const studentTranscript = await SubjectTranscriptionModel.aggregate()
+		.match({
+			student: new mongoose.Types.ObjectId(id),
+			schoolYear: schoolYear._id
+		})
+		.lookup({
+			from: 'students',
+			localField: 'student',
+			foreignField: '_id',
+			as: 'student',
+			pipeline: [
+				{
+					$project: {
+						_id: 1,
+						fullName: 1
 					}
 				}
+			]
+		})
+		.unwind('$student')
+		.lookup({
+			from: 'subjects',
+			localField: 'subject',
+			foreignField: '_id',
+			as: 'subject',
+			pipeline: [
+				{
+					$project: {
+						_id: 1,
+						subjectName: 1
+					}
+				}
+			]
+		})
+		.unwind('$subject')
+		.group({
+			_id: '$student',
+			student: { $first: '$student' },
+			transcript: {
+				$push: {
+					subject: '$subject',
+					firstSemester: '$firstSemester',
+					secondSemester: '$secondSemester',
+					isPassed: '$isPassed'
+				}
 			}
-		},
-		{
-			$project: {
-				_id: 0,
-				student: '$student',
-				transcript: 1
-			}
-		}
-	]);
+		})
+		.project({
+			_id: 0,
+			subject: 1,
+			transcript: 1,
+			student: 1
+		});
 
-	return transcriptStudent.at(0);
+	return studentTranscript.at(0);
 };
 
 // lấy điểm tất cả học sinh / tất cả các môn / lớp
-export const selectTranscriptAllSubjectByClass = async (classId: string, schoolYear: ObjectId) => {
-	if (isValidObjectId('classId'))
-		throw createHttpError.BadRequest('ClassId không phải type objectId. ClassId: ' + classId);
+export const selectTranscriptAllSubjectByClass = async (classId: string | ObjectId, schoolYear: ObjectId) => {
+	if (!isValidObjectId(classId)) throw createHttpError.BadRequest('Invalid class ID');
 
 	// lấy ra tất cả học sinh của lớp
 	const listStudent: IStudent[] = await StudentModel.find({
@@ -250,72 +237,59 @@ export const selectTranscriptAllSubjectByClass = async (classId: string, schoolY
 		.lean();
 
 	// lấy ra bảng điểm
-	const transcriptStudentList = await SubjectTranscriptionModel.aggregate([
-		{
-			$match: {
-				student: { $in: listStudent.map((student) => student._id) },
-				schoolYear: schoolYear
-			}
-		},
-		{
-			$lookup: {
-				from: 'students',
-				foreignField: '_id',
-				localField: 'student',
-				as: 'studentInfo',
-				pipeline: [
-					{
-						$project: {
-							fullName: 1
-						}
-					}
-				]
-			}
-		},
-		{
-			$unwind: '$studentInfo'
-		},
-		{
-			$lookup: {
-				from: 'subjects',
-				foreignField: '_id',
-				localField: 'subject',
-				as: 'subject',
-				pipeline: [
-					{
-						$project: {
-							subjectName: 1
-						}
-					}
-				]
-			}
-		},
-		{
-			$unwind: '$subject'
-		},
-		{
-			$group: {
-				_id: '$student', // group transcript by student
-				student: { $first: '$studentInfo' },
-				transcript: {
-					// add student's subject, student's firstSemeter, student's secondSemester fields to transcript
-					$push: {
-						subject: '$subject',
-						firstSemester: '$firstSemester',
-						secondSemester: '$secondSemester'
+	const studentsTranscriptsByClass = await SubjectTranscriptionModel.aggregate()
+		.match({
+			student: { $in: listStudent.map((student) => student._id) },
+			schoolYear: schoolYear
+		})
+		.lookup({
+			from: 'subjects',
+			foreignField: '_id',
+			localField: 'subject',
+			as: 'subject',
+			pipeline: [
+				{
+					$project: {
+						subjectName: 1
 					}
 				}
+			]
+		})
+		.unwind('$subject')
+		.lookup({
+			from: 'students',
+			foreignField: '_id',
+			localField: 'student',
+			as: 'student',
+			pipeline: [
+				{
+					$project: {
+						_id: 1,
+						fullName: 1,
+						class: 1
+					}
+				}
+			]
+		})
+		.unwind('$student')
+		.group({
+			_id: '$student',
+			student: { $first: '$student' },
+			transcript: {
+				$push: {
+					subject: '$subject',
+					firstSemester: '$firstSemester',
+					secondSemester: '$secondSemester',
+					isPassed: '$isPassed'
+				}
 			}
-		},
-		{ $sort: { student: 1 } },
-		{
-			$project: {
-				_id: 0,
-				student: '$student',
-				transcript: 1
-			}
-		}
-	]);
-
-	return transcriptStudentList;
+		})
+		.sort({ student: 1 })
+		.project({
+			_id: 0,
+			student: 1,
+			transcript: 1
+		});
+	// .allowDiskUse(true);
+	return studentsTranscriptsByClass;
 };
