@@ -1,15 +1,7 @@
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import transporter from '../../configs/nodemailer.config';
 
-export const sendVerificationEmail = async ({
-	to,
-	subject,
-	template
-}: {
-	to: string;
-	subject: string;
-	template: string;
-}) =>
+export const sendMail = async ({ to, subject, html }: { to: string; subject: string; html: string }) =>
 	await transporter.sendMail(
 		{
 			from: {
@@ -18,7 +10,7 @@ export const sendVerificationEmail = async ({
 			},
 			to: to,
 			subject: subject,
-			html: template
+			html: html
 		},
 		(err: Error | null, info: SMTPTransport.SentMessageInfo): void => {
 			if (err) console.log('Failed to send mail.\nError: ', err.message);

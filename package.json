@@ -29,6 +29,7 @@
 		"http-errors": "^2.0.0",
 		"joi": "^17.8.3",
 		"jsonwebtoken": "^8.5.1",
+		"moment": "^2.29.4",
 		"mongoose": "^6.8.1",
 		"mongoose-autopopulate": "^0.17.1",
 		"mongoose-delete": "^0.5.4",
