@@ -4,6 +4,8 @@ import removeVietnameseTones from '../../helpers/vnFullTextSearch';
 import { IUser } from '../../types/user.type';
 import UserModel from '../models/user.model';
 import { UserRoleEnum } from './../../types/user.type';
+import { sendMail } from './mail.service';
+import { getDeactivateUserEmail } from '../../helpers/mailTemplates';
 
 export const createUser = async (payload: Partial<IUser> & Array<Partial<IUser>>) => {
 	if (Array.isArray(payload) && payload.every((user) => user.role === UserRoleEnum.PARENTS)) {
@@ -145,3 +147,23 @@ export const searchParents = async (searchTerm: string) => {
 
 export const updateUserPicture = async (user: Pick<IUser, '_id'>, pictureUrl: string) =>
 	await UserModel.findOneAndUpdate({ _id: user._id }, { picture: pictureUrl }, { new: true });
+
+export const deactivateParentsUser = async (
+	parents: Pick<IUser, '_id' | 'email'> | Array<Pick<IUser, '_id' | 'email'>>
+) => {
+	if (Array.isArray(parents)) {
+		const deactivatedParents = await UserModel.updateMany(
+			{ _id: { $in: parents } },
+			{ deleted: true },
+			{ new: true }
+		);
+		const sendMailPromises = parents.map(
+			(user) => new Promise((resolve) => sendMail(getDeactivateUserEmail(user)).catch((error) => resolve(error)))
+		);
+		await Promise.all(sendMailPromises);
+		return deactivatedParents;
+	}
+	const deactivatedParents = await UserModel.findOneAndUpdate({ _id: parents._id }, { deleted: true }, { new: true });
+	await sendMail(getDeactivateUserEmail(parents as Pick<IUser, 'email' | '_id'>));
+	return deactivatedParents;
+};

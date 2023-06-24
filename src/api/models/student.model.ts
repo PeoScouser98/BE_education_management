@@ -26,7 +26,7 @@ const StudentSchema = new mongoose.Schema<IStudentDocument>(
 		parents: {
 			type: mongoose.Types.ObjectId,
 			ref: 'Users',
-			autopopulate: { select: '_id displayName phone', options: { lean: true } }
+			autopopulate: { select: '_id displayName phone email', options: { lean: true } }
 		},
 		gender: {
 			type: String,
@@ -85,16 +85,16 @@ const StudentSchema = new mongoose.Schema<IStudentDocument>(
 );
 
 StudentSchema.plugin(mongoosePaginate);
-StudentSchema.plugin(mongooseDelete, {
-	overrideMethods: ['find', 'findOne'],
-	deletedAt: true
-});
+// StudentSchema.plugin(mongooseDelete, {
+// 	overrideMethods: ['find', 'findOne'],
+// 	deletedAt: true
+// });
 StudentSchema.plugin(mongooseAutoPopulate);
 
-const StudentModel: TSoftDeleteStudentModel & TPaginatedStudentModel = mongoose.model<
-	IStudentDocument,
-	TSoftDeleteStudentModel & TPaginatedStudentModel
->('Students', StudentSchema);
+const StudentModel: TPaginatedStudentModel = mongoose.model<IStudentDocument, TPaginatedStudentModel>(
+	'Students',
+	StudentSchema
+);
 
 StudentSchema.pre('save', function () {
 	this.fullName = toCapitalize(this.fullName) as string;
