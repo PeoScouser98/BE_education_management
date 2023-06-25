@@ -21,12 +21,11 @@ git clone https://github.com/PeoScouser98/BE_education_management.git <folder_na
 ```bash
 cd <folder_name>
 ```
-
+Download và copy file .env vào folder root để lấy các biến môi trường (Repo owner sẽ cung cấp cho các contributors)
 3. Cài đặt các packages
 ```bash
 $ npm install
 ```
-
 4. Run project
 ```bash
 $ npm run dev
