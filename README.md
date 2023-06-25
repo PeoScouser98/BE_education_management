@@ -21,22 +21,20 @@ git clone https://github.com/PeoScouser98/BE_education_management.git <folder_na
 ```bash
 cd <folder_name>
 ```
-Download và copy file .env vào folder root để lấy các biến môi trường (Repo owner sẽ cung cấp cho các contributors)
-3. Cài đặt các packages
+3. Download và copy file .env vào folder root để lấy các biến môi trường (Repository owner sẽ cung cấp cho các contributors)
+5. Cài đặt các packages
 ```bash
 $ npm install
 ```
-4. Run project
+5. Run project
 ```bash
 $ npm run dev
 ```
-
-5. Build project
+6. Build project
 ```bash
 $ npm run build
 ```
-
-6. Mở trình duyệt và truy cập vào http://localhost:3001/api/document/ để check API document
+7. Mở trình duyệt và truy cập vào http://localhost:3001/api/document/ để check API document
 
 ## Features:
 - Quản lý học sinh (thành tích học tập, điểm danh, lịch học, ...)
