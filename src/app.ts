@@ -28,18 +28,18 @@ const app = express();
 app.use(express.json());
 
 // set security HTTP headers
-app.use(
-	helmet({
-		contentSecurityPolicy: {
-			useDefaults: false,
-			directives: {
-				...helmet.contentSecurityPolicy.getDefaultDirectives(),
-				'style-src': ["'self'", "'unsafe-inline'", AppConfig.BOOTSTRAP_ICONS_CDN],
-				'script-src': ["'self'", "'unsafe-inline'", AppConfig.TAILWIND_CDN]
-			}
-		}
-	})
-);
+// app.use(
+// 	helmet({
+// 		contentSecurityPolicy: {
+// 			useDefaults: false,
+// 			directives: {
+// 				...helmet.contentSecurityPolicy.getDefaultDirectives(),
+// 				'style-src': ["'self'", "'unsafe-inline'", AppConfig.BOOTSTRAP_ICONS_CDN],
+// 				'script-src': ["'self'", "'unsafe-inline'", AppConfig.TAILWIND_CDN]
+// 			}
+// 		}
+// 	})
+// );
 
 // logging request/response
 app.use(morgan('tiny'));
@@ -58,7 +58,7 @@ app.use(
 // enable cors
 app.use(
 	cors({
-		origin: AppConfig.CLIENT_URL,
+		origin: [process.env.MAIN_FRONTEND_URL!, process.env.LOCAL_FRONTEND_URL!],
 		credentials: true,
 		methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']
 	})
