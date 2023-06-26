@@ -5,6 +5,9 @@ export interface ISubject extends Document {
 	_id: ObjectId;
 	subjectName: string;
 	subjectCode: string;
+	appliedForGrades: Array<number>;
+	isMainSubject: boolean;
+	isElectiveSubject: boolean;
 }
 export interface ISubjectDocument extends Omit<SoftDeleteDocument, '_id'>, ISubject {}
 export type TSubjectModel = Model<ISubjectDocument>;
