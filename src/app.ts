@@ -45,6 +45,17 @@ app.use(express.json());
 app.use(morgan('tiny'));
 
 // use session - cookie
+
+// enable cors
+app.use(
+	cors({
+		origin: ['http://localhost:3000', 'https://fe-education-testing.vercel.app'],
+		credentials: true,
+		methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+		preflightContinue: true
+	})
+);
+
 app.use(cookieParser());
 app.use(
 	session({
@@ -54,16 +65,6 @@ app.use(
 		resave: true
 	})
 );
-
-// enable cors
-app.use(
-	cors({
-		origin: [process.env.MAIN_FRONTEND_URL!, process.env.LOCAL_FRONTEND_URL!],
-		credentials: true,
-		methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']
-	})
-);
-
 app.use(passport.initialize());
 app.use(passport.session());
 
