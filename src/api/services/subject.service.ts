@@ -18,8 +18,8 @@ export const createNewSubject = async (subject: Omit<ISubject, '_id'>) => {
 		subjectCode: subject.subjectCode.toUpperCase()
 	});
 	if (duplicatedSubjectCode) throw createHttpError.Conflict('Subject already exists');
-	const subjectResult = await new SubjectModel(subject).save();
-	return subjectResult;
+	const newSubject = await new SubjectModel(subject).save();
+	return newSubject;
 };
 
 // update
@@ -27,7 +27,7 @@ export const updateSubject = async (id: string, subject: Partial<Omit<ISubject, 
 	if (!id) {
 		throw createHttpError.BadRequest('Missing parameter');
 	}
-	const { error } = validateSubjectUpdateBody(subject);
+	const { error, value } = validateSubjectUpdateBody(subject);
 	if (error) throw createHttpError.BadRequest(error.message);
 	if (!isValidObjectId(id)) throw createHttpError.BadRequest('Invalid subject ID!');
 	// check tồn tại
@@ -37,7 +37,7 @@ export const updateSubject = async (id: string, subject: Partial<Omit<ISubject, 
 	}
 	const duplicatedSubjectCode = await SubjectModel.exists({ subjectCode: subject.subjectCode?.toUpperCase() });
 	if (duplicatedSubjectCode) throw createHttpError.Conflict('Subject code already existed!');
-	return await SubjectModel.findOneAndUpdate({ _id: id }, subject, { new: true });
+	return await SubjectModel.findOneAndUpdate({ _id: id }, value, { new: true });
 };
 
 // delete soft

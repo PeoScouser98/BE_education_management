@@ -14,6 +14,19 @@ const SubjectSchema = new mongoose.Schema<ISubjectDocument>(
 			unique: true,
 			uppercase: true,
 			required: true
+		},
+		appliedForGrades: {
+			type: [Number],
+			required: true,
+			default: [1, 2, 3, 4, 5]
+		},
+		isMainSubject: {
+			type: Boolean,
+			required: true
+		},
+		isElectiveSubject: {
+			type: Boolean,
+			required: true
 		}
 	},
 	{
