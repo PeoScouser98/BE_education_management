@@ -22,7 +22,7 @@ export const signinWithGoogle = useCatchAsync(async (req: Request, res: Response
 		return res.redirect(AppConfig.CLIENT_URL + '/signin');
 	}
 	const accessToken = jwt.sign({ payload: req.user }, process.env.ACCESS_TOKEN_SECRET!, {
-		expiresIn: '1h'
+		expiresIn: '15m'
 	});
 
 	const refreshToken = jwt.sign({ payload: req.user }, process.env.REFRESH_TOKEN_SECRET!, {
@@ -115,8 +115,8 @@ export const refreshToken = useCatchAsync(async (req: Request, res: Response) =>
 	if (!decoded.payload) {
 		throw createHttpError.Forbidden('Invalid token payload');
 	}
-	const newAccessToken = jwt.sign(decoded.payload, process.env.ACCESS_TOKEN_SECRET!, {
-		expiresIn: '30m'
+	const newAccessToken = jwt.sign({ payload: decoded.payload }, process.env.ACCESS_TOKEN_SECRET!, {
+		expiresIn: '15m'
 	});
 	// Lưu lại token mới trong redis
 	await redisClient.set(AuthRedisKeyPrefix.ACCESS_TOKEN + req.cookies.uid, newAccessToken, {
