@@ -308,11 +308,14 @@ components:
          properties:
             _id:
                type: objectId
+            name:
+               type: string
+               required: true
             startAt:
-               type: number
+               type: Date
                default: năm hiện tại
             endAt:
-               type: number
+               type: Date
                default: năm hiện tại + 1
             createdAt:
                type: Date
