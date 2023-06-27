@@ -12,7 +12,7 @@ export class HttpException implements ErrorResponse {
 	message: string;
 	statusCode: number;
 
-	constructor(error: HttpError | MongooseError | Error | any) {
+	constructor(error: HttpError | MongooseError | Error) {
 		this.message = error.message;
 		this.statusCode = isHttpError(error)
 			? error.status
