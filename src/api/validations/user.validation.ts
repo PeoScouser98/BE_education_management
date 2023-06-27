@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import { IUser, UserGenderEnum } from '../../types/user.type';
+import { toCapitalize } from '../../helpers/toolkit';
 
 export const validateSigninData = (payload: Pick<IUser, 'phone' & 'password'>) => {
 	const schema = Joi.object({
@@ -26,6 +27,7 @@ export const validateSigninData = (payload: Pick<IUser, 'phone' & 'password'>) =
 export const validateNewTeacherData = (payload: Omit<IUser, '_id'>) => {
 	const schema = Joi.object({
 		email: Joi.string()
+			.lowercase()
 			.email({ tlds: { allow: true } })
 			.regex(/^[\w.+\-]+@gmail\.com$/, { name: 'email' })
 			.required()
@@ -33,7 +35,7 @@ export const validateNewTeacherData = (payload: Omit<IUser, '_id'>) => {
 				'object.regex': 'Email must be a valid Gmail address !'
 			}),
 		password: Joi.string().min(6).max(24),
-		displayName: Joi.string().required(),
+		displayName: Joi.string().custom(toCapitalize).required(),
 		address: Joi.string().required(),
 		dateOfBirth: Joi.date().required(),
 		phone: Joi.string()
@@ -43,9 +45,9 @@ export const validateNewTeacherData = (payload: Omit<IUser, '_id'>) => {
 			.required()
 			.valid(...Object.values(UserGenderEnum)),
 		eduBackground: Joi.object({
-			universityName: Joi.string().required(),
+			universityName: Joi.string().custom(toCapitalize).required(),
 			graduatedAt: Joi.date().required(),
-			qualification: Joi.string().required()
+			qualification: Joi.string().custom(toCapitalize).required()
 		})
 	});
 	return schema.validate(payload);
@@ -54,6 +56,7 @@ export const validateNewTeacherData = (payload: Omit<IUser, '_id'>) => {
 export const validateNewParentsData = (payload: Omit<IUser, '_id'> | Omit<IUser, '_id'>[]) => {
 	const schema = Joi.object({
 		email: Joi.string()
+			.lowercase()
 			.email()
 			.regex(/^[\w.+\-]+@gmail\.com$/, { name: 'email' })
 			.required()
@@ -63,7 +66,7 @@ export const validateNewParentsData = (payload: Omit<IUser, '_id'> | Omit<IUser,
 		phone: Joi.string()
 			.pattern(/^\d{10,11}$/, { name: 'phone number' })
 			.required(),
-		displayName: Joi.string().required(),
+		displayName: Joi.string().custom(toCapitalize).required(),
 		address: Joi.string().required(),
 		dateOfBirth: Joi.date().required(),
 		gender: Joi.string().required()
@@ -81,6 +84,7 @@ export const validateUpdateUserData = (payload: Partial<IUser>) => {
 	const schema = Joi.object({
 		email: Joi.string()
 			.email()
+			.lowercase()
 			.regex(/^[\w.+\-]+@gmail\.com$/, { name: 'email' })
 			.optional()
 			.messages({
