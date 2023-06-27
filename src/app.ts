@@ -21,32 +21,45 @@ import { HttpStatusCode } from './configs/statusCode.config';
 const ROOT_FOLDER = path.join(__dirname, '..');
 const SRC_FOLDER = path.join(ROOT_FOLDER, 'src');
 
-// Initialize Express app
+/* Initialize Express app */
 const app = express();
 
-// for parsing application / json
+/* Request body parser */
 app.use(express.json());
 
-// set security HTTP headers
-// app.use(
-// 	helmet({
-// 		contentSecurityPolicy: {
-// 			useDefaults: false,
-// 			directives: {
-// 				...helmet.contentSecurityPolicy.getDefaultDirectives(),
-// 				'style-src': ["'self'", "'unsafe-inline'", AppConfig.BOOTSTRAP_ICONS_CDN],
-// 				'script-src': ["'self'", "'unsafe-inline'", AppConfig.TAILWIND_CDN]
-// 			}
-// 		}
-// 	})
-// );
+/* Security request headers */
+app.use(
+	helmet({
+		contentSecurityPolicy: {
+			useDefaults: false,
+			directives: {
+				...helmet.contentSecurityPolicy.getDefaultDirectives(),
+				'style-src': ["'self'", "'unsafe-inline'", AppConfig.BOOTSTRAP_ICONS_CDN],
+				'script-src': ["'self'", "'unsafe-inline'", AppConfig.TAILWIND_CDN]
+			}
+		},
+		referrerPolicy: {
+			policy: 'strict-origin-when-cross-origin'
+		}
+	})
+);
 
-// logging request/response
+/* Logger */
 app.use(morgan('tiny'));
 
-// use session - cookie
+/* Using Session - Cookies */
+app.use(cookieParser());
+app.use(
+	session({
+		saveUninitialized: false,
+		secret: AppConfig.KEY_SESSION,
+		store: new MemoryStore(),
+		resave: true,
+		proxy: true
+	})
+);
 
-// enable cors
+/* Enabling CORS */
 app.use(
 	cors({
 		origin: ['http://localhost:3000', 'https://fe-education-testing.vercel.app'],
@@ -56,25 +69,16 @@ app.use(
 	})
 );
 
-app.use(cookieParser());
-app.use(
-	session({
-		saveUninitialized: false,
-		secret: AppConfig.KEY_SESSION,
-		store: new MemoryStore(),
-		resave: true
-	})
-);
+/* Init passport */
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Use routers
+/* Enpoints */
 app.use('/api', rootRouter);
 
-// Swagger
+/* Swagger */
 // app.use('/public', express.static(path.join(SRC_FOLDER, 'public')));
 app.use('/api/document', swaggerUI.serve, swaggerUI.setup(swaggerOptions));
-
 app.get('/', (req, res) => res.json({ message: 'Server now is running.', status: HttpStatusCode.OK }));
 
 export default app;
