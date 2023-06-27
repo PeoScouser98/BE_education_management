@@ -8,7 +8,7 @@ const connectMongoDB = async () => {
 			? console.log('[INFO] ::: Environment -> Production')
 			: console.log('[INFO] ::: Environment -> Development');
 		// const databaseUri = isProductionEnv ? process.env.MAIN_DB_URI! : process.env.TEST_DB_URI!;
-		const data = await mongoose.connect(process.env.DB_URI!);
+		const data = await mongoose.connect(process.env.TEST_DB_URI!);
 		console.log('[SUCCESS] ::: Connected to database');
 		return data;
 	} catch (error) {
