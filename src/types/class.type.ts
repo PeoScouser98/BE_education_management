@@ -1,11 +1,12 @@
 import { Model, ObjectId, SortOrder } from 'mongoose';
 import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
+import { IUser } from './user.type';
 
 export interface IClass {
 	_id: ObjectId;
 	grade: 1 | 2 | 3 | 4 | 5;
 	className: string;
-	headTeacher: ObjectId;
+	headTeacher: ObjectId | Pick<IUser, '_id' | 'displayName' | 'email' | 'phone'>;
 	students: Array<ObjectId>;
 	totalStudents?: number;
 }
