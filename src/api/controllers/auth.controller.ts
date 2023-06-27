@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import createHttpError from 'http-errors';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import path from 'path';
-import AppConfig from '../../configs/app.config';
+import { oauth2Client } from '../../configs/googleApis.config';
 import { HttpStatusCode } from '../../configs/statusCode.config';
 import redisClient from '../../database/redis';
 import formatPhoneNumber from '../../helpers/formatPhoneNumber';
@@ -13,44 +13,57 @@ import { AuthRedisKeyPrefix } from '../../types/redis.type';
 import { IUser, UserRoleEnum } from '../../types/user.type';
 import '../auth/googlePassport';
 import UserModel from '../models/user.model';
+import { getPermissionByRole } from '../services/permission.service';
 import sendSMS from '../services/sms.service';
-import { changePassword } from '../services/user.service';
+import { changePassword, getUserByEmail } from '../services/user.service';
 
 export const signinWithGoogle = useCatchAsync(async (req: Request, res: Response) => {
-	const user = req.user as Partial<IUser>;
-	if (!user) {
-		return res.redirect(AppConfig.CLIENT_URL + '/signin');
+	const idToken = req.body.idToken as string;
+	if (!idToken) {
+		throw createHttpError.BadRequest('Token ID must be provided !');
 	}
-	const accessToken = jwt.sign({ payload: req.user }, process.env.ACCESS_TOKEN_SECRET!, {
+	const loginTicket = await oauth2Client.verifyIdToken({ idToken });
+	const payload = loginTicket.getPayload();
+	const user = await getUserByEmail(payload?.email!);
+	if (!user) {
+		throw createHttpError.NotFound('Cannot find user');
+	}
+	user.picture = payload?.picture;
+	const userPermissions = await getPermissionByRole(user?.role!);
+	const accessToken = jwt.sign({ payload: user }, process.env.ACCESS_TOKEN_SECRET!, {
 		expiresIn: '15m'
 	});
-
-	const refreshToken = jwt.sign({ payload: req.user }, process.env.REFRESH_TOKEN_SECRET!, {
+	const refreshToken = jwt.sign({ payload: user }, process.env.REFRESH_TOKEN_SECRET!, {
 		expiresIn: '30d'
 	});
 
 	await Promise.all([
 		redisClient.set(AuthRedisKeyPrefix.ACCESS_TOKEN + user._id, accessToken, {
-			EX: 60 * 60 // 1 hour
+			EX: 60 * 60
 		}),
 		redisClient.set(AuthRedisKeyPrefix.REFRESH_TOKEN + user._id, refreshToken, {
-			EX: 60 * 60 * 24 * 30 // 1 month
+			EX: 60 * 60 * 24 * 30
 		})
 	]);
 
 	res.cookie('access_token', accessToken, {
-		maxAge: 60 * 60 * 1000 * 24 * 365, // 1 day
-		httpOnly: true
-		// secure: false,
+		maxAge: 60 * 60 * 1000 * 24,
+		httpOnly: true,
+		secure: true
 	});
 
-	res.cookie('uid', user?._id?.toString().trim(), {
-		maxAge: 60 * 60 * 1000 * 24 * 30, // 30 days
-		httpOnly: true
-		// secure: false,
+	res.cookie('uid', user?._id, {
+		maxAge: 60 * 60 * 1000 * 24 * 30,
+		httpOnly: true,
+		secure: true
 	});
 
-	return res.redirect(AppConfig.CLIENT_URL + '/signin/success');
+	return res.status(HttpStatusCode.CREATED).json({
+		user: { ...user, picture: payload?.picture },
+		userPermissions,
+		accessToken,
+		refreshToken
+	});
 });
 
 export const signinWithPhoneNumber = useCatchAsync(async (req: Request, res: Response) => {
@@ -64,22 +77,20 @@ export const signinWithPhoneNumber = useCatchAsync(async (req: Request, res: Res
 
 	await Promise.all([
 		redisClient.set(AuthRedisKeyPrefix.ACCESS_TOKEN + user._id, accessToken, {
-			EX: 60 * 60 // 1 hour
+			EX: 60 * 60
 		}),
 		redisClient.set(AuthRedisKeyPrefix.REFRESH_TOKEN + user._id, refreshToken, {
-			EX: 60 * 60 * 24 * 30 // 1 month
+			EX: 60 * 60 * 24 * 30
 		})
 	]);
 
 	res.cookie('access_token', accessToken, {
 		maxAge: 60 * 60 * 1000 * 24 * 365, // 1 day
 		httpOnly: true
-		// secure: false,
 	});
 	res.cookie('uid', user?._id?.toString().trim(), {
 		maxAge: 60 * 60 * 1000 * 24 * 365, // 30 days
 		httpOnly: true
-		// secure: false,
 	});
 
 	return res.status(HttpStatusCode.OK).json({
