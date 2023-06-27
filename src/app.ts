@@ -54,8 +54,7 @@ app.use(
 		saveUninitialized: false,
 		secret: AppConfig.KEY_SESSION,
 		store: new MemoryStore(),
-		resave: true,
-		proxy: true
+		resave: true
 	})
 );
 
