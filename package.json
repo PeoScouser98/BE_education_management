@@ -6,7 +6,7 @@
 	"scripts": {
 		"start": "SET NODE_ENV=production && node ./dist/bundle.js",
 		"dev": "nodemon --watch src/docs --ext yaml --exec \"nodemon --swc ./src/server.ts\"",
-		"build": "npx webpack --config webpack.config.js",
+		"build": "npx webpack --mode production --config webpack.config.js",
 		"cleanup": "rm -rf dist && rm -rf build",
 		"eslint:fix": "eslint --fix . --ext .ts",
 		"lint": "eslint . --ext .ts",
