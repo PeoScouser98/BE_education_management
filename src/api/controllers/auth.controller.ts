@@ -49,12 +49,14 @@ export const signinWithGoogle = useCatchAsync(async (req: Request, res: Response
 	res.cookie('access_token', accessToken, {
 		maxAge: 60 * 60 * 1000 * 24,
 		httpOnly: true,
+		sameSite: 'none',
 		secure: true
 	});
 
 	res.cookie('uid', user?._id, {
 		maxAge: 60 * 60 * 1000 * 24 * 30,
 		httpOnly: true,
+		sameSite: 'none',
 		secure: true
 	});
 
