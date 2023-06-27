@@ -137,8 +137,9 @@ export const refreshToken = useCatchAsync(async (req: Request, res: Response) =>
 	});
 	res.cookie('access_token', newAccessToken, {
 		maxAge: 60 * 60 * 1000 * 24 * 365, // 1 day
-		httpOnly: true
-		// secure: false,
+		httpOnly: true,
+		sameSite: 'none',
+		secure: false
 	});
 	return res.status(HttpStatusCode.OK).json({
 		refreshToken: newAccessToken,
