@@ -31,7 +31,7 @@ export const signinWithGoogle = useCatchAsync(async (req: Request, res: Response
 	user.picture = payload?.picture;
 	const userPermissions = await getPermissionByRole(user?.role!);
 	const accessToken = jwt.sign({ payload: user }, process.env.ACCESS_TOKEN_SECRET!, {
-		expiresIn: '15m'
+		expiresIn: '1m'
 	});
 	const refreshToken = jwt.sign({ payload: user }, process.env.REFRESH_TOKEN_SECRET!, {
 		expiresIn: '30d'
@@ -68,6 +68,36 @@ export const signinWithGoogle = useCatchAsync(async (req: Request, res: Response
 	});
 });
 
+/**
+ * * Only use for testing on Thunder Client
+ * ! Do not use for Frontend app
+ */
+export const googleLoginTest = useCatchAsync(async (req: Request, res: Response) => {
+	let oauth2Token = req.headers.authorization;
+	if (!oauth2Token) throw createHttpError.Unauthorized('Access token must be provided!');
+
+	const payload = await (
+		await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: oauth2Token } })
+	).json();
+	const user = await getUserByEmail(payload?.email!);
+	if (!user) {
+		throw createHttpError.NotFound('Cannot find user');
+	}
+	user.picture = payload?.picture;
+	const accessToken = jwt.sign({ payload: user }, process.env.ACCESS_TOKEN_SECRET!, {
+		expiresIn: '24h'
+	});
+	console.log('accessToken :>> ', accessToken);
+	res.header('Cookie', `access_token=${accessToken}`);
+	res.header('Cookie', `uid=${user?._id}`);
+	return res.status(HttpStatusCode.CREATED).json({
+		user: { ...user, picture: payload?.picture },
+		accessToken
+	});
+});
+
+// ! Deprecated
+// #region Signin with phone number
 export const signinWithPhoneNumber = useCatchAsync(async (req: Request, res: Response) => {
 	const user = req.user as Partial<IUser>;
 	const accessToken = jwt.sign({ payload: user }, process.env.ACCESS_TOKEN_SECRET!, {
@@ -100,6 +130,7 @@ export const signinWithPhoneNumber = useCatchAsync(async (req: Request, res: Res
 		accessToken: accessToken
 	});
 });
+// #endregion
 
 export const getUser = useCatchAsync(async (req: Request, res: Response) => {
 	if (!req.profile) {
@@ -129,16 +160,15 @@ export const refreshToken = useCatchAsync(async (req: Request, res: Response) =>
 		throw createHttpError.Forbidden('Invalid token payload');
 	}
 	const newAccessToken = jwt.sign({ payload: decoded.payload }, process.env.ACCESS_TOKEN_SECRET!, {
-		expiresIn: '15m'
+		expiresIn: '5m'
 	});
 	// Lưu lại token mới trong redis
 	await redisClient.set(AuthRedisKeyPrefix.ACCESS_TOKEN + req.cookies.uid, newAccessToken, {
 		EX: 60 * 60 // 1 hour
 	});
 	res.cookie('access_token', newAccessToken, {
-		maxAge: 60 * 60 * 1000 * 24 * 365, // 1 day
+		maxAge: 60 * 60 * 1000 * 24, // 1 day
 		httpOnly: true,
-		sameSite: 'none',
 		secure: false
 	});
 	return res.status(HttpStatusCode.OK).json({

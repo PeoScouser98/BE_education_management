@@ -11,4 +11,10 @@ router.get('/auth/verify-account', AuthController.verifyAccount);
 router.get('/auth/refresh-token', AuthController.refreshToken);
 router.post('/auth/send-otp', AuthController.sendOtp);
 
+/**
+ * * Only use for testing on Thunder Client
+ * ! Do not use for Frontend app
+ */
+router.get('/login', AuthController.googleLoginTest);
+
 export default router;
