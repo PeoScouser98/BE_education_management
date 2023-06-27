@@ -167,3 +167,8 @@ export const deactivateParentsUser = async (
 	await sendMail(getDeactivateUserEmail(parents as Pick<IUser, 'email' | '_id'>));
 	return deactivatedParents;
 };
+
+export const getUserByEmail = async (email: string) =>
+	await UserModel.findOne({ email })
+		.select('_id displayName role phone email')
+		.transform((doc) => ({ ...doc?.toObject(), _id: doc?._id.toString() }));
