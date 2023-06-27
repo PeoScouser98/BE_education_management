@@ -61,7 +61,7 @@ app.use(
 /* Enabling CORS */
 app.use(
 	cors({
-		origin: ['http://localhost:3000', 'https://fe-education-testing.vercel.app'],
+		origin: [process.env.LOCAL_FRONTEND_URL!, process.env.MAIN_FRONTEND_URL!],
 		credentials: true,
 		methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
 		preflightContinue: true
