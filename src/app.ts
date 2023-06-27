@@ -54,7 +54,11 @@ app.use(
 		saveUninitialized: false,
 		secret: AppConfig.KEY_SESSION,
 		store: new MemoryStore(),
-		resave: true
+		resave: true,
+		cookie: {
+			sameSite: 'none',
+			path: '/'
+		}
 	})
 );
 

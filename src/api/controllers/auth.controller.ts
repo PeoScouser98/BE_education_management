@@ -31,7 +31,7 @@ export const signinWithGoogle = useCatchAsync(async (req: Request, res: Response
 	user.picture = payload?.picture;
 	const userPermissions = await getPermissionByRole(user?.role!);
 	const accessToken = jwt.sign({ payload: user }, process.env.ACCESS_TOKEN_SECRET!, {
-		expiresIn: '1m'
+		expiresIn: '5s'
 	});
 	const refreshToken = jwt.sign({ payload: user }, process.env.REFRESH_TOKEN_SECRET!, {
 		expiresIn: '30d'
@@ -49,15 +49,15 @@ export const signinWithGoogle = useCatchAsync(async (req: Request, res: Response
 	res.cookie('access_token', accessToken, {
 		maxAge: 60 * 60 * 1000 * 24,
 		httpOnly: true,
-		sameSite: 'none',
-		secure: true
+		secure: true,
+		sameSite: 'none'
 	});
 
 	res.cookie('uid', user?._id, {
 		maxAge: 60 * 60 * 1000 * 24 * 30,
-		httpOnly: true,
-		sameSite: 'none',
-		secure: true
+		httpOnly: false,
+		secure: true,
+		sameSite: 'none'
 	});
 
 	return res.status(HttpStatusCode.CREATED).json({
@@ -87,9 +87,6 @@ export const googleLoginTest = useCatchAsync(async (req: Request, res: Response)
 	const accessToken = jwt.sign({ payload: user }, process.env.ACCESS_TOKEN_SECRET!, {
 		expiresIn: '24h'
 	});
-	console.log('accessToken :>> ', accessToken);
-	res.header('Cookie', `access_token=${accessToken}`);
-	res.header('Cookie', `uid=${user?._id}`);
 	return res.status(HttpStatusCode.CREATED).json({
 		user: { ...user, picture: payload?.picture },
 		accessToken
@@ -160,22 +157,25 @@ export const refreshToken = useCatchAsync(async (req: Request, res: Response) =>
 		throw createHttpError.Forbidden('Invalid token payload');
 	}
 	const newAccessToken = jwt.sign({ payload: decoded.payload }, process.env.ACCESS_TOKEN_SECRET!, {
-		expiresIn: '5m'
+		expiresIn: '5s'
 	});
 	// Lưu lại token mới trong redis
 	await redisClient.set(AuthRedisKeyPrefix.ACCESS_TOKEN + req.cookies.uid, newAccessToken, {
 		EX: 60 * 60 // 1 hour
 	});
-	res.cookie('access_token', newAccessToken, {
-		maxAge: 60 * 60 * 1000 * 24, // 1 day
-		httpOnly: true,
-		secure: false
-	});
-	return res.status(HttpStatusCode.OK).json({
-		refreshToken: newAccessToken,
-		statusCode: HttpStatusCode.OK,
-		message: 'ok'
-	});
+	return res
+		.status(HttpStatusCode.OK)
+		.cookie('access_token', newAccessToken, {
+			maxAge: 60 * 60 * 1000 * 24, // 1 day
+			httpOnly: true,
+			secure: true,
+			sameSite: 'none'
+		})
+		.json({
+			refreshToken: newAccessToken,
+			statusCode: HttpStatusCode.OK,
+			message: 'ok'
+		});
 });
 
 export const signout = useCatchAsync(async (req: Request, res: Response) => {
