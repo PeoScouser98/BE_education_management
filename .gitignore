@@ -4,3 +4,4 @@ dump.rdb
 thunder-tests
 .vscode
 .env
+dist
