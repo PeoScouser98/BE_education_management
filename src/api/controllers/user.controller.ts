@@ -153,7 +153,7 @@ export const updateUserInfo = useCatchAsync(async (req: Request, res: Response) 
 // [PATCH] /users/parents/:userId
 export const updateParentsInfo = useCatchAsync(async (req: Request, res: Response) => {
 	const { parentsId } = req.params;
-	const { error, value } = validateUpdateUserData(req.body);
+	const { error, value } = validateNewParentsData(req.body);
 	if (error) throw createHttpError.BadRequest(error.message);
 	const updatedParentsUser = await UserService.updateParentsUserInfo(parentsId, value);
 	if (!updatedParentsUser) throw createHttpError.NotFound('Cannot find parents user to update !');
