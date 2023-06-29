@@ -30,35 +30,10 @@ export const updateSubject = useCatchAsync(async (req: Request, res: Response) =
 	return res.status(HttpStatusCode.CREATED).json(newSubject);
 });
 
-// [DELETE] /api/subject/:id?option=force
+// [DELETE] /api/subject/:id
 export const deleteSubject = useCatchAsync(async (req: Request, res: Response) => {
 	const id = req.params.id;
-	const option = req.query._option || 'soft';
 	if (!id) throw createHttpError(HttpStatusCode.NO_CONTENT);
-	let result;
-	switch (option) {
-		case 'soft':
-			result = await SubjectServices.deleteSoft(id);
-			break;
-		case 'force':
-			result = await SubjectServices.deleteForce(id);
-			break;
-
-		default:
-			throw createHttpError.InternalServerError('InternalServerError');
-	}
+	const result = await SubjectServices.deleteSubject(id);
 	return res.status(HttpStatusCode.NO_CONTENT).json(result);
-});
-
-// [PUT] /api/subject/restore/:id
-export const restore = useCatchAsync(async (req: Request, res: Response) => {
-	const id: string = req.params.id;
-	const result = await SubjectServices.restore(id);
-	return res.status(result.statusCode).json(result);
-});
-
-// [GET] /api/subjects/trash
-export const getTrash = useCatchAsync(async (req: Request, res: Response) => {
-	const result = await SubjectServices.getTrash();
-	return res.status(HttpStatusCode.OK).json(result);
 });
