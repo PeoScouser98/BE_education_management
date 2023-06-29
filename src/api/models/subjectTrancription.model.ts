@@ -23,19 +23,21 @@ const SubjectTranscriptSchema = new mongoose.Schema<ISubjectTranscriptDocument>(
 			autopopulate: { select: 'subjectName' }
 		},
 		isPassed: {
-			type: Boolean,
-			default: null
+			type: Boolean
+		},
+		remark: {
+			type: String,
+			trim: true,
+			default: ''
 		},
 		firstSemester: {
 			midtermTest: {
 				type: Number,
-				default: null,
 				min: 0,
 				max: 10
 			},
 			finalTest: {
 				type: Number,
-				default: null,
 				min: 0,
 				max: 10
 			}
@@ -43,13 +45,11 @@ const SubjectTranscriptSchema = new mongoose.Schema<ISubjectTranscriptDocument>(
 		secondSemester: {
 			midtermTest: {
 				type: Number,
-				default: null,
 				min: 0,
 				max: 10
 			},
 			finalTest: {
 				type: Number,
-				default: null,
 				min: 0,
 				max: 10
 			}

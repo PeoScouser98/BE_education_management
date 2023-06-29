@@ -1,43 +1,44 @@
 import createHttpError from 'http-errors';
-import { ObjectId, isValidObjectId } from 'mongoose';
+import mongoose, { ObjectId, isValidObjectId } from 'mongoose';
 import { IStudent } from '../../types/student.type';
 import { ISubjectTranscript } from '../../types/subjectTranscription.type';
 import ClassModel from '../models/class.model';
 import StudentModel from '../models/student.model';
 import SubjectModel from '../models/subject.model';
 import SubjectTranscriptionModel from '../models/subjectTrancription.model';
-import { validateSubjectTranscript, validateSubjectTranscriptOne } from '../validations/subjectTrancription.validation';
+import { validateSubjectTranscript } from '../validations/subjectTrancription.validation';
 import { getCurrentSchoolYear } from './schoolYear.service';
-import mongoose from 'mongoose';
 
 // Nhập điểm nhiều học sinh 1 lúc / môn / lớp
-export const newScoreList = async (
+export const insertSubjectTranscriptByClass = async (
 	subjectId: string,
 	classId: string,
 	data: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>[]
 ) => {
-	// check xem classId và subjectId đã đúng type chưa
 	if (!isValidObjectId(classId) || !isValidObjectId(subjectId))
-		throw createHttpError.BadRequest('classId or subjectId is not in the correct ObjectId format');
+		throw createHttpError.BadRequest(`Class's ID or subject's ID is invalid ObjectId`);
 
 	if (!Array.isArray(data) || data.length === 0)
 		throw createHttpError.BadRequest('Body data must be an array and cannot be empty!');
 
-	const [schoolYear, existedClass, existedSubject, isAllStudentInClass] = await Promise.all([
+	const [currentSchoolYear, currentClass, currentSubject, isAllStudentInClass] = await Promise.all([
 		getCurrentSchoolYear(),
-		ClassModel.exists({ _id: classId }),
-		SubjectModel.exists({ _id: subjectId }),
+		ClassModel.findOne({ _id: classId }),
+		SubjectModel.findOne({ _id: subjectId }),
 		StudentModel.exists({
 			$and: [{ _id: { $in: data.map((std) => std.student) } }, { class: classId }]
 		})
 	]);
+	if (!currentClass) throw createHttpError.NotFound('Class does not exist or has been deleted!');
 
-	if (!existedClass) throw createHttpError.NotFound('Class does not exist or has been deleted!'); // check if class exists
-	if (!existedSubject) throw createHttpError.NotFound('Subject does not exist or has been deleted!'); // check if subject exists
-	if (!isAllStudentInClass) throw createHttpError.Conflict('Some students do not exist in this class !'); // check if all student are in class to request
+	// Check if subject submit for transcript does exist
+	if (!currentSubject) throw createHttpError.NotFound('Subject does not exist or has been deleted!');
+
+	// Check tất cả học sinh trong bảng điểm gửi lên có nằm trong lớp
+	if (!isAllStudentInClass) throw createHttpError.Conflict('Some students do not exist in this class !');
 
 	// validate bảng điểm của các student gửi lên
-	const { error, value } = validateSubjectTranscript(data);
+	const { error, value } = validateSubjectTranscript(data, currentSubject, currentClass);
 	if (error) throw createHttpError.BadRequest(error.message);
 
 	const bulkWriteOption = value.map((item: ISubjectTranscript) => ({
@@ -45,7 +46,7 @@ export const newScoreList = async (
 			filter: {
 				student: item.student,
 				subject: subjectId,
-				schoolYear: schoolYear
+				schoolYear: currentSchoolYear
 			},
 			update: item,
 			upsert: true
@@ -53,67 +54,6 @@ export const newScoreList = async (
 	}));
 
 	return await SubjectTranscriptionModel.bulkWrite(bulkWriteOption);
-};
-
-// nhập điểm 1 học sinh / môn / lớp
-export const newScore = async (
-	subjectId: string,
-	studentId: string,
-	data: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear' | 'student'>
-) => {
-	// check xem studentId và subjectId đã đúng type chưa
-	if (!isValidObjectId(studentId) || !isValidObjectId(subjectId)) {
-		throw createHttpError.BadRequest('studentId or subjectId is not in the correct ObjectId format');
-	}
-
-	if (!data || Object.keys(data).length === 0) {
-		throw createHttpError(304);
-	}
-
-	// lấy ra schoolYear của hiện tại
-	const schoolYear = await getCurrentSchoolYear();
-
-	// check xem môn học và student có tồn tại hay không
-	const studentExistQuery = StudentModel.findOne({ _id: studentId });
-	const subjectExistQuery = SubjectModel.findOne({ _id: subjectId });
-
-	const [studentExist, subjectExist] = await Promise.all([studentExistQuery, subjectExistQuery]);
-	if (!studentExist) throw createHttpError.NotFound('Student does not exist or has been deleted!');
-	if (!subjectExist) throw createHttpError.NotFound('Subject does not exist or has been deleted!');
-
-	// validate
-	const { error } = validateSubjectTranscriptOne(data);
-	if (error) {
-		throw createHttpError.BadRequest(error.message);
-	}
-
-	// check xem student đã có bảng điểm chưa
-	const transcriptExists = await SubjectTranscriptionModel.findOne({
-		student: studentId,
-		subject: subjectId,
-		schoolYear: schoolYear._id
-	});
-
-	if (transcriptExists) {
-		// đã tồn tại (update lại)
-		return await SubjectTranscriptionModel.findOneAndUpdate(
-			{
-				_id: transcriptExists._id
-			},
-			data,
-			{
-				new: true
-			}
-		);
-	} else {
-		// chưa tồn tại (tạo bảng điểm)
-		return await new SubjectTranscriptionModel({
-			...data,
-			student: studentId,
-			subject: subjectId,
-			schoolYear: schoolYear._id
-		}).save();
-	}
 };
 
 // lấy bảng điểm học sinh / lớp / môn
@@ -209,13 +149,13 @@ export const getStudentTranscript = async (id: string) => {
 					subject: '$subject',
 					firstSemester: '$firstSemester',
 					secondSemester: '$secondSemester',
-					isPassed: '$isPassed'
+					isPassed: '$isPassed',
+					remark: '$remark'
 				}
 			}
 		})
 		.project({
 			_id: 0,
-			subject: 1,
 			transcript: 1,
 			student: 1
 		});
@@ -280,7 +220,8 @@ export const selectTranscriptAllSubjectByClass = async (classId: string | Object
 					subject: '$subject',
 					firstSemester: '$firstSemester',
 					secondSemester: '$secondSemester',
-					isPassed: '$isPassed'
+					isPassed: '$isPassed',
+					remark: '$remark'
 				}
 			}
 		})
@@ -290,6 +231,6 @@ export const selectTranscriptAllSubjectByClass = async (classId: string | Object
 			student: 1,
 			transcript: 1
 		});
-	// .allowDiskUse(true);
+
 	return studentsTranscriptsByClass;
 };
