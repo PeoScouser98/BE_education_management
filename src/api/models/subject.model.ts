@@ -47,7 +47,7 @@ SubjectSchema.pre('save', function (next) {
 	next();
 });
 
-const SubjectModel: TSoftDeleteSubjectModel = mongoose.model<ISubjectDocument, TSoftDeleteSubjectModel>(
+const SubjectModel = mongoose.model<ISubjectDocument>(
 	'Subjects',
 	SubjectSchema
 );

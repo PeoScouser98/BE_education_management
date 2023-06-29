@@ -8,7 +8,10 @@ export const validateSubjectRequestBody = (data: Omit<ISubject, '_id'>) => {
 		subjectCode: Joi.string().uppercase().trim().required(),
 		isMainSubject: Joi.boolean().required(),
 		appliedForGrades: Joi.array().items(Joi.number().valid(1, 2, 3, 4, 5)).default([1, 2, 3, 4, 5]),
-		isElectiveSubject: Joi.boolean().required()
+		isElectiveSubject: Joi.boolean().when('isMainSubject', {
+			is: Joi.boolean().equal(true),
+			then: Joi.boolean().default(false)
+		})
 	});
 	return schema.validate(data);
 };
@@ -19,7 +22,12 @@ export const validateSubjectUpdateBody = (data: Partial<Omit<ISubject, '_id'>>) 
 		subjectCode: Joi.string().uppercase().trim().optional(),
 		isMainSubject: Joi.boolean().optional(),
 		appliedForGrades: Joi.array().items(Joi.number().valid(1, 2, 3, 4, 5)).optional(),
-		isElectiveSubject: Joi.boolean().optional()
+		isElectiveSubject: Joi.boolean()
+			.when('isMainSubject', {
+				is: Joi.boolean().equal(true),
+				then: Joi.boolean().default(false)
+			})
+			.optional()
 	});
 	return schema.validate(data);
 };
