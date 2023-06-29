@@ -4,17 +4,11 @@ import { checkAuthenticated, checkIsTeacher } from '../middlewares/authGuard.mid
 
 const router = express.Router();
 
-router.post(
+router.put(
 	'/transcripts/:classId/:subjectId',
 	checkAuthenticated,
 	checkIsTeacher,
-	TrancriptionController.scoreTableInputs
-);
-router.post(
-	'/transcripts/:studentId/:subjectId',
-	checkAuthenticated,
-	checkIsTeacher,
-	TrancriptionController.scoreTableInputOne
+	TrancriptionController.insertSubjectTranscriptByClass
 );
 router.get('/transcripts/class/:classId/:subjectId', checkAuthenticated, TrancriptionController.getTranscriptByClass);
 router.get('/transcripts/student/:id', checkAuthenticated, TrancriptionController.getTranscriptByStudent);

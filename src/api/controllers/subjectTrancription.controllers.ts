@@ -7,20 +7,11 @@ import mongoose, { ObjectId, isValidObjectId } from 'mongoose';
 import createHttpError from 'http-errors';
 
 // [POST] /api/transcripts/:classId/:subjectId
-export const scoreTableInputs = useCatchAsync(async (req: Request, res: Response) => {
+export const insertSubjectTranscriptByClass = useCatchAsync(async (req: Request, res: Response) => {
 	const data = req.body;
 	const subjectId = req.params.subjectId;
 	const classId = req.params.classId;
-	const result = await TranscriptService.newScoreList(subjectId, classId, data);
-	return res.status(HttpStatusCode.CREATED).json(result);
-});
-
-// [POST] /api/transcript/:studentId/:subjectId
-export const scoreTableInputOne = useCatchAsync(async (req: Request, res: Response) => {
-	const data = req.body;
-	const subjectId = req.params.subjectId;
-	const studentId = req.params.studentId;
-	const result = await TranscriptService.newScore(subjectId, studentId, data);
+	const result = await TranscriptService.insertSubjectTranscriptByClass(subjectId, classId, data);
 	return res.status(HttpStatusCode.CREATED).json(result);
 });
 
