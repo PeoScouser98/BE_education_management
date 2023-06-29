@@ -35,7 +35,10 @@ export const updateSubject = async (id: string, subject: Partial<Omit<ISubject, 
 	if (!existedSubject) {
 		throw createHttpError.NotFound('Subject does not exist');
 	}
-	const duplicatedSubjectCode = await SubjectModel.exists({ subjectCode: subject.subjectCode?.toUpperCase() });
+	const duplicatedSubjectCode = await SubjectModel.exists({
+		_id: { $ne: id },
+		subjectCode: subject.subjectCode?.toUpperCase()
+	});
 	if (duplicatedSubjectCode) throw createHttpError.Conflict('Subject code already existed!');
 	return await SubjectModel.findOneAndUpdate({ _id: id }, value, { new: true });
 };
