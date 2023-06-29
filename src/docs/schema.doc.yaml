@@ -83,6 +83,7 @@ components:
                type: Date
             address:
                type: string
+
       Teacher:
          allOf:
             - $ref: '#/components/schemas/User'
@@ -91,6 +92,7 @@ components:
             employmentStatus:
                type: boolean
                default: false
+
       Parent:
          type: object
          properties:
@@ -127,6 +129,7 @@ components:
             - phone
             - dateOfBirth
             - gender
+
       Class:
          type: object
          properties:
@@ -163,10 +166,18 @@ components:
             subjectName:
                type: string
                description: 'Tên môn học'
-            slug:
+            subjectCode:
                type: string
                unique: true
                description: 'slug của môn học (server tự tạo)'
+            isMainSubject:
+               type: boolean
+               required: true
+               description: 'Môn học chính hoặc không, dùng để xác định cách thức đánh giá, bằng điểm/nhận xét'
+            isElectiveSubject:
+               type: boolean
+               required: true
+               description: 'Môn học tự chọn hoặc không, dùng để xác định bắt buộc có trong bảng điểm/không'
             createdAt:
                type: Date
             updatedAt:
@@ -239,10 +250,10 @@ components:
                type: ObjectId
                required: true
                description: 'id lớp học hiện tại'
-            parentsPhoneNumber:
+            parents:
                type: string
                required: true
-               description: 'Số điện thoại phụ huynh'
+               description: 'ID user phụ huynh'
             isPolicyBeneficiary:
                type: boolean
                description: 'Có phải gia định thuộc diện chính sách không'
