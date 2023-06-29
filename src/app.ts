@@ -81,7 +81,11 @@ app.use('/api', rootRouter);
 
 /* Swagger */
 // app.use('/public', express.static(path.join(SRC_FOLDER, 'public')));
-app.use('/api/document', swaggerUI.serve, swaggerUI.setup(swaggerOptions));
+app.use(
+	'/api/document',
+	swaggerUI.serve,
+	swaggerUI.setup(swaggerOptions, { customCss: '.swagger-ui .topbar { display: none }' })
+);
 app.get('/', (req, res) => res.json({ message: 'Server now is running.', status: HttpStatusCode.OK }));
 
 export default app;
