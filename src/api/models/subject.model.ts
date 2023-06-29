@@ -43,6 +43,7 @@ SubjectSchema.plugin(MongooseDelete, {
 
 SubjectSchema.pre('save', function (next) {
 	this.subjectName = toCapitalize(this.subjectName)!;
+	if (this.isMainSubject === true) this.isElectiveSubject = false;
 	next();
 });
 
