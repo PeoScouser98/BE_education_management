@@ -1,9 +1,8 @@
 import mongoose from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
-import mongooseDelete from 'mongoose-delete';
 import mongoosePaginate from 'mongoose-paginate-v2';
 import { toCapitalize } from '../../helpers/toolkit';
-import { IStudentDocument, TPaginatedStudentModel, TSoftDeleteStudentModel } from '../../types/student.type';
+import { IStudentDocument, TPaginatedStudentModel } from '../../types/student.type';
 import { UserGenderEnum } from '../../types/user.type';
 
 const StudentSchema = new mongoose.Schema<IStudentDocument>(
@@ -63,7 +62,6 @@ const StudentSchema = new mongoose.Schema<IStudentDocument>(
 					schoolYear: {
 						type: mongoose.Types.ObjectId,
 						ref: 'SchoolYears'
-						// autopopulate: true
 					},
 					hasPermision: { type: Boolean, default: false },
 					reason: {
@@ -85,10 +83,6 @@ const StudentSchema = new mongoose.Schema<IStudentDocument>(
 );
 
 StudentSchema.plugin(mongoosePaginate);
-// StudentSchema.plugin(mongooseDelete, {
-// 	overrideMethods: ['find', 'findOne'],
-// 	deletedAt: true
-// });
 StudentSchema.plugin(mongooseAutoPopulate);
 
 const StudentModel: TPaginatedStudentModel = mongoose.model<IStudentDocument, TPaginatedStudentModel>(
