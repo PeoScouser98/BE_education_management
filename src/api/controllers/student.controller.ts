@@ -140,3 +140,10 @@ export const selectAttendanceAllClass = useCatchAsync(async (req: Request, res: 
 	const result = await StudentServices.getAttendanceAllClass(Number(page), Number(limit), date);
 	return res.status(HttpStatusCode.OK).json(result);
 });
+
+export const getStudentsByParents = useCatchAsync(async (req: Request, res: Response) => {
+	const parentsId = req.profile?._id!;
+	console.log('parentsId', parentsId);
+	const children = await StudentServices.getStudentsByParents(parentsId);
+	return res.status(HttpStatusCode.OK).json(children);
+});

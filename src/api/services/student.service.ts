@@ -1,5 +1,5 @@
 import createHttpError from 'http-errors';
-import mongoose, { SortOrder, isValidObjectId } from 'mongoose';
+import mongoose, { ObjectId, SortOrder, isValidObjectId } from 'mongoose';
 import { HttpStatusCode } from '../../configs/statusCode.config';
 import { compareDates } from '../../helpers/toolkit';
 import { IAttendance, IStudent } from '../../types/student.type';
@@ -440,3 +440,16 @@ export const setStudentsAsGraduatedByClass = async (classId: string) => {
 	// const deactivatedParents = await deactivateParentsUser(parentsList);
 	// return { gradutatedStudentsList, deactivatedParents };
 };
+
+export const getStudentsByParents = async (parentsId: string | ObjectId) =>
+	await StudentModel.find({ parents: parentsId })
+		.populate({
+			path: 'class',
+			select: '_id className headTeacher grade',
+			options: { lean: true },
+			populate: {
+				path: 'headTeacher',
+				select: 'displayName phone email'
+			}
+		})
+		.select('-parents -createdAt -updatedAt');

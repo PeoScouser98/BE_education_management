@@ -8,7 +8,7 @@ export interface IStudent extends Document {
 	fullName: string;
 	gender: string;
 	dateOfBirth: Date;
-	class: ObjectId;
+	class: ObjectId | string;
 	parents: ObjectId | Pick<IUser, '_id' | 'email' | 'phone' | 'displayName' | 'address'>;
 	isPolicyBeneficiary?: boolean;
 	isGraduated?: boolean;
