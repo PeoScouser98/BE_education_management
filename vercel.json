@@ -15,11 +15,5 @@
 			"src": "/(.*)",
 			"dest": "src/server.ts"
 		}
-	],
-	"rewrites": [
-		{
-			"source": "/(.*)",
-			"destination": "/dist/$1"
-		}
 	]
 }
