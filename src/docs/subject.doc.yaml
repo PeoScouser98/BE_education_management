@@ -14,7 +14,19 @@ paths:
                      properties:
                         subjectName:
                            type: string
-                  example: { subjectName: Tiếng Việt }
+                        subjectCode: 
+                           type: string
+                        isMainSubject: 
+                           type: boolean
+                        isElectiveSubject: 
+                           type: boolean
+                  example: 
+                     { 
+                        "subjectName": "Giáo Dục Thể Chất",
+                        "subjectCode": "GDTC-C1",
+                        "isMainSubject": false,
+                        "isElectiveSubject": true,
+                     }
 
          responses:
             201:
@@ -23,6 +35,24 @@ paths:
                   application/json:
                      schema:
                         $ref: '#/components/schemas/Subject'
+                     example:
+                        {
+                           "subjectName": "Môn Tết",
+                           "subjectCode": "TE-C2",
+                           "appliedForGrades": [
+                              1,
+                              2,
+                              3,
+                              4,
+                              5
+                           ],
+                           "isMainSubject": false,
+                           "isElectiveSubject": false,
+                           "_id": "64a050bacfded534c734183f",
+                           "deleted": false,
+                           "createdAt": "2023-07-01T16:13:46.769Z",
+                           "updatedAt": "2023-07-01T16:13:46.769Z"
+                        }
             204:
                description: Không nhận được request body
             400:
@@ -43,33 +73,6 @@ paths:
          tags:
             - Subjects
          description: Lấy ra tất cả các subject
-         summary: Đăng nhập
-         responses:
-            200:
-               description: ok
-               content:
-                  application/json:
-                     schema:
-                        type: array
-                        items:
-                           $ref: '#/components/schemas/Subject'
-                     example:
-                        [
-                           {
-                              _id: '637ec5ce577ebd6709c65124',
-                              subjectName: 'Tiếng Việt',
-                              slug: 'tieng-viet',
-                              createdAt: '2023-03-14T17:02:24.526+00:00',
-                              updatedAt: '2023-03-14T17:02:24.526+00:00',
-                              deleted: false
-                           }
-                        ]
-
-   /subjects/trash:
-      get:
-         tags:
-            - Subjects
-         description: Lấy ra các subject đã bị xóa mềm (trong thùng rác)
          summary: Đăng nhập với vai trò Headmaster
          responses:
             200:
@@ -83,13 +86,39 @@ paths:
                      example:
                         [
                            {
-                              _id: '637ec5ce577ebd6709c65124',
-                              subjectName: 'Tiếng Việt',
-                              slug: 'tieng-viet',
-                              createdAt: '2023-03-14T17:02:24.526+00:00',
-                              updatedAt: '2023-03-14T17:02:24.526+00:00',
-                              deleted: true
-                           }
+                              "deleted": false,
+                              "_id": "649889d3f132383b190244e5",
+                              "subjectName": "Giáo Dục Thể Chất",
+                              "subjectCode": "GDTC-C1",
+                              "appliedForGrades": [
+                                 1,
+                                 2,
+                                 3,
+                                 4,
+                                 5
+                              ],
+                              "isMainSubject": false,
+                              "isElectiveSubject": false,
+                              "createdAt": "2023-06-25T18:39:15.215Z",
+                              "updatedAt": "2023-06-25T18:42:44.726Z"
+                           },
+                           {
+                              "deleted": false,
+                              "_id": "64988b534c9bcbc4a30990ed",
+                              "subjectName": "Hoạt Động Trải Nghiệm",
+                              "subjectCode": "NDTN-C1",
+                              "appliedForGrades": [
+                                 1,
+                                 2,
+                                 3,
+                                 4,
+                                 5
+                              ],
+                              "isMainSubject": false,
+                              "isElectiveSubject": false,
+                              "createdAt": "2023-06-25T18:45:39.422Z",
+                              "updatedAt": "2023-06-25T18:45:39.422Z"
+                           },   
                         ]
 
    /subjects/:id:
@@ -116,6 +145,24 @@ paths:
                   application/json:
                      schema:
                         $ref: '#/components/schemas/Subject'
+                     example:
+                        {
+                           "_id": "64a050bacfded534c734183f",
+                           "subjectName": "Môn Testt",
+                           "subjectCode": "TE-C2",
+                           "appliedForGrades": [
+                              1,
+                              2,
+                              3,
+                              4,
+                              5
+                           ],
+                           "isMainSubject": false,
+                           "isElectiveSubject": false,
+                           "deleted": false,
+                           "createdAt": "2023-07-01T16:13:46.769Z",
+                           "updatedAt": "2023-07-01T16:32:16.792Z"
+                        }
             204:
                description: Không nhận được data (req body)
             400:
@@ -175,7 +222,7 @@ paths:
          tags:
             - Subjects
          description: Lấy subject theo id
-         summary: Đăng nhập
+         summary: Đăng nhập với vai trò Headmaster
          responses:
             200:
                description: Lấy ra subject theo id thành công
@@ -185,37 +232,19 @@ paths:
                         $ref: '#/components/schemas/Subject'
                      example:
                         {
-                           '_id': '644921d8d739366960dfc2af',
-                           'subjectName': 'Tiếng việt',
-                           'deleted': false,
-                           'createdAt': '2023-04-26T13:06:32.372Z',
-                           'updatedAt': '2023-05-11T04:51:57.449Z',
-                           'slug': 'tieng-viet',
-                           '__v': 0,
-                           'deletedAt': '2023-05-07T06:46:47.603Z'
+                           "_id": "64a050bacfded534c734183f",
+                           "subjectName": "Môn Testt",
+                           "subjectCode": "TE-C2",
+                           "appliedForGrades": [
+                              1,
+                              2,
+                              3,
+                              4,
+                              5
+                           ],
+                           "isMainSubject": false,
+                           "isElectiveSubject": false,
+                           "deleted": false,
+                           "createdAt": "2023-07-01T16:13:46.769Z",
+                           "updatedAt": "2023-07-01T16:32:16.792Z"
                         }
-   /subjects/restore/:id:
-      patch:
-         tags:
-            - Subjects
-         description: Khôi phục 1 subject đã xóa mềm
-         summary: Đăng nhập với vai trò Headmaster
-         responses:
-            201:
-               description: Khôi phục thành công
-               content:
-                  application/json:
-                     schema:
-                        type: object
-                        properties:
-                           message:
-                              type: string
-                     example:
-                        { message: Subject has been permanently deleted(force) | moved the subject to the trash(soft) }
-            400:
-               description: id không đúng type objectId
-               content:
-                  application/json:
-                     schema:
-                        $ref: '#/components/schemas/HttpError'
-                     example: { statusCode: 400, message: '_id of the subject is invalid' }
