@@ -524,7 +524,47 @@ components:
                type: string
             updatedAt:
                type: string
-
+      Remark:
+         type: object
+         properties:
+            _id:
+               type: string
+            student:
+               type: ObjectId
+               required: true
+            schoolYear:
+               type: ObjectId
+               description: 'Năm học của đánh giá'
+            conduct:
+               type: string
+               required: true
+               enum: 
+                  - Yếu
+                  - Trung bình
+                  - Khá
+                  - Tốt
+               description: 'Đánh giá phẩm chất'
+            proficiency:
+               type: string
+               required: true
+               enum: 
+                  - Yếu
+                  - Trung bình
+                  - Khá
+                  - Tốt
+               description: 'Đánh giá phẩm chất'
+            remark: 
+               type: string
+            remarkedBy:
+               type: ObjectId
+               required: true
+            createdAt:
+               type: Date
+               example: '2023-03-14T17:02:24.526+00:00'
+            updatedAt:
+               type: Date
+               example: '2023-03-14T17:02:24.526+00:00'
+           
       HttpError:
          type: object
          properties:
