@@ -1467,3 +1467,33 @@ paths:
                      schema:
                         $ref: '#/components/schemas/HttpError'
                      example: { message: 'Cannot find time table to delete!', statusCode: 204 }
+
+   /timetable/teacher/:teacherId:
+      get:
+         tags:
+            - Time Table
+         summary: Cần đăng nhập
+         description: Lấy thời khóa biểu cho giáo viên theo lớp học
+         parameters:
+            - name: '_classId'
+              in: query
+              description: Class mà giáo viên có lịch học
+              schema:
+                 type: ObjectId
+         responses:
+            200:
+               description: Lấy ra thời khóa biểu cho giáo viên theo lớp thành công
+               content:
+                  application/json:
+                     schema:
+                        $ref: '#/components/schemas/TimeTable'
+                     example:
+                        null
+            400:
+               description: Thiếu, chưa đúng id class || class đó không tồn tại
+               content:
+                  application/json:
+                     schema:
+                        $ref: '#/components/schemas/HttpError'
+                     example:
+                        example: { statusCode: 404, message: Invalid class ID }
