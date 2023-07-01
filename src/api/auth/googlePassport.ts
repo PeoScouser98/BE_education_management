@@ -12,11 +12,10 @@ passport.use(
 			clientID: process.env.GOOGLE_CLIENT_ID as string,
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
 			callbackURL: '/api/auth/google/callback',
-			passReqToCallback: true,
+			passReqToCallback: true
 		},
 		function (req, accessToken, refreshToken, profile, done) {
 			UserModel.findOne({ email: profile.email }).exec((err, user) => {
-				console.log(user);
 				if (err) {
 					return done(err, false);
 				}

@@ -1,33 +1,55 @@
 import mongoose from 'mongoose';
 import MongooseDelete from 'mongoose-delete';
-import { createSlug } from '../../helpers/toolkit';
-import { ISoftDeleteSubjectModel, ISubjectDocument } from '../../types/subject.type';
+import { toCapitalize } from '../../helpers/toolkit';
+import { ISubjectDocument, TSoftDeleteSubjectModel } from '../../types/subject.type';
 
-const subjectSchema = new mongoose.Schema<ISubjectDocument>(
+const SubjectSchema = new mongoose.Schema<ISubjectDocument>(
 	{
-		subjectName: String,
-		slug: {
+		subjectName: {
+			type: String,
+			required: true
+		},
+		subjectCode: {
 			type: String,
 			unique: true,
+			uppercase: true,
+			required: true
 		},
+		appliedForGrades: {
+			type: [Number],
+			required: true,
+			default: [1, 2, 3, 4, 5]
+		},
+		isMainSubject: {
+			type: Boolean,
+			required: true
+		},
+		isElectiveSubject: {
+			type: Boolean,
+			required: true
+		}
 	},
 	{
+		versionKey: false,
 		collection: 'subjects',
-		timestamps: true,
+		timestamps: true
 	}
 );
 
-subjectSchema.plugin(MongooseDelete, { overrideMethods: ['find', 'findOne'], deletedAt: true });
+SubjectSchema.plugin(MongooseDelete, {
+	overrideMethods: ['find', 'findOne'],
+	deletedAt: true
+});
 
-subjectSchema.pre('save', function (next) {
-	this.slug = createSlug(this.subjectName);
-
+SubjectSchema.pre('save', function (next) {
+	this.subjectName = toCapitalize(this.subjectName)!;
+	if (this.isMainSubject === true) this.isElectiveSubject = false;
 	next();
 });
 
-const SubjectModel: ISoftDeleteSubjectModel = mongoose.model<
-	ISubjectDocument,
-	ISoftDeleteSubjectModel
->('Subjects', subjectSchema);
+const SubjectModel = mongoose.model<ISubjectDocument>(
+	'Subjects',
+	SubjectSchema
+);
 
 export default SubjectModel;

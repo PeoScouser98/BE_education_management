@@ -2,7 +2,7 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import 'dotenv/config';
-import express, { Request, Response } from 'express';
+import express from 'express';
 import session, { MemoryStore } from 'express-session';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -21,13 +21,13 @@ import { HttpStatusCode } from './configs/statusCode.config';
 const ROOT_FOLDER = path.join(__dirname, '..');
 const SRC_FOLDER = path.join(ROOT_FOLDER, 'src');
 
-// Initialize Express app
+/* Initialize Express app */
 const app = express();
 
-// for parsing application / json
+/* Request body parser */
 app.use(express.json());
 
-// set security HTTP headers
+/* Security request headers */
 app.use(
 	helmet({
 		contentSecurityPolicy: {
@@ -35,16 +35,19 @@ app.use(
 			directives: {
 				...helmet.contentSecurityPolicy.getDefaultDirectives(),
 				'style-src': ["'self'", "'unsafe-inline'", AppConfig.BOOTSTRAP_ICONS_CDN],
-				'script-src': ["'self'", "'unsafe-inline'", AppConfig.TAILWIND_CDN],
-			},
+				'script-src': ["'self'", "'unsafe-inline'", AppConfig.TAILWIND_CDN]
+			}
 		},
+		referrerPolicy: {
+			policy: 'strict-origin-when-cross-origin'
+		}
 	})
 );
 
-// logging request/response
+/* Logger */
 app.use(morgan('tiny'));
 
-// use session - cookie
+/* Using Session - Cookies */
 app.use(cookieParser());
 app.use(
 	session({
@@ -52,31 +55,37 @@ app.use(
 		secret: AppConfig.KEY_SESSION,
 		store: new MemoryStore(),
 		resave: true,
+		cookie: {
+			sameSite: 'none',
+			path: '/'
+		}
 	})
 );
 
-// enable cors
+/* Enabling CORS */
 app.use(
 	cors({
-		origin: AppConfig.CLIENT_URL,
+		origin: [process.env.LOCAL_FRONTEND_URL!, process.env.MAIN_FRONTEND_URL!],
 		credentials: true,
 		methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+		preflightContinue: true
 	})
 );
 
+/* Init passport */
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Use routers
+/* Enpoints */
 app.use('/api', rootRouter);
 
-// Swagger
+/* Swagger */
 // app.use('/public', express.static(path.join(SRC_FOLDER, 'public')));
-app.use('/api/document', swaggerUI.serve, swaggerUI.setup(swaggerOptions));
-
-// Default response
-app.get('*', async (req: Request, res: Response) => {
-	return res.redirect('/api/document');
-});
+app.use(
+	'/api/document',
+	swaggerUI.serve,
+	swaggerUI.setup(swaggerOptions, { customCss: '.swagger-ui .topbar { display: none }' })
+);
+app.get('/', (req, res) => res.json({ message: 'Server now is running.', status: HttpStatusCode.OK }));
 
 export default app;

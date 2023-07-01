@@ -1,11 +1,14 @@
 import { Model, ObjectId } from 'mongoose';
 import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
+import { ISubject } from './subject.type';
 
 export interface ISubjectTranscript extends Document {
 	_id: ObjectId;
 	student: ObjectId;
 	schoolYear: ObjectId;
-	subject: ObjectId;
+	subject: ObjectId | string | Partial<ISubject>;
+	isPassed?: boolean;
+	remark?: string;
 	firstSemester?: {
 		midtermTest?: {
 			type: number;
@@ -32,13 +35,8 @@ export interface ISubjectTranscript extends Document {
 	};
 }
 
-export interface ISubjectTranscriptDocument
-	extends Omit<SoftDeleteDocument, '_id'>,
-		ISubjectTranscript {}
+export interface ISubjectTranscriptDocument extends Omit<SoftDeleteDocument, '_id'>, ISubjectTranscript {}
 
-export type ISubjectTranscriptModel = Model<ISubjectTranscriptDocument>;
+export type TSubjectTranscriptModel = Model<ISubjectTranscriptDocument>;
 
-export type ISoftDeleteSubjectTranscriptModel = SoftDeleteModel<
-	ISubjectTranscriptDocument,
-	ISubjectTranscriptModel
->;
+export type TSoftDeleteSubjectTranscriptModel = SoftDeleteModel<ISubjectTranscriptDocument, TSubjectTranscriptModel>;

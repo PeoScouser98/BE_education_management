@@ -1,27 +1,29 @@
 import Joi from 'joi';
 import { IAttendance, IStudent } from '../../types/student.type';
+import { UserGenderEnum } from '../../types/user.type';
 
 // validate
-export const validateReqBodyStudent = (data: Omit<IStudent, '_id'>) => {
+export const validateReqBodyStudent = (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
 	const schema = Joi.object({
 		class: Joi.string().required(),
 		code: Joi.string().required(),
 		fullName: Joi.string().required().min(6).max(100),
-		gender: Joi.bool().required(),
+		gender: Joi.string()
+			.valid(...Object.values(UserGenderEnum))
+			.required(),
 		dateOfBirth: Joi.date().required(),
-		parentsPhoneNumber: Joi.string()
-			.required()
-			.pattern(/^(?:\+84|0)(?:1\d{9}|3\d{8}|5\d{8}|7\d{8}|8\d{8}|9\d{8})$/),
+		parents: Joi.string().required(),
 		isPolicyBeneficiary: Joi.bool().optional(),
-		isGraduated: Joi.bool().optional(),
+		isGraduated: Joi.bool().optional()
 	});
-	return schema.validate(data);
+	const arraySchema = Joi.array().items(schema);
+	return Array.isArray(data) ? arraySchema.validate(data) : schema.validate(data);
 };
 
 export const validateAttendanceStudent = (data: Omit<IAttendance, '_id' | 'date'>) => {
 	const schema = Joi.object({
 		hasPermision: Joi.bool().optional(),
-		reason: Joi.string().min(8).max(256).optional(),
+		reason: Joi.string().max(256).optional()
 	});
 
 	return schema.validate(data);
@@ -32,14 +34,14 @@ export const validateUpdateReqBodyStudent = (data: Partial<Omit<IStudent, '_id'>
 		class: Joi.string().required().optional(),
 		code: Joi.string().required().optional(),
 		fullName: Joi.string().required().min(6).max(100).optional(),
-		gender: Joi.bool().required().optional(),
-		dateOfBirth: Joi.date().required().optional(),
-		parentsPhoneNumber: Joi.string()
+		gender: Joi.string()
+			.valid(...Object.values(UserGenderEnum))
 			.required()
-			.optional()
-			.pattern(/^(?:\+84|0)(?:1\d{9}|3\d{8}|5\d{8}|7\d{8}|8\d{8}|9\d{8})$/),
+			.optional(),
+		dateOfBirth: Joi.date().required().optional(),
+		parents: Joi.string().required().optional(),
 		isPolicyBeneficiary: Joi.bool().optional(),
-		isGraduated: Joi.bool().optional(),
+		isGraduated: Joi.bool().optional()
 	});
 	return schema.validate(data);
 };

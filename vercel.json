@@ -1,18 +1,25 @@
 {
 	"version": 2,
 	"buildCommand": "npm run build",
+	"installCommand": "npm install",
 	"devCommand": "npm run dev",
 	"outputDirectory": "dist",
 	"builds": [
 		{
-			"src": "dist/bundle.js",
+			"src": "src/server.ts",
 			"use": "@vercel/node"
 		}
 	],
 	"routes": [
 		{
 			"src": "/(.*)",
-			"dest": "dist/bundle.js"
+			"dest": "src/server.ts"
+		}
+	],
+	"rewrites": [
+		{
+			"source": "/(.*)",
+			"destination": "/dist/$1"
 		}
 	]
 }

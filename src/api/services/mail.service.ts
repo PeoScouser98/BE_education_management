@@ -1,30 +1,19 @@
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import transporter from '../../configs/nodemailer.config';
-import createHttpError from 'http-errors';
 
-export const sendVerificationEmail = async ({
-	to,
-	subject,
-	template,
-}: {
-	to: string;
-	subject: string;
-	template: string;
-}) =>
+export const sendMail = async ({ to, subject, html }: { to: string; subject: string; html: string }) =>
 	await transporter.sendMail(
 		{
 			from: {
 				address: process.env.AUTH_EMAIL!,
-				name: 'Tiểu học Bột Xuyên',
+				name: 'Tiểu học Bột Xuyên'
 			},
 			to: to,
 			subject: subject,
-			html: template,
+			html: html
 		},
 		(err: Error | null, info: SMTPTransport.SentMessageInfo): void => {
-			console.log('recipient:>>>', to);
-			console.log('err:>>>', err);
-			if (err) throw createHttpError.InternalServerError('Failed to send mail');
+			if (err) console.log('Failed to send mail.\nError: ', err.message);
 			else console.log(info.response);
 		}
 	);

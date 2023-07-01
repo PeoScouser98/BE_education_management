@@ -1,14 +1,15 @@
 import { Model, ObjectId, PaginateModel } from 'mongoose';
 import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
+import { IUser } from './user.type';
 
 export interface IStudent extends Document {
 	_id: ObjectId;
 	code: string;
 	fullName: string;
-	gender: boolean;
+	gender: string;
 	dateOfBirth: Date;
-	class: ObjectId;
-	parentsPhoneNumber: string;
+	class: ObjectId | string;
+	parents: ObjectId | Pick<IUser, '_id' | 'email' | 'phone' | 'displayName' | 'address'>;
 	isPolicyBeneficiary?: boolean;
 	isGraduated?: boolean;
 	transferSchool?: Date;
@@ -22,11 +23,22 @@ export interface IAttendance extends Document {
 	hasPermision?: boolean;
 	reason?: string;
 }
+export interface IStudentRemark extends Document {
+	_id: ObjectId;
+	student: ObjectId | Pick<IStudent, '_id' | 'fullName' | 'class'>;
+	conduct: StudentQualityEnum;
+	proficiency: StudentQualityEnum;
+	remark: string;
+	remarkedBy: string | ObjectId | Pick<IUser, '_id' | 'displayName'>;
+}
+export enum StudentQualityEnum {
+	BAD = 'Yếu',
+	NORMAL = 'Trung bình',
+	OK = 'Khá',
+	GOOD = 'Tốt'
+}
 
-export interface StudentDocument extends Omit<SoftDeleteDocument, '_id'>, IStudent {}
-
-export type IStudentModel = Model<StudentDocument>;
-
-export type SoftDeleteStudentModel = SoftDeleteModel<StudentDocument, IStudentModel>;
-
-export type IPaginatedStudentModel = PaginateModel<StudentDocument>;
+export interface IStudentDocument extends Omit<SoftDeleteDocument, '_id'>, IStudent {}
+export type TStudentModel = Model<IStudentDocument>;
+export type TSoftDeleteStudentModel = SoftDeleteModel<IStudentDocument, TStudentModel>;
+export type TPaginatedStudentModel = PaginateModel<IStudentDocument>;

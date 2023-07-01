@@ -15,10 +15,10 @@ export const validatePermissionData = (data: Omit<IPermission, '_id'>) => {
 						Joi.string()
 							.valid(...Object.values(PermissionActionsEnum))
 							.required()
-					),
+					)
 				})
 			)
-			.default([]),
+			.default([])
 	});
 	return schema.validate(data);
 };

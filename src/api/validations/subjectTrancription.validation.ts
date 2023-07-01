@@ -1,35 +1,55 @@
+import { IClass } from './../../types/class.type';
 import Joi from 'joi';
+import { ISubject } from '../../types/subject.type';
 import { ISubjectTranscript } from '../../types/subjectTranscription.type';
 
 export const validateSubjectTranscript = (
-	data: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>
+	data:
+		| Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>
+		| Array<Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>>,
+	subject: ISubject,
+	currentClass: IClass
 ) => {
-	const schema = Joi.object({
+	let schema = Joi.object({
 		student: Joi.string().required(),
-		firstSemester: Joi.object({
-			midtermTest: Joi.number().required().min(0).max(10),
-			finalTest: Joi.number().required().min(0).max(10),
-		}).optional(),
-		secondSemester: Joi.object({
-			midtermTest: Joi.number().required().min(0).max(10),
-			finalTest: Joi.number().required().min(0).max(10),
-		}).optional(),
+		remark: Joi.string().required(),
+		isPassed: Joi.boolean().when('secondSemester', {
+			is: Joi.object({
+				midtermTest: Joi.number().min(0).max(10),
+				finalTest: Joi.number().min(0).max(10).greater(5)
+			}),
+			then: Joi.boolean().default(true),
+			otherwise: Joi.boolean().default(false)
+		})
 	});
-	return schema.validate(data);
-};
 
-export const validateSubjectTranscriptOne = (
-	data: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear' | 'student'>
-) => {
-	const schema = Joi.object({
-		firstSemester: Joi.object({
-			midtermTest: Joi.number().required().min(0).max(10),
-			finalTest: Joi.number().required().min(0).max(10),
-		}).optional(),
-		secondSemester: Joi.object({
-			midtermTest: Joi.number().required().min(0).max(10),
-			finalTest: Joi.number().required().min(0).max(10),
-		}).optional(),
+	let semesterTranscriptSchema = Joi.object({
+		finalTest: Joi.number().min(0).max(10).required()
 	});
-	return schema.validate(data);
+
+	if (currentClass.grade > 3) {
+		semesterTranscriptSchema = semesterTranscriptSchema.keys({
+			midtermTest: Joi.number().min(0).max(10).required()
+		});
+	}
+
+	/**
+	 * Chỉ môn học chính mới có điểm số
+	 * Phải có điểm kỳ 1 thì mới có điểm kỳ 2
+	 */
+
+	if (subject.isMainSubject) {
+		schema = schema.keys({
+			firstSemester: semesterTranscriptSchema.required(),
+			secondSemester: semesterTranscriptSchema.when('firstSemester', {
+				is: Joi.exist(),
+				then: Joi.required(),
+				otherwise: Joi.forbidden()
+			})
+		});
+	}
+
+	const arraySchema = Joi.array().items(schema);
+
+	return Array.isArray(data) ? arraySchema.validate(data) : schema.validate(data);
 };

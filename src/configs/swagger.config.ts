@@ -10,21 +10,21 @@ const swaggerOptions = swaggerJSDoc({
 		servers: [
 			{
 				url: 'http://localhost:3001/api',
-				description: 'Development API',
+				description: 'Development API'
 			},
 			{
 				url: 'https://education-management-backend.vercel.app',
-				description: 'Production API',
-			},
+				description: 'Production API'
+			}
 		],
 		info: {
 			title: 'APIs Documentation',
 			version: '1.0.0',
-			description: 'Documentation for all endpoints',
-		},
+			description: 'Documentation for all endpoints'
+		}
 	},
 
-	apis: ['src/docs/**/*.yaml'],
+	apis: ['src/docs/**/*.yaml']
 });
 
 export default swaggerOptions;

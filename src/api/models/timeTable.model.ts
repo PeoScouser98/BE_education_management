@@ -1,31 +1,30 @@
-import mongoose, { ObjectId } from 'mongoose';
+import mongoose from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
 
-import { ISubject } from '../../types/subject.type';
-import { IScheduleSlotTime, ITimeTable } from '../../types/timeTable.type';
+import { ITimeTable } from '../../types/timeTable.type';
 
 const ScheduleSlotSchema = new mongoose.Schema(
 	{
 		period: {
 			type: Number,
 			require: true,
-			enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+			enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 		},
 		subject: {
 			type: mongoose.Types.ObjectId,
 			ref: 'Subjects',
 			require: true,
-			autopopulate: { select: 'subjectName _id' },
+			autopopulate: { select: 'subjectName _id' }
 		},
 		teacher: {
 			type: mongoose.Types.ObjectId,
 			ref: 'Users',
 			require: true,
-			autopopulate: { select: 'displayName _id' },
-		},
+			autopopulate: { select: 'displayName _id', options: { id: false } }
+		}
 	},
 	{
-		_id: false,
+		_id: false
 	}
 );
 const TimeTableSchema = new mongoose.Schema(
@@ -34,20 +33,21 @@ const TimeTableSchema = new mongoose.Schema(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Classes',
 			required: true,
+			autopopulate: { select: 'className', options: { lean: true } }
 		},
 		schedule: {
 			monday: [ScheduleSlotSchema],
 			tuesday: [ScheduleSlotSchema],
-			wednessday: [ScheduleSlotSchema],
+			wednesday: [ScheduleSlotSchema],
 			thursday: [ScheduleSlotSchema],
 			friday: [ScheduleSlotSchema],
-			saturday: [ScheduleSlotSchema],
-		},
+			saturday: [ScheduleSlotSchema]
+		}
 	},
 	{
 		timestamps: true,
 		versionKey: false,
-		collection: 'time_table',
+		collection: 'time_tables'
 	}
 );
 

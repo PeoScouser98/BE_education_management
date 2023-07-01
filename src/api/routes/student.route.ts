@@ -11,22 +11,23 @@ import {
 	selectAttendanceByStudent,
 	selectAttendanceAllClass,
 	getPolicyBeneficiary,
+	getStudentsByParents
 } from '../controllers/student.controller';
+import { checkAuthenticated } from '../middlewares/authGuard.middleware';
 
 const router = express.Router();
 
-// *** Chú ý ***: có 2 path student: students và student (có s và không s)
-router.get('/students/attendance', selectAttendanceAllClass);
-router.get('/students/attendance/:classId', selectAttendanceByClass);
-router.get('/students/attendance/student/:id', selectAttendanceByStudent);
-router.get('/students/policyBeneficiary', getPolicyBeneficiary);
-router.get('/students/stop/:type', getStudentStop);
-router.get('/students/detail/:id', getStudentDetail);
-router.get('/students/:class', getStudentByClass);
-router.post('/students', createStudent);
-
-router.put('/students/attendance/:classId', attendanceStudentByClass);
-router.put('/students/services/:id', serviceStudent);
-router.put('/students/:id', updateStudent);
+router.get('/students/attendance', checkAuthenticated, selectAttendanceAllClass);
+router.get('/students/children-of-parents', checkAuthenticated, getStudentsByParents);
+router.get('/students/attendance/:classId', checkAuthenticated, selectAttendanceByClass);
+router.get('/students/attendance/student/:id', checkAuthenticated, selectAttendanceByStudent);
+router.get('/students/policyBeneficiary', checkAuthenticated, getPolicyBeneficiary);
+router.get('/students/stop/:type', checkAuthenticated, getStudentStop);
+router.get('/students/detail/:id', checkAuthenticated, getStudentDetail);
+router.get('/students/:class', checkAuthenticated, getStudentByClass);
+router.post('/students', checkAuthenticated, createStudent);
+router.patch('/students/attendance/:classId', checkAuthenticated, attendanceStudentByClass);
+router.patch('/students/services/:id', checkAuthenticated, serviceStudent);
+router.patch('/students/:id', checkAuthenticated, updateStudent);
 
 export default router;

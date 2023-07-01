@@ -1,7 +1,7 @@
 import { Document, ObjectId } from 'mongoose';
 import { ISubject, ISubjectDocument } from './subject.type';
 import { IUser, IUserDocument } from './user.type';
-export interface IScheduleSlotTime {
+export interface IScheduleSlotTime extends Document {
 	subject: ObjectId | ISubjectDocument | string;
 	teacher: ObjectId | IUserDocument | string;
 	period: number;
@@ -27,5 +27,5 @@ export enum DayInWeekEnum {
 	WEDNESSDAY = 'wednesday',
 	THURSDAY = 'thursday',
 	FRIDAY = 'friday',
-	SATURDAY = 'saturday',
+	SATURDAY = 'saturday'
 }

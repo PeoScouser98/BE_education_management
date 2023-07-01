@@ -7,6 +7,6 @@ export const redisOptions = {
 		port: +process.env.REDIS_PORT!,
 		noDelay: false,
 		keepAlive: -1,
-		connectionTimeOut: 5000,
-	},
+		connectionTimeOut: 5000
+	}
 };

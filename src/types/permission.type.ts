@@ -5,7 +5,7 @@ export enum PermissionActionsEnum {
 	GET = 'GET',
 	CREATE = 'CREATE',
 	UPDATE = 'UPDATE',
-	DELETE = 'DELETE',
+	DELETE = 'DELETE'
 }
 export interface IPermission extends Document {
 	_id: ObjectId;
@@ -19,6 +19,6 @@ export interface IPermission extends Document {
 
 export interface IPermissionDocument extends Omit<SoftDeleteDocument, '_id'>, IPermission {}
 
-export type IPermissionModel = Model<IPermission>;
+export type TPermissionModel = Model<IPermission>;
 
-export type ISoftDeletePermissionModel = SoftDeleteModel<IPermissionDocument, IPermissionModel>;
+export type TSoftDeletePermissionModel = SoftDeleteModel<IPermissionDocument, TPermissionModel>;
