@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { IAttendance, IStudent } from '../../types/student.type';
+import { IAttendance, IStudent, StudentStatusEnum } from '../../types/student.type';
 import { UserGenderEnum } from '../../types/user.type';
 
 // validate
@@ -14,7 +14,9 @@ export const validateReqBodyStudent = (data: Omit<IStudent, '_id'> | Omit<IStude
 		dateOfBirth: Joi.date().required(),
 		parents: Joi.string().required(),
 		isPolicyBeneficiary: Joi.bool().optional(),
-		isGraduated: Joi.bool().optional()
+		status: Joi.string()
+			.valid(...Object.values(StudentStatusEnum))
+			.optional()
 	});
 	const arraySchema = Joi.array().items(schema);
 	return Array.isArray(data) ? arraySchema.validate(data) : schema.validate(data);
@@ -41,7 +43,9 @@ export const validateUpdateReqBodyStudent = (data: Partial<Omit<IStudent, '_id'>
 		dateOfBirth: Joi.date().required().optional(),
 		parents: Joi.string().required().optional(),
 		isPolicyBeneficiary: Joi.bool().optional(),
-		isGraduated: Joi.bool().optional()
+		status: Joi.string()
+			.valid(...Object.values(StudentStatusEnum))
+			.optional()
 	});
 	return schema.validate(data);
 };
