@@ -84,7 +84,8 @@ export const getStudentByClass = async (classId: string) => {
 					$project: {
 						_id: 1,
 						email: 1,
-						displayName: 1
+						displayName: 1,
+						phone: 1
 					}
 				}
 			]
