@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import createHttpError from 'http-errors';
-import { SortOrder, isValidObjectId } from 'mongoose';
+import { isValidObjectId } from 'mongoose';
+import { HttpStatusCode } from '../../configs/statusCode.config';
 import { formatDate } from '../../helpers/toolkit';
+import useCatchAsync from '../../helpers/useCatchAsync';
 import { IStudent } from '../../types/student.type';
 import * as StudentServices from '../services/student.service';
-import { HttpStatusCode } from '../../configs/statusCode.config';
-import useCatchAsync from '../../helpers/useCatchAsync';
 
 // [POST] /api/students
 export const createStudent = useCatchAsync(async (req: Request, res: Response) => {
@@ -22,13 +22,10 @@ export const updateStudent = useCatchAsync(async (req: Request, res: Response) =
 	return res.status(HttpStatusCode.CREATED).json(newStudent);
 });
 
-// [GET] /api/students/:class?page=1&_sort=fullName&_order=asc&select='-absentDays'&limit=10
+// [GET] /api/students/:classId
 export const getStudentByClass = useCatchAsync(async (req: Request, res: Response) => {
-	const idClass = req.params.class;
-	const order: SortOrder = req.query._order === 'desc' ? 1 : -1;
-	const groupBy: string = req.query._sort?.toString() || 'fullName';
-	const select: string = req.query.select?.toString() || '';
-	const result = await StudentServices.getStudentByClass(idClass, order, groupBy, select);
+	const classId = req.params.classId;
+	const result = await StudentServices.getStudentByClass(classId);
 	return res.status(HttpStatusCode.OK).json(result);
 });
 
@@ -143,7 +140,14 @@ export const selectAttendanceAllClass = useCatchAsync(async (req: Request, res: 
 
 export const getStudentsByParents = useCatchAsync(async (req: Request, res: Response) => {
 	const parentsId = req.profile?._id!;
-	console.log('parentsId', parentsId);
 	const children = await StudentServices.getStudentsByParents(parentsId);
 	return res.status(HttpStatusCode.OK).json(children);
+});
+
+export const promoteStudentsByClass = useCatchAsync(async (req: Request, res: Response) => {
+	const classId = req.params.classId;
+
+	const promotedStudents = await StudentServices.promoteStudentsByClass(classId);
+
+	return res.status(HttpStatusCode.OK).json(promotedStudents);
 });
