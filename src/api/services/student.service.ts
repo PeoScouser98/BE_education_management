@@ -1,11 +1,11 @@
 import createHttpError from 'http-errors';
-import mongoose, { ObjectId, SortOrder, isValidObjectId } from 'mongoose';
+import mongoose, { ObjectId, isValidObjectId } from 'mongoose';
 import { HttpStatusCode } from '../../configs/statusCode.config';
 import { compareDates } from '../../helpers/toolkit';
-import { IAttendance, IStudent } from '../../types/student.type';
-import { ISubjectTranscript } from '../../types/subjectTranscription.type';
+import { IAttendance, IStudent, StudentStatusEnum } from '../../types/student.type';
 import { IUser } from '../../types/user.type';
 import ClassModel from '../models/class.model';
+import SchoolYearModel from '../models/schoolYear.model';
 import StudentModel from '../models/student.model';
 import {
 	validateAttendanceStudent,
@@ -13,7 +13,6 @@ import {
 	validateUpdateReqBodyStudent
 } from '../validations/student.validation';
 import { getCurrentSchoolYear } from './schoolYear.service';
-import { getStudentTranscript, selectTranscriptAllSubjectByClass } from './subjectTrancription.service';
 import { deactivateParentsUser } from './user.service';
 
 interface IAbsentStudent {
@@ -60,58 +59,186 @@ export const updateStudent = async (id: string, data: Partial<Omit<IStudent, '_i
 };
 
 // get student theo class
-export const getStudentByClass = async (classId: string, order: SortOrder, groupBy: string, select: string) => {
-	const sortableFields = [
-		'code',
-		'fullName',
-		'gender',
-		'dateOfBirth',
-		'class',
-		'parentsPhoneNumber',
-		'isPolicyBeneficiary',
-		'isGraduated'
-	];
+export const getStudentByClass = async (classId: string) => {
+	const [currentSchoolYear] = await SchoolYearModel.find().sort({ endAt: -1 });
+	if (!currentSchoolYear)
+		return await StudentModel.find({
+			class: classId,
+			dropoutDate: null,
+			transferSchool: null
+		});
 
-	if (!sortableFields.includes(groupBy)) {
-		throw createHttpError.BadRequest(
-			"_sort can only belong to ['code','fullName','gender','dateOfBirth','class','parentsPhoneNumber','isPolicyBeneficiary','isGraduated']"
-		);
-	}
-
-	const result = await StudentModel.find({
-		class: classId,
-		dropoutDate: null,
-		transferSchool: null
-	})
-		.sort({ [groupBy]: order })
-		.select(select);
-
-	return result;
+	return await StudentModel.aggregate()
+		.match({
+			class: new mongoose.Types.ObjectId(classId),
+			dropoutDate: null,
+			transferSchool: null
+		})
+		.lookup({
+			from: 'users',
+			localField: 'parents',
+			foreignField: '_id',
+			as: 'parents',
+			pipeline: [
+				{
+					$project: {
+						_id: 1,
+						email: 1,
+						displayName: 1
+					}
+				}
+			]
+		})
+		.unwind('$parents')
+		.lookup({
+			from: 'student_remarks',
+			localField: '_id',
+			let: { studentId: '$_id' },
+			foreignField: 'student',
+			as: 'remarkAsQualified',
+			pipeline: [
+				{
+					$match: {
+						$expr: {
+							$and: [
+								{
+									$eq: ['$student', '$$studentId']
+								},
+								{
+									$eq: ['$schoolYear', currentSchoolYear._id]
+								}
+							]
+						}
+					}
+				},
+				{
+					$project: {
+						_id: 0,
+						isQualified: 1
+					}
+				}
+			]
+		})
+		.unwind('$remarkAsQualified')
+		.lookup({
+			from: 'subject_transcriptions',
+			localField: '_id',
+			let: { studentId: '$_id' },
+			foreignField: 'student',
+			as: 'completedProgram',
+			pipeline: [
+				{
+					$match: {
+						$expr: {
+							$and: [
+								{ $eq: ['$student', '$$studentId'] },
+								{
+									$eq: ['$schoolYear', currentSchoolYear._id]
+								}
+							]
+						}
+					}
+				}
+			]
+		})
+		.lookup({
+			from: 'classes',
+			localField: 'class',
+			foreignField: '_id',
+			as: 'class',
+			pipeline: [{ $project: { grade: 1, className: 1 } }]
+		})
+		.unwind('$class')
+		.addFields({
+			completedProgram: {
+				$cond: {
+					if: {
+						$or: [
+							{
+								$and: [
+									{ $in: ['$class.grade', [1, 2]] },
+									{ $eq: [{ $size: '$completedProgram' }, 9] },
+									{
+										$eq: [
+											{
+												$size: {
+													$filter: {
+														input: '$completedProgram',
+														as: 'item',
+														cond: { $eq: ['$$item.isPassed', true] }
+													}
+												}
+											},
+											9
+										]
+									}
+								]
+							},
+							{
+								$and: [
+									{ $in: ['$class.grade', [3, 4, 5]] },
+									{ $eq: [{ $size: '$completedProgram' }, 11] },
+									{
+										$eq: [
+											{
+												$size: {
+													$filter: {
+														input: '$completedProgram',
+														as: 'item',
+														cond: { $eq: ['$$item.isPassed', true] }
+													}
+												}
+											},
+											11
+										]
+									}
+								]
+							}
+						]
+					},
+					then: true,
+					else: false
+				}
+			},
+			remarkAsQualified: '$remarkAsQualified.isQualified'
+		})
+		.addFields({
+			isGraduated: {
+				$cond: {
+					if: {
+						$and: [
+							{ $eq: ['$remarkAsQualified', true] },
+							{ $eq: ['$completedProgram', true] },
+							{ $eq: ['$class.grade', 5] }
+						]
+					},
+					then: true,
+					else: false
+				}
+			}
+		});
 };
 
 // get detail student
 export const getDetailStudent = async (id: string) => {
 	if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-		throw createHttpError.BadRequest('_id of the student is invalid');
+		throw createHttpError.BadRequest('Invalid student ID!');
 	}
 
 	const student: IStudent | null = await StudentModel.findOne({
 		_id: id
-	}).populate({
-		path: 'class',
-		select: 'className headTeacher'
-	});
-
-	const transcriptStudent: ISubjectTranscript[] = await getStudentTranscript(id);
+	})
+		.populate({
+			path: 'class',
+			select: 'className headTeacher'
+		})
+		.populate({ path: 'remarkOfHeadTeacher' });
 
 	if (!student) {
 		throw createHttpError.NotFound('Student does not exist!');
 	}
 
-	return {
-		info: student,
-		transcript: transcriptStudent
-	};
+	return student;
 };
 
 // h/s chuyển trường
@@ -189,7 +316,7 @@ export const getStudentDropout = async (year: 'all' | number, page: number, limi
 };
 
 // điểm danh
-export const markAttendanceStudent = async (idClass: string, absentStudents: IAbsentStudent[]) => {
+export const markAttendanceStudent = async (classId: string, absentStudents: IAbsentStudent[]) => {
 	if (!absentStudents) {
 		throw createHttpError(HttpStatusCode.NO_CONTENT);
 	}
@@ -237,7 +364,7 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 	// Kiểm tra xem học sinh vắng có đúng học sinh của lớp không
 	const checkExist: IStudent[] = await StudentModel.find({
 		_id: { $in: absentStudentIdList },
-		class: idClass
+		class: classId
 	});
 
 	const studentNotExist: string[] = [];
@@ -310,8 +437,8 @@ export const markAttendanceStudent = async (idClass: string, absentStudents: IAb
 };
 
 // lấy ra tình trạng điểm danh của 1 lớp theo ngày
-export const dailyAttendanceList = async (idClass: string, date: Date) => {
-	if (!idClass || !mongoose.Types.ObjectId.isValid(idClass)) {
+export const dailyAttendanceList = async (classId: string, date: Date) => {
+	if (!classId || !mongoose.Types.ObjectId.isValid(classId)) {
 		throw createHttpError.BadRequest('The provided idClass is invalid');
 	}
 
@@ -328,7 +455,7 @@ export const dailyAttendanceList = async (idClass: string, date: Date) => {
 				}
 			}
 		},
-		class: idClass
+		class: classId
 	}).lean();
 
 	if (studentAbsents.length === 0) {
@@ -357,9 +484,7 @@ export const dailyAttendanceList = async (idClass: string, date: Date) => {
 
 // Lấy ra tình trạng điểm danh của 1 học sinh trong 1 tháng (sẽ trả về ngày vắng mặt trong tháng đấy)
 export const attendanceOfStudentByMonth = async (id: string, month: number, year: number) => {
-	const {
-		info: { absentDays }
-	} = await getDetailStudent(id);
+	const { absentDays } = await getDetailStudent(id);
 
 	const result: IAttendance[] = [];
 
@@ -424,21 +549,21 @@ export const getAttendanceAllClass = async (page: number, limit: number, date: D
 	};
 };
 
-export const setStudentsAsGraduatedByClass = async (classId: string) => {
-	// const students = await StudentModel.find({ class: classId, dropoutDate: null, transferSchool: null });
-	const currentClass = await ClassModel.findOne({ _id: classId });
-	if (!currentClass) throw createHttpError.NotFound('Invalid class');
-
-	if (currentClass.grade != 5)
-		throw createHttpError.BadRequest('Only students is in grade 5 is qualified to be marked as graduated !');
-
-	const currentSchoolYear = await getCurrentSchoolYear();
-	const unqualifiedStudents = await selectTranscriptAllSubjectByClass(currentClass._id, currentSchoolYear._id);
-	const gradutatedStudentsList = await StudentModel.updateMany({}, { isGraduated: true, class: null }, { new: true });
-
-	// const parentsList = students.map((student: IStudent) => student.parents) as Array<Pick<IUser, '_id' | 'email'>>;
-	// const deactivatedParents = await deactivateParentsUser(parentsList);
-	// return { gradutatedStudentsList, deactivatedParents };
+export const promoteStudentsByClass = async (classId: string) => {
+	const studentsInClass = await getStudentByClass(classId);
+	const promotedStudents = studentsInClass.filter((student) => student.remarkAsQualified && student.completedProgram);
+	if (promotedStudents.every((student) => student.class?.grade === 5)) {
+		const graduatedStudents = await StudentModel.updateMany(
+			{
+				_id: promotedStudents
+			},
+			{ status: StudentStatusEnum.GRADUATED },
+			{ new: true }
+		);
+		await deactivateParentsUser(promotedStudents.map((student) => student.parents));
+		return graduatedStudents;
+	}
+	return promotedStudents;
 };
 
 export const getStudentsByParents = async (parentsId: string | ObjectId) =>

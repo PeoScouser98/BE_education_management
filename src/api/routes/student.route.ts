@@ -11,9 +11,10 @@ import {
 	selectAttendanceByStudent,
 	selectAttendanceAllClass,
 	getPolicyBeneficiary,
-	getStudentsByParents
+	getStudentsByParents,
+	promoteStudentsByClass
 } from '../controllers/student.controller';
-import { checkAuthenticated } from '../middlewares/authGuard.middleware';
+import { checkAuthenticated, checkIsHeadmaster } from '../middlewares/authGuard.middleware';
 
 const router = express.Router();
 
@@ -21,11 +22,12 @@ router.get('/students/attendance', checkAuthenticated, selectAttendanceAllClass)
 router.get('/students/children-of-parents', checkAuthenticated, getStudentsByParents);
 router.get('/students/attendance/:classId', checkAuthenticated, selectAttendanceByClass);
 router.get('/students/attendance/student/:id', checkAuthenticated, selectAttendanceByStudent);
-router.get('/students/policyBeneficiary', checkAuthenticated, getPolicyBeneficiary);
+router.get('/students/policy-beneficiary', checkAuthenticated, getPolicyBeneficiary);
 router.get('/students/stop/:type', checkAuthenticated, getStudentStop);
 router.get('/students/detail/:id', checkAuthenticated, getStudentDetail);
-router.get('/students/:class', checkAuthenticated, getStudentByClass);
+router.get('/students/:classId', getStudentByClass);
 router.post('/students', checkAuthenticated, createStudent);
+router.patch('/students/set-student-graduated', checkAuthenticated, checkIsHeadmaster, promoteStudentsByClass);
 router.patch('/students/attendance/:classId', checkAuthenticated, attendanceStudentByClass);
 router.patch('/students/services/:id', checkAuthenticated, serviceStudent);
 router.patch('/students/:id', checkAuthenticated, updateStudent);
