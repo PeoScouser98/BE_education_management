@@ -2,6 +2,8 @@ import mongoose from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
 
 import { ITimeTable } from '../../types/timeTable.type';
+import { ISubject } from '../../types/subject.type';
+import { IUser } from '../../types/user.type';
 
 const ScheduleSlotSchema = new mongoose.Schema(
 	{
@@ -13,14 +15,22 @@ const ScheduleSlotSchema = new mongoose.Schema(
 		subject: {
 			type: mongoose.Types.ObjectId,
 			ref: 'Subjects',
-			require: true,
-			autopopulate: { select: 'subjectName _id' }
+			required: true,
+			autopopulate: {
+				select: 'subjectName -_id',
+				options: { lean: true },
+				transform: (doc: Pick<ISubject, 'subjectName'>) => doc?.subjectName ?? ''
+			}
 		},
 		teacher: {
 			type: mongoose.Types.ObjectId,
 			ref: 'Users',
-			require: true,
-			autopopulate: { select: 'displayName _id', options: { id: false } }
+			required: true,
+			autopopulate: {
+				select: 'displayName -_id',
+				options: { lean: true },
+				transform: (doc: Pick<IUser, 'displayName'>) => doc?.displayName ?? ''
+			}
 		}
 	},
 	{
@@ -47,7 +57,8 @@ const TimeTableSchema = new mongoose.Schema(
 	{
 		timestamps: true,
 		versionKey: false,
-		collection: 'time_tables'
+		collection: 'time_tables',
+		strictPopulate: false
 	}
 );
 

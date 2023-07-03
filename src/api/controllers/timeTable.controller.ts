@@ -42,10 +42,16 @@ export const deleteTimeTable = useCatchAsync(async (req: Request, res: Response)
 });
 
 // [GET] /time-table/:classId
+export const getTimeTableDetail = useCatchAsync(async (req: Request, res: Response) => {
+	const timeTable = await TimeTableService.getTimeTableDetail(req.params.id);
+	if (!timeTable) throw createHttpError.NotFound('Time table not found!');
+	return res.status(HttpStatusCode.OK).json(timeTable);
+});
+
+// [GET] /time-table/detail/:id
 export const getTimeTableByClass = useCatchAsync(async (req: Request, res: Response) => {
 	const timeTable = await TimeTableService.getTimetableByClass(req.params.classId);
 	if (!timeTable) throw createHttpError.NotFound('Time table not found!');
-
 	return res.status(HttpStatusCode.OK).json(timeTable);
 });
 

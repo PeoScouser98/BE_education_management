@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { ITimeTable } from '../../types/timeTable.type';
 import { IUser } from '../../types/user.type';
 import TimeTableModel from '../models/timeTable.model';
@@ -14,7 +15,10 @@ export const updateTimetable = async ({
 
 export const deleteTimeTable = async (classId: string) => await TimeTableModel.findOneAndDelete({ class: classId });
 
-export const getTimetableByClass = async (classId: string) => await TimeTableModel.findOne({ class: classId });
+export const getTimeTableDetail = async (id: string) => await TimeTableModel.findById(id);
+
+export const getTimetableByClass = async (classId: string) =>
+	await TimeTableModel.aggregate().match({ class: new mongoose.Types.ObjectId(classId) });
 
 export const getTeacherTimeTableByClass = async (teacherId: string, classId: string) => {
 	const result = await TimeTableModel.findOne({
