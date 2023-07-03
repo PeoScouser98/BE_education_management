@@ -12,6 +12,11 @@ router.put(
 );
 router.get('/transcripts/class/:classId/:subjectId', checkAuthenticated, TrancriptionController.getTranscriptByClass);
 router.get('/transcripts/student/:id', checkAuthenticated, TrancriptionController.getTranscriptByStudent);
-router.get('/transcripts/:classId', checkAuthenticated, TrancriptionController.selectTranscriptAllSubjectByClass);
+router.get(
+	'/transcripts/:classId',
+	checkAuthenticated,
+	checkIsTeacher,
+	TrancriptionController.selectTranscriptAllSubjectByClass
+);
 
 export default router;
