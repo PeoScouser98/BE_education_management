@@ -14,7 +14,8 @@ const StudentSchema = new mongoose.Schema<IStudentDocument>(
 		},
 		class: {
 			type: mongoose.Types.ObjectId,
-			ref: 'Classes'
+			ref: 'Classes',
+			autopopulate: true
 		},
 		fullName: {
 			type: String,
