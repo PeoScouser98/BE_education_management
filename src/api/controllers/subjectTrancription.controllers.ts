@@ -40,6 +40,6 @@ export const selectTranscriptAllSubjectByClass = useCatchAsync(async (req: Reque
 			? new mongoose.Types.ObjectId(schoolYearQueryValue as string)
 			: currentSchoolYear._id;
 	if (!isValidObjectId(schoolYear)) throw createHttpError.BadRequest('Invalid school year ID !');
-	const result = await TranscriptService.selectTranscriptAllSubjectByClass(id, schoolYear as ObjectId);
+	const result = await TranscriptService.getTranscriptsByClass(id, schoolYear as ObjectId);
 	return res.status(HttpStatusCode.OK).json(result);
 });

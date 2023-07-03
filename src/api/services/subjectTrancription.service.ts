@@ -1,5 +1,6 @@
 import createHttpError from 'http-errors';
-import mongoose, { ObjectId, isValidObjectId } from 'mongoose';
+import { ObjectId, isValidObjectId } from 'mongoose';
+import { IClass } from '../../types/class.type';
 import { IStudent } from '../../types/student.type';
 import { ISubjectTranscript } from '../../types/subjectTranscription.type';
 import ClassModel from '../models/class.model';
@@ -56,7 +57,7 @@ export const insertSubjectTranscriptByClass = async (
 	return await SubjectTranscriptionModel.bulkWrite(bulkWriteOption);
 };
 
-// lấy bảng điểm học sinh / lớp / môn
+// lấy bảng điểm của tất học sinh trong 1 lớp theo môn học
 export const selectSubjectTranscriptByClass = async (classId: string, subjectId: string) => {
 	if (!classId || !subjectId || !isValidObjectId(classId) || !isValidObjectId(subjectId)) {
 		throw createHttpError.BadRequest('classId or subjectId is not in the correct ObjectId format');
@@ -87,28 +88,29 @@ export const selectSubjectTranscriptByClass = async (classId: string, subjectId:
 	return transcriptStudentList;
 };
 
-// lấy ra bảng điểm học sinh / tất cả môn
-export const getStudentTranscript = async (id: string) => {
+// lấy ra bảng điểm 1 học sinh với tất cả môn
+export const getStudentTranscript = async (id: string | ObjectId) => {
 	if (!id || !isValidObjectId(id)) {
-		throw createHttpError.BadRequest('id student is not in the correct ObjectId format');
+		throw createHttpError.BadRequest('Invalid student ID !');
 	}
 
-	// check sự tồn tại của học sinh
-	const student: IStudent | null = await StudentModel.findOne({
+	const student: null | IStudent = await StudentModel.findOne({
 		_id: id,
 		dropoutDate: null,
 		transferSchool: null
-	});
+	}).populate({ path: 'class' });
 
 	if (!student) {
 		throw createHttpError.NotFound('Student does not exist');
 	}
 
 	const schoolYear = await getCurrentSchoolYear();
-
+	const studentClass = student.class as Partial<IClass>;
+	const studentGrade = studentClass?.grade!;
+	const totalSubjectsOfTranscript = [1, 2].includes(studentGrade) ? 9 : 11;
 	const studentTranscript = await SubjectTranscriptionModel.aggregate()
 		.match({
-			student: new mongoose.Types.ObjectId(id),
+			student: student._id,
 			schoolYear: schoolYear._id
 		})
 		.lookup({
@@ -154,32 +156,59 @@ export const getStudentTranscript = async (id: string) => {
 				}
 			}
 		})
+		.addFields({
+			completedProgram: {
+				$and: [
+					{ $eq: [{ $size: '$transcript' }, totalSubjectsOfTranscript] },
+					{
+						$eq: [
+							{
+								$setEquals: [
+									{
+										$map: {
+											input: '$transcript',
+											as: 'transcript',
+											in: '$$transcript.isPassed'
+										}
+									},
+									Array(totalSubjectsOfTranscript).fill(true)
+								]
+							},
+							true
+						]
+					}
+				]
+			}
+		})
 		.project({
 			_id: 0,
 			transcript: 1,
-			student: 1
+			student: 1,
+			completedProgram: 1
 		});
 
 	return studentTranscript.at(0);
 };
 
-// lấy điểm tất cả học sinh / tất cả các môn / lớp
-export const selectTranscriptAllSubjectByClass = async (classId: string | ObjectId, schoolYear: ObjectId) => {
+// Lấy bảng điểm tất cả các môn của 1 lớp
+export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYear: ObjectId) => {
 	if (!isValidObjectId(classId)) throw createHttpError.BadRequest('Invalid class ID');
 
-	// lấy ra tất cả học sinh của lớp
-	const listStudent: IStudent[] = await StudentModel.find({
-		class: classId,
-		dropoutDate: null,
-		transferSchool: null
-	})
-		.select('_id')
-		.lean();
+	const [listStudent, [grade]] = await Promise.all([
+		StudentModel.find({
+			class: classId,
+			dropoutDate: null,
+			transferSchool: null
+		}).distinct('_id'),
+		ClassModel.findOne({ _id: classId }).distinct('grade')
+	]);
 
-	// lấy ra bảng điểm
-	const studentsTranscriptsByClass = await SubjectTranscriptionModel.aggregate()
+	// Khối 1,2 chỉ có 9 môn, khối 3,4,5 có 11 môn
+	const totalSubjectsOfTranscript = [1, 2].includes(grade) ? 9 : 11;
+
+	return await SubjectTranscriptionModel.aggregate()
 		.match({
-			student: { $in: listStudent.map((student) => student._id) },
+			student: { $in: listStudent },
 			schoolYear: schoolYear
 		})
 		.lookup({
@@ -225,12 +254,35 @@ export const selectTranscriptAllSubjectByClass = async (classId: string | Object
 				}
 			}
 		})
+		.addFields({
+			completedProgram: {
+				$and: [
+					{ $eq: [{ $size: '$transcript' }, totalSubjectsOfTranscript] },
+					{
+						$eq: [
+							{
+								$setEquals: [
+									{
+										$map: {
+											input: '$transcript',
+											as: 'transcript',
+											in: '$$transcript.isPassed'
+										}
+									},
+									Array(totalSubjectsOfTranscript).fill(true)
+								]
+							},
+							true
+						]
+					}
+				]
+			}
+		})
 		.sort({ student: 1 })
 		.project({
 			_id: 0,
 			student: 1,
-			transcript: 1
+			transcript: 1,
+			completedProgram: 1
 		});
-
-	return studentsTranscriptsByClass;
 };
