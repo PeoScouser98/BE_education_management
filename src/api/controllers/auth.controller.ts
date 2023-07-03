@@ -31,7 +31,7 @@ export const signinWithGoogle = useCatchAsync(async (req: Request, res: Response
 	user.picture = payload?.picture;
 	const userPermissions = await getPermissionByRole(user?.role!);
 	const accessToken = jwt.sign({ payload: user }, process.env.ACCESS_TOKEN_SECRET!, {
-		expiresIn: '5s'
+		expiresIn: '1h'
 	});
 	const refreshToken = jwt.sign({ payload: user }, process.env.REFRESH_TOKEN_SECRET!, {
 		expiresIn: '30d'
@@ -83,10 +83,16 @@ export const googleLoginTest = useCatchAsync(async (req: Request, res: Response)
 	if (!user) {
 		throw createHttpError.NotFound('Cannot find user');
 	}
+
 	user.picture = payload?.picture;
 	const accessToken = jwt.sign({ payload: user }, process.env.ACCESS_TOKEN_SECRET!, {
 		expiresIn: '24h'
 	});
+
+	await redisClient.set(AuthRedisKeyPrefix.ACCESS_TOKEN + user._id, accessToken, {
+		EX: 60 * 60
+	});
+
 	return res.status(HttpStatusCode.CREATED).json({
 		user: { ...user, picture: payload?.picture },
 		accessToken
@@ -157,7 +163,7 @@ export const refreshToken = useCatchAsync(async (req: Request, res: Response) =>
 		throw createHttpError.Forbidden('Invalid token payload');
 	}
 	const newAccessToken = jwt.sign({ payload: decoded.payload }, process.env.ACCESS_TOKEN_SECRET!, {
-		expiresIn: '5s'
+		expiresIn: '1h'
 	});
 	// Lưu lại token mới trong redis
 	await redisClient.set(AuthRedisKeyPrefix.ACCESS_TOKEN + req.cookies.uid, newAccessToken, {
