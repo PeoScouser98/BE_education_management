@@ -7,8 +7,7 @@ const SubjectTranscriptSchema = new mongoose.Schema<ISubjectTranscriptDocument>(
 		student: {
 			type: mongoose.Types.ObjectId,
 			require: true,
-			ref: 'Students',
-			autopopulate: { select: 'fullName -parents' }
+			ref: 'Students'
 		},
 		schoolYear: {
 			type: mongoose.Types.ObjectId,

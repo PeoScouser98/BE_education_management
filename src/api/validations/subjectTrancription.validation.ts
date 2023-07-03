@@ -12,14 +12,14 @@ export const validateSubjectTranscript = (
 ) => {
 	let schema = Joi.object({
 		student: Joi.string().required(),
-		remark: Joi.string().required(),
+		remark: Joi.string().optional(),
 		isPassed: Joi.boolean().when('secondSemester', {
 			is: Joi.object({
 				midtermTest: Joi.number().min(0).max(10),
-				finalTest: Joi.number().min(0).max(10).greater(5)
+				finalTest: Joi.number().min(0).max(10).less(5)
 			}),
-			then: Joi.boolean().default(true),
-			otherwise: Joi.boolean().default(false)
+			then: Joi.boolean().default(false),
+			otherwise: Joi.boolean().default(true)
 		})
 	});
 
