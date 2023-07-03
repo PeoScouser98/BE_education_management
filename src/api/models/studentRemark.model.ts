@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { StudentQualityEnum } from '../../types/student.type';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
+import { IStudentRemark } from '../../types/student.type';
 
 const StudentRemarkSchema = new mongoose.Schema(
 	{
@@ -8,7 +8,7 @@ const StudentRemarkSchema = new mongoose.Schema(
 			type: mongoose.Types.ObjectId,
 			ref: 'Students',
 			required: true,
-			autopopulate: { select: '_id fullName', options: { lean: true } }
+			autopopulate: { select: '_id fullName -parents' }
 		},
 		schoolYear: {
 			type: mongoose.Types.ObjectId,
@@ -18,19 +18,17 @@ const StudentRemarkSchema = new mongoose.Schema(
 		conduct: {
 			// đánh giá phẩm chất
 			type: String,
-			required: true,
-			enum: Object.values(StudentQualityEnum)
+			required: true
 		},
 		proficiency: {
 			// đánh giá năng lực
 			type: String,
-			required: true,
-			enum: Object.values(StudentQualityEnum)
+			required: true
 		},
-		remark: {
-			type: String,
-			trim: true
-			// required: true
+		isQualified: {
+			type: Boolean,
+			trim: true,
+			required: true
 		},
 		remarkedBy: {
 			type: mongoose.Types.ObjectId,
@@ -48,6 +46,6 @@ const StudentRemarkSchema = new mongoose.Schema(
 
 StudentRemarkSchema.plugin(mongooseAutoPopulate);
 
-const StudentRemarkModel = mongoose.model('StudentRemarks', StudentRemarkSchema);
+const StudentRemarkModel = mongoose.model<IStudentRemark>('StudentRemarks', StudentRemarkSchema);
 
 export default StudentRemarkModel;

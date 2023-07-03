@@ -4,6 +4,6 @@ import { checkAuthenticated, checkIsTeacher } from '../middlewares/authGuard.mid
 
 const router = express.Router();
 
-router.post('/student-remark', checkAuthenticated, checkIsTeacher, StudentRemarkController.createStudentRemark);
+router.put('/student-remark/:classId', checkAuthenticated, checkIsTeacher, StudentRemarkController.createStudentRemark);
 
 export default router;
