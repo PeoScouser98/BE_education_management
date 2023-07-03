@@ -33,11 +33,5 @@ router.get('/users/teachers', checkAuthenticated, UserController.getTeachersBySt
 router.get('/users/:userId', checkAuthenticated, UserController.getUserDetails);
 router.get('/users/parents/:classId', checkAuthenticated, UserController.getParentsUserByClass);
 router.post('/users/search-parents', checkAuthenticated, checkIsTeacher, UserController.searchParentsUsers);
-// router.patch(
-// 	'/users/parents/:userId/deactivate', // updated route name
-// 	checkAuthenticated,
-// 	checkIsHeadmaster,
-// 	UserController.deactivateParentAccount
-// );
 
 export default router;
