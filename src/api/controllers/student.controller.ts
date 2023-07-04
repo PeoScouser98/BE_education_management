@@ -61,13 +61,13 @@ export const serviceStudent = useCatchAsync(async (req: Request, res: Response) 
 });
 
 // [GET] /api/students/stop/:type
-export const getStudentStop = useCatchAsync(async (req: Request, res: Response) => {
-	const type = req.params.type;
+export const getStudentLeftSchool = useCatchAsync(async (req: Request, res: Response) => {
+	const type = req.query._type;
 	const page = req.query._page || 1;
 	const limit = req.query._limit || 10;
 	const year = req.query._year || new Date().getFullYear();
 	const optionList = {
-		transferSchool: 'transferSchool',
+		transferSchool: 'transfer',
 		dropout: 'dropout'
 	};
 	let result: any = [];
@@ -82,7 +82,6 @@ export const getStudentStop = useCatchAsync(async (req: Request, res: Response) 
 		default:
 			throw createHttpError(400, 'Type is not valid');
 	}
-
 	return res.status(HttpStatusCode.OK).json(result);
 });
 
@@ -108,7 +107,7 @@ export const selectAttendanceByClass = useCatchAsync(async (req: Request, res: R
 });
 
 // [GET] /api/student/attendance/:id?month=03&year2023
-export const selectAttendanceByStudent = useCatchAsync(async (req: Request, res: Response) => {
+export const getAttendanceByStudent = useCatchAsync(async (req: Request, res: Response) => {
 	const id: string = req.params.id;
 	const month = req.query._month || new Date().getMonth() + 1;
 	const year = req.query._year || new Date().getFullYear();
@@ -146,8 +145,6 @@ export const getStudentsByParents = useCatchAsync(async (req: Request, res: Resp
 
 export const promoteStudentsByClass = useCatchAsync(async (req: Request, res: Response) => {
 	const classId = req.params.classId;
-
-	const promotedStudents = await StudentServices.promoteStudentsByClass(classId);
-
-	return res.status(HttpStatusCode.OK).json(promotedStudents);
+	const result = await StudentServices.promoteStudentsByClass(classId);
+	return res.status(HttpStatusCode.OK).json(result);
 });

@@ -15,11 +15,6 @@ import {
 import { getCurrentSchoolYear } from './schoolYear.service';
 import { deactivateParentsUser } from './user.service';
 
-interface IAbsentStudent {
-	idStudent: string;
-	absent?: Omit<IAttendance, '_id'>;
-}
-
 // create new student using form
 export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
 	const { error } = validateReqBodyStudent(data);
@@ -65,14 +60,14 @@ export const getStudentByClass = async (classId: string) => {
 		return await StudentModel.find({
 			class: classId,
 			dropoutDate: null,
-			transferSchool: null
+			transferSchoolDate: null
 		});
 
 	return await StudentModel.aggregate()
 		.match({
 			class: new mongoose.Types.ObjectId(classId),
 			dropoutDate: null,
-			transferSchool: null
+			transferSchoolDate: null
 		})
 		.lookup({
 			from: 'users',
@@ -90,7 +85,7 @@ export const getStudentByClass = async (classId: string) => {
 				}
 			]
 		})
-		.unwind('$parents')
+		// .unwind('$parents')
 		.lookup({
 			from: 'student_remarks',
 			localField: '_id',
@@ -201,7 +196,8 @@ export const getStudentByClass = async (classId: string) => {
 					else: false
 				}
 			},
-			remarkAsQualified: '$remarkAsQualified.isQualified'
+			remarkAsQualified: '$remarkAsQualified.isQualified',
+			parents: '$parents'
 		})
 		.addFields({
 			isGraduated: {
@@ -251,7 +247,7 @@ export const setStudentTransferSchool = async (id: string, date: string) => {
 	// check xem có còn học ở trường không
 	const student = await StudentModel.findOne({
 		_id: id,
-		transferSchool: null,
+		transferSchoolDate: null,
 		dropoutDate: null
 	});
 	if (!student) {
@@ -259,7 +255,11 @@ export const setStudentTransferSchool = async (id: string, date: string) => {
 	}
 	const parentsOfStudent = student.parents as unknown as Pick<IUser, '_id' | 'email'>;
 	if (parentsOfStudent) await deactivateParentsUser(parentsOfStudent);
-	return await StudentModel.findOneAndUpdate({ _id: id }, { transferSchool: date }, { new: true });
+	return await StudentModel.findOneAndUpdate(
+		{ _id: id },
+		{ transferSchoolDate: date, status: StudentStatusEnum.TRANSFER_SCHOOL },
+		{ new: true }
+	);
 };
 
 // hs nghỉ học
@@ -276,7 +276,7 @@ export const setDropoutStudent = async (id: string, date: string) => {
 	// check xem có còn học ở trường không
 	const student = await StudentModel.findOne({
 		_id: id,
-		transferSchool: null,
+		transferSchoolDate: null,
 		dropoutDate: null
 	});
 
@@ -284,16 +284,20 @@ export const setDropoutStudent = async (id: string, date: string) => {
 		throw createHttpError.NotFound('Student has transferred to another school or dropped out');
 	}
 	await deactivateParentsUser(student.parents as unknown as Pick<IUser, '_id' | 'email'>);
-	return await StudentModel.findOneAndUpdate({ _id: id }, { dropoutDate: date }, { new: true });
+	return await StudentModel.findOneAndUpdate(
+		{ _id: id },
+		{ dropoutDate: date, status: StudentStatusEnum.DROPPED_OUT },
+		{ new: true }
+	);
 };
 
 // Lấy ra các học sinh đã chuyển trường
 export const getStudentTransferSchool = async (year: number | 'all', page: number, limit: number) => {
 	const filter =
 		year === 'all'
-			? { transferSchool: { $ne: null } }
+			? { transferSchoolDate: { $ne: null } }
 			: {
-					$expr: { $eq: [{ $year: '$transferSchool' }, year] }
+					$expr: { $eq: [{ $year: '$transferSchoolDate' }, year] }
 			  };
 	return await StudentModel.paginate(filter, {
 		page: page,
@@ -317,7 +321,13 @@ export const getStudentDropout = async (year: 'all' | number, page: number, limi
 };
 
 // điểm danh
-export const markAttendanceStudent = async (classId: string, absentStudents: IAbsentStudent[]) => {
+export const markAttendanceStudent = async (
+	classId: string,
+	absentStudents: Array<{
+		idStudent: string;
+		absent?: Omit<IAttendance, '_id'>;
+	}>
+) => {
 	if (!absentStudents) {
 		throw createHttpError(HttpStatusCode.NO_CONTENT);
 	}
@@ -505,7 +515,7 @@ export const attendanceOfStudentByMonth = async (id: string, month: number, year
 // Lấy ra các học sinh chính sách
 export const getPolicyBeneficiary = async (page: number, limit: number) => {
 	return await StudentModel.paginate(
-		{ dropoutDate: null, transferSchool: null, isPolicyBeneficiary: true },
+		{ dropoutDate: null, transferSchoolDate: null, isPolicyBeneficiary: true },
 		{
 			page: page,
 			limit: limit,
@@ -552,19 +562,28 @@ export const getAttendanceAllClass = async (page: number, limit: number, date: D
 
 export const promoteStudentsByClass = async (classId: string) => {
 	const studentsInClass = await getStudentByClass(classId);
-	const promotedStudents = studentsInClass.filter((student) => student.remarkAsQualified && student.completedProgram);
-	if (promotedStudents.every((student) => student.class?.grade === 5)) {
-		const graduatedStudents = await StudentModel.updateMany(
-			{
-				_id: promotedStudents
-			},
-			{ status: StudentStatusEnum.GRADUATED },
-			{ new: true }
-		);
-		await deactivateParentsUser(promotedStudents.map((student) => student.parents));
-		return graduatedStudents;
+	const promotedStudents = studentsInClass.filter(
+		(student: IStudent & { remarkAsQualified: boolean; completedProgram: boolean }) =>
+			student.remarkAsQualified && student.completedProgram
+	);
+	console.log('promotedStudents', promotedStudents);
+	const isAbleToPromoted =
+		promotedStudents.length > 0 &&
+		promotedStudents.every((student) => student.class?.grade === 5 && student.class !== null);
+	if (isAbleToPromoted) {
+		const [graduatedStudents, _] = await Promise.all([
+			StudentModel.updateMany(
+				{
+					_id: { $in: promotedStudents }
+				},
+				{ status: StudentStatusEnum.GRADUATED, class: null },
+				{ new: true }
+			),
+			deactivateParentsUser(promotedStudents.map((student) => student.parents))
+		]);
+		return { message: `${graduatedStudents.modifiedCount} students has been promoted.` };
 	}
-	return promotedStudents;
+	return { message: 'No student to promoted' };
 };
 
 export const getStudentsByParents = async (parentsId: string | ObjectId) =>
