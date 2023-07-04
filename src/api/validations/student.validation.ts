@@ -43,6 +43,8 @@ export const validateUpdateReqBodyStudent = (data: Partial<Omit<IStudent, '_id'>
 		dateOfBirth: Joi.date().required().optional(),
 		parents: Joi.string().required().optional(),
 		isPolicyBeneficiary: Joi.bool().optional(),
+		transferSchoolDate: Joi.date().optional(),
+		dropoutDate: Joi.date().optional(),
 		status: Joi.string()
 			.valid(...Object.values(StudentStatusEnum))
 			.optional()
