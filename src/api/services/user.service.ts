@@ -152,18 +152,14 @@ export const deactivateParentsUser = async (
 	parents: Pick<IUser, '_id' | 'email'> | Array<Pick<IUser, '_id' | 'email'>>
 ) => {
 	if (Array.isArray(parents)) {
-		const deactivatedParents = await UserModel.updateMany(
-			{ _id: { $in: parents } },
-			{ deleted: true },
-			{ new: true }
-		);
+		const deactivatedParents = await UserModel.deleteMany({ _id: { $in: parents } });
 		const sendMailPromises = parents.map(
 			(user) => new Promise((resolve) => sendMail(getDeactivateUserEmail(user)).catch((error) => resolve(error)))
 		);
 		await Promise.all(sendMailPromises);
 		return deactivatedParents;
 	}
-	const deactivatedParents = await UserModel.findOneAndUpdate({ _id: parents._id }, { deleted: true }, { new: true });
+	const deactivatedParents = await UserModel.findOneAndDelete({ _id: parents._id });
 	await sendMail(getDeactivateUserEmail(parents as Pick<IUser, 'email' | '_id'>));
 	return deactivatedParents;
 };
