@@ -15,7 +15,7 @@ export const updateTimetable = async ({
 
 export const deleteTimeTable = async (classId: string) => await TimeTableModel.findOneAndDelete({ class: classId });
 
-export const getTimeTableDetail = async (id: string) => await TimeTableModel.findById(id);
+export const getTimeTableDetail = async (classId: string) => await TimeTableModel.findOne({ class: classId });
 
 export const getTimetableByClass = async (classId: string) =>
 	await TimeTableModel.aggregate().match({ class: new mongoose.Types.ObjectId(classId) });
