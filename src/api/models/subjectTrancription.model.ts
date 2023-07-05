@@ -24,11 +24,6 @@ const SubjectTranscriptSchema = new mongoose.Schema<ISubjectTranscriptDocument>(
 		isPassed: {
 			type: Boolean
 		},
-		remark: {
-			type: String,
-			trim: true,
-			default: ''
-		},
 		firstSemester: {
 			midtermTest: {
 				type: Number,

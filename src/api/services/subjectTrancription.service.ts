@@ -151,8 +151,7 @@ export const getStudentTranscript = async (id: string | ObjectId) => {
 					subject: '$subject',
 					firstSemester: '$firstSemester',
 					secondSemester: '$secondSemester',
-					isPassed: '$isPassed',
-					remark: '$remark'
+					isPassed: '$isPassed'
 				}
 			}
 		})
@@ -249,8 +248,7 @@ export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYe
 					subject: '$subject',
 					firstSemester: '$firstSemester',
 					secondSemester: '$secondSemester',
-					isPassed: '$isPassed',
-					remark: '$remark'
+					isPassed: '$isPassed'
 				}
 			}
 		})

@@ -12,7 +12,6 @@ export const validateSubjectTranscript = (
 ) => {
 	let schema = Joi.object({
 		student: Joi.string().required(),
-		remark: Joi.string().optional(),
 		isPassed: Joi.boolean().when('secondSemester', {
 			is: Joi.object({
 				midtermTest: Joi.number().min(0).max(10),

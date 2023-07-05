@@ -8,30 +8,13 @@ export interface ISubjectTranscript extends Document {
 	schoolYear: ObjectId;
 	subject: ObjectId | string | Partial<ISubject>;
 	isPassed?: boolean;
-	remark?: string;
 	firstSemester?: {
-		midtermTest?: {
-			type: number;
-			min: 0;
-			max: 10;
-		};
-		finalTest?: {
-			type: number;
-			min: 0;
-			max: 10;
-		};
+		midtermTest?: number;
+		finalTest: number;
 	};
 	secondSemester?: {
-		midtermTest?: {
-			type: number;
-			min: 0;
-			max: 10;
-		};
-		finalTest?: {
-			type: number;
-			min: 0;
-			max: 10;
-		};
+		midtermTest?: number;
+		finalTest: number;
 	};
 }
 
