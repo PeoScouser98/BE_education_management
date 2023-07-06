@@ -50,3 +50,8 @@ export const updateSchoolYear = async (schoolYearId: string, payload: Partial<IS
 	if (existedSchoolYear) throw createHttpError.Conflict('School year name already existed!');
 	return await SchoolYearModel.findOneAndUpdate({ _id: schoolYearId }, value, { new: true, upsert: false });
 };
+
+export const getLatestSchoolYear = async () => {
+	const schoolYears = await SchoolYearModel.find().sort({ endAt: -1 });
+	return schoolYears[0];
+};
