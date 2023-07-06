@@ -5,6 +5,7 @@ import useCatchAsync from '../../helpers/useCatchAsync';
 import { getCurrentSchoolYear } from '../services/schoolYear.service';
 import mongoose, { ObjectId, isValidObjectId } from 'mongoose';
 import createHttpError from 'http-errors';
+import SubjectTranscriptionModel from '../models/subjectTrancription.model';
 
 // [POST] /api/transcripts/:classId/:subjectId
 export const insertSubjectTranscriptByClass = useCatchAsync(async (req: Request, res: Response) => {
@@ -23,18 +24,19 @@ export const getTranscriptByClass = useCatchAsync(async (req: Request, res: Resp
 	return res.status(HttpStatusCode.OK).json(result);
 });
 
-// [GET] /api/transcript/student/:id
+// [GET] /api/transcript/student/:id?_scy=...
 export const getTranscriptByStudent = useCatchAsync(async (req: Request, res: Response) => {
 	const id = req.params.id;
-	const result = await TranscriptService.getStudentTranscript(id);
+	const schoolYearQuery = req.query._scy as string;
+	const result = await TranscriptService.getStudentTranscript(id, schoolYearQuery);
 	return res.status(HttpStatusCode.OK).json(result);
 });
 
-// [GET] /api/transcript/:classId
+// [GET] /api/transcript/:classId?_scy=...
 export const selectTranscriptAllSubjectByClass = useCatchAsync(async (req: Request, res: Response) => {
 	const id = req.params.classId;
 	const currentSchoolYear = await getCurrentSchoolYear();
-	const schoolYearQueryValue = req.query._schoolYear;
+	const schoolYearQueryValue = req.query._scy;
 	const schoolYear =
 		schoolYearQueryValue && isValidObjectId(schoolYearQueryValue)
 			? new mongoose.Types.ObjectId(schoolYearQueryValue as string)
@@ -42,4 +44,9 @@ export const selectTranscriptAllSubjectByClass = useCatchAsync(async (req: Reque
 	if (!isValidObjectId(schoolYear)) throw createHttpError.BadRequest('Invalid school year ID !');
 	const result = await TranscriptService.getTranscriptsByClass(id, schoolYear as ObjectId);
 	return res.status(HttpStatusCode.OK).json(result);
+});
+
+export const getValidSchoolYearOfStudentTranscript = useCatchAsync(async (req: Request, res: Response) => {
+	const validSchoolYears = await TranscriptService.getValidSchoolYearOfStudentTranscript(req.params.studentId);
+	return res.status(HttpStatusCode.CREATED).json(validSchoolYears);
 });

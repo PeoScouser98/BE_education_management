@@ -11,7 +11,7 @@ export const getOneSubject = async (subjectId: string) => await SubjectModel.fin
 
 export const createNewSubject = async (subject: Omit<ISubject, '_id'>) => {
 	// check validate
-	const { error ,value} = validateSubjectRequestBody(subject);
+	const { error, value } = validateSubjectRequestBody(subject);
 	if (error) throw createHttpError.BadRequest(error.message);
 	// check tồn tại
 	const duplicatedSubjectCode = await SubjectModel.exists({
@@ -44,7 +44,6 @@ export const updateSubject = async (id: string, subject: Partial<Omit<ISubject, 
 	return await SubjectModel.findOneAndUpdate({ _id: id }, value, { new: true });
 };
 
-
 // force delete
 export const deleteSubject = async (id: string) => {
 	const learningMaterialBySubject = await LearningMaterialModel.exists({ subject: id });
@@ -53,4 +52,3 @@ export const deleteSubject = async (id: string) => {
 	if (!isValidObjectId(id)) throw createHttpError.BadRequest('_id of the subject is invalid');
 	return await SubjectModel.deleteOne({ _id: id });
 };
-

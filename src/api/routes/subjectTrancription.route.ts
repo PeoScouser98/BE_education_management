@@ -18,5 +18,10 @@ router.get(
 	checkIsTeacher,
 	TrancriptionController.selectTranscriptAllSubjectByClass
 );
+router.get(
+	'/transcripts/valid-tranc-scy/:studentId',
+	checkAuthenticated,
+	TrancriptionController.getValidSchoolYearOfStudentTranscript
+);
 
 export default router;
