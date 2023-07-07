@@ -91,10 +91,12 @@ export const selectSubjectTranscriptByClass = async (classId: string, subjectId:
 
 // lấy ra bảng điểm 1 học sinh với tất cả môn
 export const getStudentTranscript = async (id: string | ObjectId, schoolYear: string) => {
-	if (!id || !isValidObjectId(id)) {
+	if (!isValidObjectId(id)) {
 		throw createHttpError.BadRequest('Invalid student ID !');
 	}
-
+	if (!isValidObjectId(schoolYear)) {
+		throw createHttpError.BadRequest('Invalid school year ID!');
+	}
 	const student: null | IStudent = await StudentModel.findOne({
 		_id: id,
 		dropoutDate: null,
@@ -108,16 +110,18 @@ export const getStudentTranscript = async (id: string | ObjectId, schoolYear: st
 	const studentClass = student.class as Partial<IClass>;
 	const studentGrade = studentClass?.grade!;
 	const totalSubjectsOfTranscript = [1, 2].includes(studentGrade) ? 9 : 11;
-	const validSchoolYearsOfStudentTranscripts = await getValidSchoolYearOfStudentTranscript(student._id.toString());
-	if (!validSchoolYearsOfStudentTranscripts.map((s) => s.toString()).includes(schoolYear)) {
-		throw createHttpError.BadRequest('Student does not has transcript in this school year!');
+	const validSchoolYearsStdTranscripts = await getValidSchoolYearOfStudentTranscript(student._id.toString());
+
+	const isValidSchoolYear = validSchoolYearsStdTranscripts.map((scy) => scy._id.toString()).includes(schoolYear);
+
+	if (!isValidSchoolYear) {
+		throw createHttpError.NotFound('Student does not has transcript in this school year!');
 	}
-	const latestSchoolYear = validSchoolYearsOfStudentTranscripts.at(0)._id;
+	const latestSchoolYear = validSchoolYearsStdTranscripts.at(0)._id;
 	const studentTranscripts = await SubjectTranscriptionModel.aggregate()
 		.match({
 			student: student._id,
-			schoolYear:
-				!!schoolYear && isValidObjectId(schoolYear) ? new mongoose.Types.ObjectId(schoolYear) : latestSchoolYear
+			schoolYear: isValidSchoolYear ? new mongoose.Types.ObjectId(schoolYear) : latestSchoolYear
 		})
 		.lookup({
 			from: 'students',
@@ -149,6 +153,20 @@ export const getStudentTranscript = async (id: string | ObjectId, schoolYear: st
 			]
 		})
 		.unwind('$subject')
+		.lookup({
+			from: 'school_years',
+			localField: 'schoolYear',
+			foreignField: '_id',
+			as: 'schoolYear',
+			pipeline: [
+				{
+					$project: {
+						_id: 1,
+						name: 1
+					}
+				}
+			]
+		})
 		.group({
 			_id: '$student',
 			student: { $first: '$student' },
@@ -194,7 +212,7 @@ export const getStudentTranscript = async (id: string | ObjectId, schoolYear: st
 			completedProgram: 1
 		});
 
-	return studentTranscripts;
+	return studentTranscripts.at(0);
 };
 
 // Lấy bảng điểm tất cả các môn của 1 lớp
@@ -304,7 +322,7 @@ export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYe
 };
 
 export const getValidSchoolYearOfStudentTranscript = async (studentId: string) => {
-	return await SubjectTranscriptionModel.aggregate()
+	const result = await SubjectTranscriptionModel.aggregate()
 		.match({ student: new mongoose.Types.ObjectId(studentId) })
 		.lookup({
 			from: 'school_years', // replace with your SchoolYear collection name
@@ -315,4 +333,5 @@ export const getValidSchoolYearOfStudentTranscript = async (studentId: string) =
 		.unwind('$schoolYear')
 		.group({ _id: '$schoolYear' })
 		.sort({ endAt: -1 });
+	return result.map((scy) => scy._id);
 };
