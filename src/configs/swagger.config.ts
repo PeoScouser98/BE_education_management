@@ -1,4 +1,4 @@
-import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerJSDoc from 'swagger-jsdoc'
 
 /**
  * @description config swagger
@@ -25,6 +25,6 @@ const swaggerOptions = swaggerJSDoc({
 	},
 
 	apis: ['src/docs/**/*.yaml']
-});
+})
 
-export default swaggerOptions;
+export default swaggerOptions

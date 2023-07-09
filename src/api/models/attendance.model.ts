@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import { AttendanceSessionEnum, IAttendance } from '../../types/attendance.type';
+import mongoose from 'mongoose'
+import { AttendanceSessionEnum, IAttendance } from '../../types/attendance.type'
 
 const AttendanceSchema = new mongoose.Schema(
 	{
@@ -33,12 +33,12 @@ const AttendanceSchema = new mongoose.Schema(
 		versionKey: false,
 		expires: '30d' // auto delete after 37 weeks
 	}
-);
+)
 
 AttendanceSchema.pre('save', function () {
-	if (this.isPresent === false && !this.reason) this.reason = 'Không có lý do';
-});
+	if (this.isPresent === false && !this.reason) this.reason = 'Không có lý do'
+})
 
-const AttendanceModel = mongoose.model<IAttendance>('Attendance', AttendanceSchema);
+const AttendanceModel = mongoose.model<IAttendance>('Attendance', AttendanceSchema)
 
-export default AttendanceModel;
+export default AttendanceModel

@@ -1,10 +1,10 @@
-import { ObjectId, PaginateModel } from 'mongoose';
+import { ObjectId, PaginateModel } from 'mongoose'
 
 export interface ISchoolYear extends Document {
-	_id: ObjectId;
-	name: string;
-	startAt: Date;
-	endAt: Date;
+	_id: ObjectId
+	name: string
+	startAt: Date
+	endAt: Date
 }
 
-export type TPaginatedSchoolYearModel = PaginateModel<ISchoolYear>;
+export type TPaginatedSchoolYearModel = PaginateModel<ISchoolYear>

@@ -1,9 +1,9 @@
-import mongoose from 'mongoose';
-import mongooseAutoPopulate from 'mongoose-autopopulate';
-import mongoosePaginate from 'mongoose-paginate-v2';
-import { toCapitalize } from '../../helpers/toolkit';
-import { IStudentDocument, StudentStatusEnum, TPaginatedStudentModel } from '../../types/student.type';
-import { UserGenderEnum } from '../../types/user.type';
+import mongoose from 'mongoose'
+import mongooseAutoPopulate from 'mongoose-autopopulate'
+import mongoosePaginate from 'mongoose-paginate-v2'
+import { toCapitalize } from '../../helpers/toolkit'
+import { IStudentDocument, StudentStatusEnum, TPaginatedStudentModel } from '../../types/student.type'
+import { UserGenderEnum } from '../../types/user.type'
 
 const StudentSchema = new mongoose.Schema<IStudentDocument>(
 	{
@@ -85,24 +85,24 @@ const StudentSchema = new mongoose.Schema<IStudentDocument>(
 		toJSON: { virtuals: true, transform: true },
 		toObject: { virtuals: true, transform: true }
 	}
-);
+)
 
-StudentSchema.plugin(mongoosePaginate);
-StudentSchema.plugin(mongooseAutoPopulate);
+StudentSchema.plugin(mongoosePaginate)
+StudentSchema.plugin(mongooseAutoPopulate)
 
 StudentSchema.virtual('remarkOfHeadTeacher', {
 	localField: '_id',
 	foreignField: 'student',
 	ref: 'StudentRemarks',
 	justOne: true
-});
+})
 
 StudentSchema.pre('save', function () {
-	this.fullName = toCapitalize(this.fullName) as string;
-});
+	this.fullName = toCapitalize(this.fullName) as string
+})
 const StudentModel: TPaginatedStudentModel = mongoose.model<IStudentDocument, TPaginatedStudentModel>(
 	'Students',
 	StudentSchema
-);
+)
 
-export default StudentModel;
+export default StudentModel

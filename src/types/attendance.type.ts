@@ -1,5 +1,5 @@
-import { ObjectId } from 'mongoose';
-import { IStudent } from './student.type';
+import { ObjectId } from 'mongoose'
+import { IStudent } from './student.type'
 
 export enum AttendanceSessionEnum {
 	MORNING = 'Sáng',
@@ -7,10 +7,10 @@ export enum AttendanceSessionEnum {
 }
 
 export interface IAttendance extends Document {
-	_id: ObjectId;
-	student: ObjectId | string | Pick<IStudent, '_id' | 'fullName' | 'class'>;
-	date: Date;
-	session: AttendanceSessionEnum;
-	isPresent: boolean;
-	reason: string;
+	_id: ObjectId
+	student: ObjectId | string | Pick<IStudent, '_id' | 'fullName' | 'class'>
+	date: Date
+	session: AttendanceSessionEnum
+	isPresent: boolean
+	reason: string
 }

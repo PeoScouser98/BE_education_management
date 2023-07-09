@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
-import mongooseAutoPopulate from 'mongoose-autopopulate';
-import { ISubjectTranscriptDocument } from '../../types/subjectTranscription.type';
+import mongoose from 'mongoose'
+import mongooseAutoPopulate from 'mongoose-autopopulate'
+import { ISubjectTranscriptDocument } from '../../types/subjectTranscription.type'
 
 const SubjectTranscriptSchema = new mongoose.Schema<ISubjectTranscriptDocument>(
 	{
@@ -55,13 +55,13 @@ const SubjectTranscriptSchema = new mongoose.Schema<ISubjectTranscriptDocument>(
 		versionKey: false
 		// minimize: true
 	}
-);
+)
 
-SubjectTranscriptSchema.plugin(mongooseAutoPopulate);
+SubjectTranscriptSchema.plugin(mongooseAutoPopulate)
 
 const SubjectTranscriptionModel = mongoose.model<ISubjectTranscriptDocument>(
 	'SubjectTranscriptions',
 	SubjectTranscriptSchema
-);
+)
 
-export default SubjectTranscriptionModel;
+export default SubjectTranscriptionModel

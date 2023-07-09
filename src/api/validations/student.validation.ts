@@ -1,7 +1,7 @@
-import Joi from 'joi';
-import { IStudent, StudentStatusEnum } from '../../types/student.type';
-import { UserGenderEnum } from '../../types/user.type';
-import { IAttendance } from '../../types/attendance.type';
+import Joi from 'joi'
+import { IStudent, StudentStatusEnum } from '../../types/student.type'
+import { UserGenderEnum } from '../../types/user.type'
+import { IAttendance } from '../../types/attendance.type'
 
 // validate
 export const validateReqBodyStudent = (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
@@ -18,19 +18,19 @@ export const validateReqBodyStudent = (data: Omit<IStudent, '_id'> | Omit<IStude
 		status: Joi.string()
 			.valid(...Object.values(StudentStatusEnum))
 			.optional()
-	});
-	const arraySchema = Joi.array().items(schema);
-	return Array.isArray(data) ? arraySchema.validate(data) : schema.validate(data);
-};
+	})
+	const arraySchema = Joi.array().items(schema)
+	return Array.isArray(data) ? arraySchema.validate(data) : schema.validate(data)
+}
 
 export const validateAttendanceStudent = (data: Omit<IAttendance, '_id' | 'date'>) => {
 	const schema = Joi.object({
 		hasPermision: Joi.bool().optional(),
 		reason: Joi.string().max(256).optional()
-	});
+	})
 
-	return schema.validate(data);
-};
+	return schema.validate(data)
+}
 
 export const validateUpdateReqBodyStudent = (data: Partial<Omit<IStudent, '_id'>>) => {
 	const schema = Joi.object({
@@ -49,6 +49,6 @@ export const validateUpdateReqBodyStudent = (data: Partial<Omit<IStudent, '_id'>
 		status: Joi.string()
 			.valid(...Object.values(StudentStatusEnum))
 			.optional()
-	});
-	return schema.validate(data);
-};
+	})
+	return schema.validate(data)
+}

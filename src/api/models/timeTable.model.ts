@@ -1,9 +1,9 @@
-import mongoose from 'mongoose';
-import mongooseAutoPopulate from 'mongoose-autopopulate';
+import mongoose from 'mongoose'
+import mongooseAutoPopulate from 'mongoose-autopopulate'
 
-import { ITimeTable } from '../../types/timeTable.type';
-import { ISubject } from '../../types/subject.type';
-import { IUser } from '../../types/user.type';
+import { ITimeTable } from '../../types/timeTable.type'
+import { ISubject } from '../../types/subject.type'
+import { IUser } from '../../types/user.type'
 
 const ScheduleSlotSchema = new mongoose.Schema(
 	{
@@ -36,7 +36,7 @@ const ScheduleSlotSchema = new mongoose.Schema(
 	{
 		_id: false
 	}
-);
+)
 const TimeTableSchema = new mongoose.Schema(
 	{
 		class: {
@@ -60,10 +60,10 @@ const TimeTableSchema = new mongoose.Schema(
 		collection: 'time_tables',
 		strictPopulate: false
 	}
-);
+)
 
-TimeTableSchema.plugin(mongooseAutoPopulate);
+TimeTableSchema.plugin(mongooseAutoPopulate)
 
-const TimeTableModel = mongoose.model<ITimeTable>('TimeTables', TimeTableSchema);
+const TimeTableModel = mongoose.model<ITimeTable>('TimeTables', TimeTableSchema)
 
-export default TimeTableModel;
+export default TimeTableModel

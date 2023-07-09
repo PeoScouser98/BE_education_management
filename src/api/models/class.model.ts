@@ -1,7 +1,7 @@
-import mongoose from 'mongoose';
-import mongooseAutoPopulate from 'mongoose-autopopulate';
-import mongooseDelete from 'mongoose-delete';
-import { IClassDocument, TSoftDeleteClassModel } from '../../types/class.type';
+import mongoose from 'mongoose'
+import mongooseAutoPopulate from 'mongoose-autopopulate'
+import mongooseDelete from 'mongoose-delete'
+import { IClassDocument, TSoftDeleteClassModel } from '../../types/class.type'
 
 const ClassSchema = new mongoose.Schema<IClassDocument>(
 	{
@@ -28,12 +28,12 @@ const ClassSchema = new mongoose.Schema<IClassDocument>(
 		timestamps: true,
 		toJSON: { virtuals: true }
 	}
-);
-ClassSchema.plugin(mongooseAutoPopulate);
+)
+ClassSchema.plugin(mongooseAutoPopulate)
 ClassSchema.plugin(mongooseDelete, {
 	overrideMethods: ['find', 'findOne'],
 	deletedAt: true
-});
+})
 
 ClassSchema.virtual('totalStudents', {
 	localField: '_id',
@@ -42,8 +42,8 @@ ClassSchema.virtual('totalStudents', {
 	count: true,
 	justOne: false,
 	options: { lean: true }
-});
+})
 
-const ClassModel: TSoftDeleteClassModel = mongoose.model<IClassDocument, TSoftDeleteClassModel>('Classes', ClassSchema);
+const ClassModel: TSoftDeleteClassModel = mongoose.model<IClassDocument, TSoftDeleteClassModel>('Classes', ClassSchema)
 
-export default ClassModel;
+export default ClassModel

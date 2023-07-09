@@ -1,7 +1,7 @@
-import 'dotenv/config';
-import passport from 'passport';
-import { Strategy as GoogleStrategy, VerifyFunctionWithRequest } from 'passport-google-oauth2';
-import UserModel from '../models/user.model';
+import 'dotenv/config'
+import passport from 'passport'
+import { Strategy as GoogleStrategy, VerifyFunctionWithRequest } from 'passport-google-oauth2'
+import UserModel from '../models/user.model'
 
 /**
  * @param options @interface StrategyOptionsWithRequest
@@ -17,19 +17,19 @@ passport.use(
 		function (req, accessToken, refreshToken, profile, done) {
 			UserModel.findOne({ email: profile.email }).exec((err, user) => {
 				if (err) {
-					return done(err, false);
+					return done(err, false)
 				}
 				if (!user) {
-					return done(null, false);
+					return done(null, false)
 				}
 
-				const displayPicture = user?.picture || profile.picture;
-				return done(null, { ...user?.toObject(), picture: displayPicture });
-			});
+				const displayPicture = user?.picture || profile.picture
+				return done(null, { ...user?.toObject(), picture: displayPicture })
+			})
 		} as VerifyFunctionWithRequest
 	)
-);
+)
 
-passport.serializeUser((user, done) => done(null, user));
+passport.serializeUser((user, done) => done(null, user))
 
-passport.deserializeUser((user, done) => done(null, user!));
+passport.deserializeUser((user, done) => done(null, user!))

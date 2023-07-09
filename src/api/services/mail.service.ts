@@ -1,5 +1,5 @@
-import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import transporter from '../../configs/nodemailer.config';
+import SMTPTransport from 'nodemailer/lib/smtp-transport'
+import transporter from '../../configs/nodemailer.config'
 
 export const sendMail = async ({ to, subject, html }: { to: string; subject: string; html: string }) =>
 	await transporter.sendMail(
@@ -13,7 +13,7 @@ export const sendMail = async ({ to, subject, html }: { to: string; subject: str
 			html: html
 		},
 		(err: Error | null, info: SMTPTransport.SentMessageInfo): void => {
-			if (err) console.log('Failed to send mail.\nError: ', err.message);
-			else console.log(info.response);
+			if (err) console.log('Failed to send mail.\nError: ', err.message)
+			else console.log(info.response)
 		}
-	);
+	)

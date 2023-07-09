@@ -1,15 +1,15 @@
-import moment from 'moment';
-import { paramsStringify } from './queryParams';
-import { IUser } from '../types/user.type';
+import moment from 'moment'
+import { paramsStringify } from './queryParams'
+import { IUser } from '../types/user.type'
 
 const getVerificationEmailTemplate = ({
 	redirectDomain,
 	user,
 	token
 }: {
-	redirectDomain: string;
-	user: Pick<IUser, 'email' | 'displayName' | 'role'>;
-	token: string;
+	redirectDomain: string
+	user: Pick<IUser, 'email' | 'displayName' | 'role'>
+	token: string
 }) => {
 	return {
 		to: user.email,
@@ -32,8 +32,8 @@ const getVerificationEmailTemplate = ({
 				</p>
 			</div>
 					`
-	};
-};
+	}
+}
 
 const getDeactivateUserEmail = (user: Pick<IUser, '_id' | 'email'>) => {
 	return {
@@ -52,9 +52,9 @@ const getDeactivateUserEmail = (user: Pick<IUser, '_id' | 'email'>) => {
          <i>Trường tiểu học Bột Xuyên</i>
        </p>
       `
-	};
-};
+	}
+}
 
 // export default get;
 
-export { getVerificationEmailTemplate, getDeactivateUserEmail };
+export { getVerificationEmailTemplate, getDeactivateUserEmail }

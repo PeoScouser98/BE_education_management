@@ -1,60 +1,60 @@
-import createHttpError from 'http-errors';
-import mongoose, { ObjectId, isValidObjectId } from 'mongoose';
-import { IAttendance } from '../../types/attendance.type';
-import { IStudent, StudentStatusEnum } from '../../types/student.type';
-import { IUser } from '../../types/user.type';
-import SchoolYearModel from '../models/schoolYear.model';
-import StudentModel from '../models/student.model';
-import { validateReqBodyStudent, validateUpdateReqBodyStudent } from '../validations/student.validation';
-import { deactivateParentsUser } from './user.service';
+import createHttpError from 'http-errors'
+import mongoose, { ObjectId, isValidObjectId } from 'mongoose'
+import { IAttendance } from '../../types/attendance.type'
+import { IStudent, StudentStatusEnum } from '../../types/student.type'
+import { IUser } from '../../types/user.type'
+import SchoolYearModel from '../models/schoolYear.model'
+import StudentModel from '../models/student.model'
+import { validateReqBodyStudent, validateUpdateReqBodyStudent } from '../validations/student.validation'
+import { deactivateParentsUser } from './user.service'
 
 // create new student using form
 export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
-	const { error } = validateReqBodyStudent(data);
+	const { error } = validateReqBodyStudent(data)
 	if (error) {
-		throw createHttpError.BadRequest(error.message);
+		throw createHttpError.BadRequest(error.message)
 	}
 
 	if (Array.isArray(data)) {
-		const hasExistedStudent = await StudentModel.exists({ code: { $in: data.map((student) => student.code) } });
-		if (hasExistedStudent) throw createHttpError(409, 'Some students already exists ');
-		return await StudentModel.insertMany(data);
+		const hasExistedStudent = await StudentModel.exists({ code: { $in: data.map((student) => student.code) } })
+		if (hasExistedStudent) throw createHttpError(409, 'Some students already exists ')
+		return await StudentModel.insertMany(data)
 	}
 
 	const hasExistedStudent = await StudentModel.exists({
 		code: data.code
-	});
+	})
 
 	if (hasExistedStudent) {
-		throw createHttpError(409, 'Student already exists ');
+		throw createHttpError(409, 'Student already exists ')
 	}
 
-	return await new StudentModel(data).save();
-};
+	return await new StudentModel(data).save()
+}
 
 // update
 export const updateStudent = async (id: string, data: Partial<Omit<IStudent, '_id' | 'code'>>) => {
 	// validate
-	const { error } = validateUpdateReqBodyStudent(data);
+	const { error } = validateUpdateReqBodyStudent(data)
 	if (error) {
-		throw createHttpError.BadRequest(error.message);
+		throw createHttpError.BadRequest(error.message)
 	}
-	const student = await StudentModel.exists({ _id: id });
+	const student = await StudentModel.exists({ _id: id })
 	if (!student) {
-		throw createHttpError.NotFound('Student does not exist!');
+		throw createHttpError.NotFound('Student does not exist!')
 	}
-	return await StudentModel.findOneAndUpdate({ _id: id }, data, { new: true });
-};
+	return await StudentModel.findOneAndUpdate({ _id: id }, data, { new: true })
+}
 
 // get student theo class
 export const getStudentByClass = async (classId: string) => {
-	const [currentSchoolYear] = await SchoolYearModel.find().sort({ endAt: -1 });
+	const [currentSchoolYear] = await SchoolYearModel.find().sort({ endAt: -1 })
 	if (!currentSchoolYear)
 		return await StudentModel.find({
 			class: classId,
 			dropoutDate: null,
 			transferSchoolDate: null
-		});
+		})
 
 	return await StudentModel.aggregate()
 		.match({
@@ -206,13 +206,13 @@ export const getStudentByClass = async (classId: string) => {
 					else: false
 				}
 			}
-		});
-};
+		})
+}
 
 // get detail student
 export const getDetailStudent = async (id: string) => {
 	if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-		throw createHttpError.BadRequest('Invalid student ID!');
+		throw createHttpError.BadRequest('Invalid student ID!')
 	}
 
 	const student: IStudent | null = await StudentModel.findOne({
@@ -222,48 +222,48 @@ export const getDetailStudent = async (id: string) => {
 			path: 'class',
 			select: 'className headTeacher'
 		})
-		.populate({ path: 'remarkOfHeadTeacher' });
+		.populate({ path: 'remarkOfHeadTeacher' })
 
 	if (!student) {
-		throw createHttpError.NotFound('Student does not exist!');
+		throw createHttpError.NotFound('Student does not exist!')
 	}
 
-	return student;
-};
+	return student
+}
 
 // h/s chuyển trường
 export const setStudentTransferSchool = async (id: string, date: string) => {
-	if (!id || !isValidObjectId(id)) throw createHttpError.BadRequest('Invalid student ID');
-	const dateCheck = new Date(date);
+	if (!id || !isValidObjectId(id)) throw createHttpError.BadRequest('Invalid student ID')
+	const dateCheck = new Date(date)
 	if (isNaN(dateCheck.getTime()))
-		throw createHttpError.BadRequest('The Date you passed is not in the correct Date data type');
+		throw createHttpError.BadRequest('The Date you passed is not in the correct Date data type')
 	// check xem có còn học ở trường không
 	const student = await StudentModel.findOne({
 		_id: id,
 		transferSchoolDate: null,
 		dropoutDate: null
-	});
+	})
 	if (!student) {
-		throw createHttpError.NotFound('The student has transferred to another school or dropped out');
+		throw createHttpError.NotFound('The student has transferred to another school or dropped out')
 	}
-	const parentsOfStudent = student.parents as unknown as Pick<IUser, '_id' | 'email'>;
-	if (parentsOfStudent) await deactivateParentsUser(parentsOfStudent);
+	const parentsOfStudent = student.parents as unknown as Pick<IUser, '_id' | 'email'>
+	if (parentsOfStudent) await deactivateParentsUser(parentsOfStudent)
 	return await StudentModel.findOneAndUpdate(
 		{ _id: id },
 		{ transferSchoolDate: date, status: StudentStatusEnum.TRANSFER_SCHOOL },
 		{ new: true }
-	);
-};
+	)
+}
 
 // hs nghỉ học
 export const setDropoutStudent = async (id: string, date: string) => {
 	if (!id) {
-		throw createHttpError.BadRequest('_id of the student is invalid');
+		throw createHttpError.BadRequest('_id of the student is invalid')
 	}
 
-	const dateCheck = new Date(date);
+	const dateCheck = new Date(date)
 	if (isNaN(dateCheck.getTime())) {
-		throw createHttpError.BadRequest('The Date you passed is not in the correct Date data type');
+		throw createHttpError.BadRequest('The Date you passed is not in the correct Date data type')
 	}
 
 	// check xem có còn học ở trường không
@@ -271,18 +271,18 @@ export const setDropoutStudent = async (id: string, date: string) => {
 		_id: id,
 		transferSchoolDate: null,
 		dropoutDate: null
-	});
+	})
 
 	if (!student) {
-		throw createHttpError.NotFound('Student has transferred to another school or dropped out');
+		throw createHttpError.NotFound('Student has transferred to another school or dropped out')
 	}
-	await deactivateParentsUser(student.parents as unknown as Pick<IUser, '_id' | 'email'>);
+	await deactivateParentsUser(student.parents as unknown as Pick<IUser, '_id' | 'email'>)
 	return await StudentModel.findOneAndUpdate(
 		{ _id: id },
 		{ dropoutDate: date, status: StudentStatusEnum.DROPPED_OUT },
 		{ new: true }
-	);
-};
+	)
+}
 
 // Lấy ra các học sinh đã chuyển trường
 export const getStudentTransferSchool = async (year: number | 'all', page: number, limit: number) => {
@@ -291,46 +291,46 @@ export const getStudentTransferSchool = async (year: number | 'all', page: numbe
 			? { transferSchoolDate: { $ne: null } }
 			: {
 					$expr: { $eq: [{ $year: '$transferSchoolDate' }, year] }
-			  };
+			  }
 	return await StudentModel.paginate(filter, {
 		page: page,
 		limit: limit
-	});
-};
+	})
+}
 
 export const getStudentDropout = async (year: 'all' | number, page: number, limit: number) => {
 	let condition: any = {
 		$expr: { $eq: [{ $year: '$dropoutDate' }, year] }
-	};
+	}
 
 	if (year === 'all') {
-		condition = { dropoutDate: { $ne: null } };
+		condition = { dropoutDate: { $ne: null } }
 	}
 
 	return await StudentModel.paginate(condition, {
 		page: page,
 		limit: limit
-	});
-};
+	})
+}
 
 // Lấy ra tình trạng điểm danh của 1 học sinh trong 1 tháng (sẽ trả về ngày vắng mặt trong tháng đấy)
 export const attendanceOfStudentByMonth = async (id: string, month: number, year: number) => {
-	const { absentDays } = await getDetailStudent(id);
+	const { absentDays } = await getDetailStudent(id)
 
-	const result: IAttendance[] = [];
+	const result: IAttendance[] = []
 
 	absentDays?.forEach((item) => {
-		const date = new Date(item.date);
-		const monthItem = date.getMonth() + 1;
-		const yearItem = date.getFullYear();
+		const date = new Date(item.date)
+		const monthItem = date.getMonth() + 1
+		const yearItem = date.getFullYear()
 
 		if (monthItem === month && yearItem === year) {
-			result.push(item);
+			result.push(item)
 		}
-	});
+	})
 
-	return result;
-};
+	return result
+}
 
 // Lấy ra các học sinh chính sách
 export const getPolicyBeneficiary = async (page: number, limit: number) => {
@@ -342,19 +342,19 @@ export const getPolicyBeneficiary = async (page: number, limit: number) => {
 			select: '-absentDays',
 			sort: { class: 'desc' }
 		}
-	);
-};
+	)
+}
 
 export const promoteStudentsByClass = async (classId: string) => {
-	const studentsInClass = await getStudentByClass(classId);
+	const studentsInClass = await getStudentByClass(classId)
 	const promotedStudents = studentsInClass.filter(
 		(student: IStudent & { remarkAsQualified: boolean; completedProgram: boolean }) =>
 			student.remarkAsQualified && student.completedProgram
-	);
-	console.log('promotedStudents', promotedStudents);
+	)
+	console.log('promotedStudents', promotedStudents)
 	const isAbleToPromoted =
 		promotedStudents.length > 0 &&
-		promotedStudents.every((student) => student.class?.grade === 5 && student.class !== null);
+		promotedStudents.every((student) => student.class?.grade === 5 && student.class !== null)
 	if (isAbleToPromoted) {
 		const [graduatedStudents, _] = await Promise.all([
 			StudentModel.updateMany(
@@ -365,11 +365,11 @@ export const promoteStudentsByClass = async (classId: string) => {
 				{ new: true }
 			),
 			deactivateParentsUser(promotedStudents.map((student) => student.parents))
-		]);
-		return { message: `${graduatedStudents.modifiedCount} students has been promoted.` };
+		])
+		return { message: `${graduatedStudents.modifiedCount} students has been promoted.` }
 	}
-	return { message: 'No student to promoted' };
-};
+	return { message: 'No student to promoted' }
+}
 
 export const getStudentsByParents = async (parentsId: string | ObjectId) =>
 	await StudentModel.find({ parents: parentsId })
@@ -382,4 +382,4 @@ export const getStudentsByParents = async (parentsId: string | ObjectId) =>
 				select: 'displayName phone email'
 			}
 		})
-		.select('-parents -createdAt -updatedAt');
+		.select('-parents -createdAt -updatedAt')

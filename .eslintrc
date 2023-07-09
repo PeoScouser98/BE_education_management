@@ -2,12 +2,7 @@
 	"root": true,
 	"parser": "@typescript-eslint/parser",
 	"plugins": ["@typescript-eslint", "prettier"],
-	"extends": [
-		// "eslint:recommended",
-		"plugin:@typescript-eslint/eslint-recommended",
-		"plugin:@typescript-eslint/recommended",
-		"prettier"
-	],
+	"extends": ["plugin:@typescript-eslint/eslint-recommended", "plugin:@typescript-eslint/recommended", "prettier"],
 	"rules": {
 		"no-useless-catch": "warn",
 		"prettier/prettier": [
@@ -18,7 +13,7 @@
 				"singleQuote": true,
 				"printWidth": 120,
 				"trailingComma": "none",
-				"semi": "off"
+				"semi": false
 			}
 		]
 	}

@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import 'dotenv/config'
 
 export const redisOptions = {
 	password: process.env.REDIS_PASSWORD!,
@@ -9,4 +9,4 @@ export const redisOptions = {
 		keepAlive: -1,
 		connectionTimeOut: 5000
 	}
-};
+}

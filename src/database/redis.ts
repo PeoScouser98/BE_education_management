@@ -1,20 +1,20 @@
-import 'dotenv/config';
-import * as redis from 'redis';
-import { redisOptions } from '../configs/redis.config';
+import 'dotenv/config'
+import * as redis from 'redis'
+import { redisOptions } from '../configs/redis.config'
 
-const redisClient = redis.createClient(redisOptions);
+const redisClient = redis.createClient(redisOptions)
 
 redisClient
 	.connect()
 	.then(() => {
-		console.log('[SUCCESS] ::: Connected to Redis');
+		console.log('[SUCCESS] ::: Connected to Redis')
 	})
 	.catch((error) => {
-		console.log('[ERROR] ::: ', error.message);
-	});
+		console.log('[ERROR] ::: ', error.message)
+	})
 
 redisClient.on('error', (error) => {
-	console.log(error.message);
-});
+	console.log(error.message)
+})
 
-export default redisClient;
+export default redisClient

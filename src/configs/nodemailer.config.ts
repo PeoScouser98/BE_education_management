@@ -1,5 +1,5 @@
-import 'dotenv/config';
-import nodemailer from 'nodemailer';
+import 'dotenv/config'
+import nodemailer from 'nodemailer'
 
 const transporter = nodemailer.createTransport({
 	service: 'gmail',
@@ -11,5 +11,5 @@ const transporter = nodemailer.createTransport({
 	tls: {
 		rejectUnauthorized: false
 	}
-});
-export default transporter;
+})
+export default transporter

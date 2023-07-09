@@ -1,6 +1,6 @@
-import Joi from 'joi';
-import { ISubject } from '../../types/subject.type';
-import { toCapitalize } from '../../helpers/toolkit';
+import Joi from 'joi'
+import { ISubject } from '../../types/subject.type'
+import { toCapitalize } from '../../helpers/toolkit'
 
 export const validateSubjectRequestBody = (data: Omit<ISubject, '_id'>) => {
 	const schema = Joi.object({
@@ -12,9 +12,9 @@ export const validateSubjectRequestBody = (data: Omit<ISubject, '_id'>) => {
 			is: Joi.boolean().equal(true),
 			then: Joi.boolean().default(false)
 		})
-	});
-	return schema.validate(data);
-};
+	})
+	return schema.validate(data)
+}
 
 export const validateSubjectUpdateBody = (data: Partial<Omit<ISubject, '_id'>>) => {
 	const schema = Joi.object({
@@ -28,6 +28,6 @@ export const validateSubjectUpdateBody = (data: Partial<Omit<ISubject, '_id'>>) 
 				then: Joi.boolean().default(false)
 			})
 			.optional()
-	});
-	return schema.validate(data);
-};
+	})
+	return schema.validate(data)
+}

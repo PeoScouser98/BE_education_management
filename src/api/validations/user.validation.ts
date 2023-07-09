@@ -1,6 +1,6 @@
-import Joi from 'joi';
-import { IUser, UserGenderEnum } from '../../types/user.type';
-import { toCapitalize } from '../../helpers/toolkit';
+import Joi from 'joi'
+import { IUser, UserGenderEnum } from '../../types/user.type'
+import { toCapitalize } from '../../helpers/toolkit'
 
 export const validateSigninData = (payload: Pick<IUser, 'phone' & 'password'>) => {
 	const schema = Joi.object({
@@ -20,9 +20,9 @@ export const validateSigninData = (payload: Pick<IUser, 'phone' & 'password'>) =
 			.error(new Error('Invalid email or userName')),
 
 		password: Joi.string().min(6).max(32).required()
-	});
-	return schema.validate(payload);
-};
+	})
+	return schema.validate(payload)
+}
 
 export const validateNewTeacherData = (payload: Omit<IUser, '_id'>) => {
 	const schema = Joi.object({
@@ -49,9 +49,9 @@ export const validateNewTeacherData = (payload: Omit<IUser, '_id'>) => {
 			graduatedAt: Joi.date().required(),
 			qualification: Joi.string().custom(toCapitalize).required()
 		})
-	});
-	return schema.validate(payload);
-};
+	})
+	return schema.validate(payload)
+}
 
 export const validateNewParentsData = (payload: Omit<IUser, '_id'> | Omit<IUser, '_id'>[]) => {
 	const schema = Joi.object({
@@ -70,15 +70,15 @@ export const validateNewParentsData = (payload: Omit<IUser, '_id'> | Omit<IUser,
 		address: Joi.string().required(),
 		dateOfBirth: Joi.date().required(),
 		gender: Joi.string().required()
-	});
+	})
 
 	const arraySchema = Joi.array()
 		.items(schema)
 		.unique((user1, user2) => user1.phone === user2.phone)
-		.unique((user1, user2) => user1.email.toLowerCase() === user2.email.toLowerCase());
+		.unique((user1, user2) => user1.email.toLowerCase() === user2.email.toLowerCase())
 
-	return Array.isArray(payload) ? arraySchema.validate(payload) : schema.validate(payload);
-};
+	return Array.isArray(payload) ? arraySchema.validate(payload) : schema.validate(payload)
+}
 
 export const validateUpdateUserData = (payload: Partial<IUser>) => {
 	const schema = Joi.object({
@@ -104,6 +104,6 @@ export const validateUpdateUserData = (payload: Partial<IUser>) => {
 			graduatedAt: Joi.date().required(),
 			qualification: Joi.string().required()
 		}).optional()
-	});
-	return schema.validate(payload);
-};
+	})
+	return schema.validate(payload)
+}

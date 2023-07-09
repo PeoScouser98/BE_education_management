@@ -1,5 +1,5 @@
-import { Model, ObjectId } from 'mongoose';
-import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
+import { Model, ObjectId } from 'mongoose'
+import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete'
 
 export enum PermissionActionsEnum {
 	GET = 'GET',
@@ -8,17 +8,17 @@ export enum PermissionActionsEnum {
 	DELETE = 'DELETE'
 }
 export interface IPermission extends Document {
-	_id: ObjectId;
-	role: string;
-	type: string;
+	_id: ObjectId
+	role: string
+	type: string
 	permissions: Array<{
-		type: string;
-		allowedActions: Array<string>;
-	}>;
+		type: string
+		allowedActions: Array<string>
+	}>
 }
 
 export interface IPermissionDocument extends Omit<SoftDeleteDocument, '_id'>, IPermission {}
 
-export type TPermissionModel = Model<IPermission>;
+export type TPermissionModel = Model<IPermission>
 
-export type TSoftDeletePermissionModel = SoftDeleteModel<IPermissionDocument, TPermissionModel>;
+export type TSoftDeletePermissionModel = SoftDeleteModel<IPermissionDocument, TPermissionModel>

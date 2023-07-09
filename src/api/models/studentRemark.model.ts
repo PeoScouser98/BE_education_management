@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
-import mongooseAutoPopulate from 'mongoose-autopopulate';
-import { IStudentRemark } from '../../types/student.type';
+import mongoose from 'mongoose'
+import mongooseAutoPopulate from 'mongoose-autopopulate'
+import { IStudentRemark } from '../../types/student.type'
 
 const StudentRemarkSchema = new mongoose.Schema(
 	{
@@ -42,10 +42,10 @@ const StudentRemarkSchema = new mongoose.Schema(
 		versionKey: false,
 		timestamps: true
 	}
-);
+)
 
-StudentRemarkSchema.plugin(mongooseAutoPopulate);
+StudentRemarkSchema.plugin(mongooseAutoPopulate)
 
-const StudentRemarkModel = mongoose.model<IStudentRemark>('StudentRemarks', StudentRemarkSchema);
+const StudentRemarkModel = mongoose.model<IStudentRemark>('StudentRemarks', StudentRemarkSchema)
 
-export default StudentRemarkModel;
+export default StudentRemarkModel

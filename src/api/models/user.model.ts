@@ -1,12 +1,12 @@
-import bcrypt, { genSaltSync } from 'bcrypt';
-import 'dotenv/config';
-import mongoose from 'mongoose';
-import mongooseDelete from 'mongoose-delete';
-import mongooseAutoPopulate from 'mongoose-autopopulate';
+import bcrypt, { genSaltSync } from 'bcrypt'
+import 'dotenv/config'
+import mongoose from 'mongoose'
+import mongooseDelete from 'mongoose-delete'
+import mongooseAutoPopulate from 'mongoose-autopopulate'
 
-import { TSoftDeleteUserModel, IUser, IUserDocument, UserGenderEnum, UserRoleEnum } from '../../types/user.type';
-import mongooseLeanVirtuals from 'mongoose-lean-virtuals';
-import { toCapitalize } from '../../helpers/toolkit';
+import { TSoftDeleteUserModel, IUser, IUserDocument, UserGenderEnum, UserRoleEnum } from '../../types/user.type'
+import mongooseLeanVirtuals from 'mongoose-lean-virtuals'
+import { toCapitalize } from '../../helpers/toolkit'
 
 const UserSchema = new mongoose.Schema<IUser>(
 	{
@@ -73,46 +73,46 @@ const UserSchema = new mongoose.Schema<IUser>(
 		toJSON: { virtuals: true },
 		autoIndex: true
 	}
-);
-UserSchema.index({ displayName: 'text' });
+)
+UserSchema.index({ displayName: 'text' })
 UserSchema.virtual('children', {
 	localField: '_id',
 	foreignField: 'parents',
 	ref: 'Students'
-});
+})
 
 UserSchema.virtual('userStatusText').get(function () {
 	switch (true) {
 		case this.isVerified === false:
-			return 'Chưa kích hoạt';
+			return 'Chưa kích hoạt'
 		case this.employmentStatus && this.isVerified:
-			return 'Đang làm việc';
+			return 'Đang làm việc'
 		case this.employmentStatus === false:
-			return 'Đã nghỉ việc';
+			return 'Đã nghỉ việc'
 	}
-});
+})
 
 UserSchema.methods.verifyPassword = function (password: string) {
-	if (!password) return false;
-	return bcrypt.compareSync(password, this.password);
-};
+	if (!password) return false
+	return bcrypt.compareSync(password, this.password)
+}
 
 UserSchema.pre('save', function (next) {
 	if (this.password) {
-		this.password = bcrypt.hashSync(this.password, genSaltSync(+process.env.SALT_ROUND!));
+		this.password = bcrypt.hashSync(this.password, genSaltSync(+process.env.SALT_ROUND!))
 	}
-	this.displayName = toCapitalize(this.displayName)!;
-	next();
-});
+	this.displayName = toCapitalize(this.displayName)!
+	next()
+})
 
 UserSchema.plugin(mongooseDelete, {
 	overrideMethods: ['find', 'findOne', 'findOneAndUpdate'],
 	deletedAt: true
-});
-UserSchema.plugin(mongooseLeanVirtuals);
-UserSchema.plugin(mongooseAutoPopulate);
+})
+UserSchema.plugin(mongooseLeanVirtuals)
+UserSchema.plugin(mongooseAutoPopulate)
 
-const UserModel = mongoose.model<IUserDocument, TSoftDeleteUserModel>('Users', UserSchema);
-UserModel.createIndexes();
+const UserModel = mongoose.model<IUserDocument, TSoftDeleteUserModel>('Users', UserSchema)
+UserModel.createIndexes()
 
-export default UserModel;
+export default UserModel

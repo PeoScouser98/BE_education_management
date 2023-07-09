@@ -1,5 +1,5 @@
-import Joi from 'joi';
-import { AttendanceSessionEnum, IAttendance } from '../../types/attendance.type';
+import Joi from 'joi'
+import { AttendanceSessionEnum, IAttendance } from '../../types/attendance.type'
 
 export const validateAttedancePayload = (payload: Array<Omit<IAttendance, '_id'>>) => {
 	const schema = Joi.array().items(
@@ -14,6 +14,6 @@ export const validateAttedancePayload = (payload: Array<Omit<IAttendance, '_id'>
 				then: Joi.forbidden()
 			})
 		})
-	);
-	return schema.validate(payload);
-};
+	)
+	return schema.validate(payload)
+}

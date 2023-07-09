@@ -1,5 +1,5 @@
-import { Model, ObjectId } from 'mongoose';
-import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
+import { Model, ObjectId } from 'mongoose'
+import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete'
 
 export enum UserGenderEnum {
 	MALE = 'Nam',
@@ -13,26 +13,26 @@ export enum UserRoleEnum {
 }
 
 export interface IUser extends Document {
-	_id: string | ObjectId;
-	email: string;
-	displayName: string;
-	password?: string;
-	picture: string;
-	address: string;
-	dateOfBirth: Date;
-	gender: UserGenderEnum;
-	phone: string;
-	role: UserRoleEnum;
+	_id: string | ObjectId
+	email: string
+	displayName: string
+	password?: string
+	picture: string
+	address: string
+	dateOfBirth: Date
+	gender: UserGenderEnum
+	phone: string
+	role: UserRoleEnum
 	eduBackground?: {
-		universityName: string;
-		graduatedAt: Date;
-		qualification: string;
-	};
-	employmentStatus?: boolean;
-	isVerified: boolean;
-	verifyPassword: (password: string) => boolean;
+		universityName: string
+		graduatedAt: Date
+		qualification: string
+	}
+	employmentStatus?: boolean
+	isVerified: boolean
+	verifyPassword: (password: string) => boolean
 }
 
 export interface IUserDocument extends IUser, Omit<SoftDeleteDocument, '_id'> {}
-export type TUserModel = Model<IUserDocument>;
-export type TSoftDeleteUserModel = SoftDeleteModel<IUserDocument, TUserModel>;
+export type TUserModel = Model<IUserDocument>
+export type TSoftDeleteUserModel = SoftDeleteModel<IUserDocument, TUserModel>

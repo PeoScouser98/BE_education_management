@@ -1,9 +1,9 @@
-import { paramsStringify } from './queryParams';
+import { paramsStringify } from './queryParams'
 
 const randomHexColor = () => {
-	const RanHexColor = Math.floor(Math.random() * 16777215).toString(16);
-	return RanHexColor;
-};
+	const RanHexColor = Math.floor(Math.random() * 16777215).toString(16)
+	return RanHexColor
+}
 
 const generatePicureByName = (char: string) => {
 	return (
@@ -11,7 +11,7 @@ const generatePicureByName = (char: string) => {
 		paramsStringify({
 			name: char
 		})
-	);
-};
+	)
+}
 
-export default generatePicureByName;
+export default generatePicureByName
