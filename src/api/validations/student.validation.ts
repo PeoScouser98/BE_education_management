@@ -1,6 +1,7 @@
 import Joi from 'joi';
-import { IAttendance, IStudent, StudentStatusEnum } from '../../types/student.type';
+import { IStudent, StudentStatusEnum } from '../../types/student.type';
 import { UserGenderEnum } from '../../types/user.type';
+import { IAttendance } from '../../types/attendance.type';
 
 // validate
 export const validateReqBodyStudent = (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
