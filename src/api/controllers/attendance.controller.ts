@@ -1,4 +1,3 @@
-import { toUpperCase } from './../../helpers/toolkit'
 import { AttendanceSessionEnum } from './../../types/attendance.type'
 import { HttpStatusCode } from './../../configs/statusCode.config'
 import { Request, Response } from 'express'
@@ -11,14 +10,6 @@ export const saveAttendanceByClass = useCatchAsync(async (req: Request, res: Res
 	const students = req.body
 	const result = await AttendanceService.saveAttendanceByClass(students)
 	return res.status(HttpStatusCode.CREATED).json(result)
-})
-
-export const getAttendanceByClass = useCatchAsync(async (req: Request, res: Response) => {
-	const classId: string = req.params.classId
-	// get attendance by class service
-	const attendanceDate = req.query._dt as string
-	const result = await AttendanceService.getAttendanceByClass(classId, attendanceDate)
-	return res.status(HttpStatusCode.OK).json(result)
 })
 
 export const getStudentAttendance = useCatchAsync(async (req: Request, res: Response) => {
@@ -42,16 +33,15 @@ export const getStudentAttendance = useCatchAsync(async (req: Request, res: Resp
 	return res.status(HttpStatusCode.OK).json(studentAttendance)
 })
 
-export const getTodayClassAttendanceBySession = useCatchAsync(async (req: Request, res: Response) => {
+export const getClassAttendanceBySession = useCatchAsync(async (req: Request, res: Response) => {
 	const session = req.query._ss
-	const date = req.query._dt
+	const date = req.query._dt ? req.query._dt.toString() : undefined
 	if (!session) throw createHttpError.BadRequest('Session is required for searching!')
-	const validSessionFilterValues = ['morning', 'afternoon']
-	if (!validSessionFilterValues.includes(session))
+	if (!Object.keys(AttendanceSessionEnum).includes(session.toString().toUpperCase()))
 		throw createHttpError.BadRequest('Invalid session filter value! Valid values are "morning", "afternoon"')
-	const result = await AttendanceService.getTodayClassAttendanceBySession(
+	const result = await AttendanceService.getClassAttendanceBySession(
 		req.params.classId,
-		date.toString(),
+		date,
 		session.toString().toUpperCase()
 	)
 	return res.status(HttpStatusCode.OK).json(result)

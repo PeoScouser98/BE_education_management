@@ -111,16 +111,17 @@ export const studentAttendance = async (studentId: string, timeRangeOption?: { f
 }
 
 // Reset form save attandance by class
-export const getTodayClassAttendanceBySession = async (classId: string, date: string, ss: string) => {
+export const getClassAttendanceBySession = async (classId: string, date: string | undefined, ss: string) => {
 	if (!!date && !moment(date).isValid()) throw createHttpError.BadRequest('Invalid date')
-	const studentsByClass = await StudentModel.find({ class: classId }).distinct('_id')
-	const attendanceOfClass = await AttendanceModel.find({
-		student: { $in: studentsByClass },
+	const studentsByClass = await StudentModel.find({ class: classId }).select('_id fullName').lean()
+	let attendanceOfClass = await AttendanceModel.find({
+		student: { $in: studentsByClass.map((std) => std._id) },
 		date: moment(date).format('YYYY-MM-DD'),
 		session: AttendanceSessionEnum[ss] as string
 	})
 		.populate({ path: 'student', select: '_id fullName', options: { lean: true } })
-		.select('-session -createdAt -updatedAt -date')
+		.select('-session -createdAt -updatedAt -date -_id')
+	if (!attendanceOfClass.length) attendanceOfClass = studentsByClass.map((std) => ({ student: std, isPresent: true }))
 	return {
 		session: AttendanceSessionEnum[ss],
 		date: moment(date).format('DD/MM/YYYY'),
