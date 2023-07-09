@@ -1,18 +1,11 @@
 import createHttpError from 'http-errors';
 import mongoose, { ObjectId, isValidObjectId } from 'mongoose';
-import { HttpStatusCode } from '../../configs/statusCode.config';
-import { compareDates } from '../../helpers/toolkit';
-import { IAttendance, IStudent, StudentStatusEnum } from '../../types/student.type';
+import { IAttendance } from '../../types/attendance.type';
+import { IStudent, StudentStatusEnum } from '../../types/student.type';
 import { IUser } from '../../types/user.type';
-import ClassModel from '../models/class.model';
 import SchoolYearModel from '../models/schoolYear.model';
 import StudentModel from '../models/student.model';
-import {
-	validateAttendanceStudent,
-	validateReqBodyStudent,
-	validateUpdateReqBodyStudent
-} from '../validations/student.validation';
-import { getCurrentSchoolYear } from './schoolYear.service';
+import { validateReqBodyStudent, validateUpdateReqBodyStudent } from '../validations/student.validation';
 import { deactivateParentsUser } from './user.service';
 
 // create new student using form
@@ -320,179 +313,6 @@ export const getStudentDropout = async (year: 'all' | number, page: number, limi
 	});
 };
 
-// điểm danh
-export const markAttendanceStudent = async (
-	classId: string,
-	absentStudents: Array<{
-		idStudent: string;
-		absent?: Omit<IAttendance, '_id'>;
-	}>
-) => {
-	if (!absentStudents) {
-		throw createHttpError(HttpStatusCode.NO_CONTENT);
-	}
-	if (!Array.isArray(absentStudents)) {
-		throw createHttpError(400, 'The list of absent students is not an array type');
-	}
-	if (absentStudents.length === 0) {
-		return {
-			message: 'Attendance has been saved!'
-		};
-	}
-
-	// nếu data gửi lên là 1 học sinh đã điểm danh trong ngày rồi
-
-	// validate học sinh nghỉ gửi lên
-	const errorValidates: { id: string; message: string }[] = [];
-
-	let message = '';
-	absentStudents.forEach((item) => {
-		if (!item.idStudent || !isValidObjectId(item.idStudent)) {
-			message = 'idStudent of the student is invalid';
-		}
-
-		if (item.absent) {
-			const { error } = validateAttendanceStudent(item.absent);
-			if (error) {
-				message += ' && ' + error.message;
-			}
-		}
-
-		if (message.length > 0) {
-			errorValidates.push({ id: item.idStudent, message: message });
-		}
-	});
-
-	if (errorValidates.length > 0) {
-		throw createHttpError(400, 'The body data does not satisfy the validation', {
-			error: errorValidates
-		});
-	}
-
-	// Lấy ra các id học sinh nghỉ
-	const absentStudentIdList: string[] = absentStudents.map((student) => student.idStudent);
-
-	// Kiểm tra xem học sinh vắng có đúng học sinh của lớp không
-	const checkExist: IStudent[] = await StudentModel.find({
-		_id: { $in: absentStudentIdList },
-		class: classId
-	});
-
-	const studentNotExist: string[] = [];
-	if (checkExist.length !== absentStudentIdList.length) {
-		absentStudentIdList.forEach((id) => {
-			const check = checkExist.find((item) => item._id.toString() === id);
-
-			if (!check) {
-				studentNotExist.push(id);
-			}
-		});
-	}
-
-	if (studentNotExist.length > 0) {
-		throw createHttpError(404, 'This student does not exist in the class', {
-			error: studentNotExist
-		});
-	}
-
-	// kiểm tra xem học sinh vắng gửi lên đã tồn tại điểm danh trong ngày chưa ( nếu đã tồn tại thì bắn lỗi học sinh đã điểm danh về )
-	const attendedStudents: { id: string; name: string }[] = [];
-
-	checkExist.forEach((student) => {
-		const check = student.absentDays?.find((item) => {
-			const checkDate = compareDates(new Date(), item?.date);
-
-			return checkDate === 0 ? true : false;
-		});
-
-		if (check) {
-			attendedStudents.push({
-				id: student._id.toString(),
-				name: student.fullName
-			});
-		}
-	});
-
-	if (attendedStudents.length > 0) {
-		throw createHttpError(409, "Today's attendance for the student already exists", {
-			error: attendedStudents
-		});
-	}
-
-	// lấy ra học kỳ hiện tại
-	const schoolYearCurr = await getCurrentSchoolYear();
-
-	// Thời gian điểm danh sẽ được server  tự động lấy là thời gian hiện tại
-	const bulkUpdateAbsentStudents: any = absentStudents.map((item) => {
-		return {
-			updateOne: {
-				filter: { _id: item.idStudent },
-				update: {
-					$push: {
-						absentDays: {
-							...item.absent,
-							date: new Date(),
-							schoolYear: schoolYearCurr._id
-						}
-					}
-				}
-			}
-		};
-	});
-
-	await StudentModel.bulkWrite(bulkUpdateAbsentStudents);
-
-	return {
-		message: 'Attendance has been saved!'
-	};
-};
-
-// lấy ra tình trạng điểm danh của 1 lớp theo ngày
-export const dailyAttendanceList = async (classId: string, date: Date) => {
-	if (!classId || !mongoose.Types.ObjectId.isValid(classId)) {
-		throw createHttpError.BadRequest('The provided idClass is invalid');
-	}
-
-	// lấy ra các học sinh vắng mặt
-	const nextDay = new Date(date);
-	nextDay.setDate(nextDay.getDate() + 1);
-
-	const studentAbsents: IStudent[] = await StudentModel.find({
-		absentDays: {
-			$elemMatch: {
-				date: {
-					$gte: date,
-					$lt: nextDay
-				}
-			}
-		},
-		class: classId
-	}).lean();
-
-	if (studentAbsents.length === 0) {
-		return {
-			absent: 0,
-			students: []
-		};
-	}
-
-	const result = studentAbsents.map((item) => {
-		let attendanceStatus = true;
-		const check = studentAbsents.find((itemAb) => itemAb._id.toString() === item._id.toString());
-
-		attendanceStatus = check ? false : true;
-		return {
-			...item,
-			attendanceStatus: attendanceStatus
-		};
-	});
-
-	return {
-		absent: studentAbsents.length,
-		students: result
-	};
-};
-
 // Lấy ra tình trạng điểm danh của 1 học sinh trong 1 tháng (sẽ trả về ngày vắng mặt trong tháng đấy)
 export const attendanceOfStudentByMonth = async (id: string, month: number, year: number) => {
 	const { absentDays } = await getDetailStudent(id);
@@ -523,41 +343,6 @@ export const getPolicyBeneficiary = async (page: number, limit: number) => {
 			sort: { class: 'desc' }
 		}
 	);
-};
-
-// Lấy ra tất cả các học sinh vắng mặt điểm danh
-export const getAttendanceAllClass = async (page: number, limit: number, date: Date) => {
-	const nextDay = new Date(date);
-	nextDay.setDate(date.getDate() + 1);
-
-	// học sinh vắng mặt của toàn trường trong ngày
-	const studentAbsentDays = await StudentModel.paginate(
-		{
-			absentDays: {
-				$elemMatch: {
-					date: {
-						$gte: date,
-						$lt: nextDay
-					}
-				}
-			}
-		},
-		{
-			lean: true,
-			page: page,
-			limit: limit,
-			sort: { class: 'desc' },
-			populate: { path: 'class', select: 'className' }
-		}
-	);
-
-	// lấy ra tất cả các class hiện tại của trường
-	const classes = await ClassModel.find({}).sort({ grade: 'asc' }).lean().select('className');
-
-	return {
-		...studentAbsentDays,
-		classes
-	};
 };
 
 export const promoteStudentsByClass = async (classId: string) => {

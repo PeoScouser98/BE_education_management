@@ -2,6 +2,7 @@ import { Model, ObjectId, PaginateModel } from 'mongoose';
 import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 import { IUser } from './user.type';
 import { IClass } from './class.type';
+import { IAttendance } from './attendance.type';
 
 export interface IStudent extends Document {
 	_id: ObjectId;
@@ -27,12 +28,6 @@ export enum StudentStatusEnum {
 	GRADUATED = 'Hoàn thành chương trình tiểu học'
 }
 
-export interface IAttendance extends Document {
-	_id: ObjectId;
-	date: Date;
-	hasPermision?: boolean;
-	reason?: string;
-}
 export interface IStudentRemark extends Document {
 	_id: ObjectId;
 	student: ObjectId | Pick<IStudent, '_id' | 'fullName' | 'class'>;

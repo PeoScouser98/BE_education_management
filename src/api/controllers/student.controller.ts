@@ -85,55 +85,11 @@ export const getStudentLeftSchool = useCatchAsync(async (req: Request, res: Resp
 	return res.status(HttpStatusCode.OK).json(result);
 });
 
-// [PUT] /api/student/attendance/:classId
-export const attendanceStudentByClass = useCatchAsync(async (req: Request, res: Response) => {
-	const classId: string = req.params.classId;
-	const data = req.body;
-	const result = await StudentServices.markAttendanceStudent(classId, data);
-	return res.status(HttpStatusCode.CREATED).json(result);
-});
-
-// [GET] /api/students/attendance/:classId?date='03-26-2023' MM-DD-YYYY
-export const selectAttendanceByClass = useCatchAsync(async (req: Request, res: Response) => {
-	const classId: string = req.params.classId;
-	let date: any = req.query._date;
-	if (date) {
-		date = new Date(formatDate(new Date(date)));
-	} else {
-		date = new Date(formatDate(new Date()));
-	}
-	const result = await StudentServices.dailyAttendanceList(classId, date);
-	return res.status(HttpStatusCode.OK).json(result);
-});
-
-// [GET] /api/student/attendance/:id?month=03&year2023
-export const getAttendanceByStudent = useCatchAsync(async (req: Request, res: Response) => {
-	const id: string = req.params.id;
-	const month = req.query._month || new Date().getMonth() + 1;
-	const year = req.query._year || new Date().getFullYear();
-	const result = await StudentServices.attendanceOfStudentByMonth(id, Number(month), Number(year));
-	return res.status(HttpStatusCode.OK).json(result);
-});
-
 // [GET] /api/students/policyBeneficiary?page=1&limit=10
 export const getPolicyBeneficiary = useCatchAsync(async (req: Request, res: Response) => {
 	const page = req.query._page || 1;
 	const limit = req.query._limit || 10;
 	const result = await StudentServices.getPolicyBeneficiary(Number(page), Number(limit));
-	return res.status(HttpStatusCode.OK).json(result);
-});
-
-// [GET] /students/attendance?page=1&limit=10&date='03-28-2023' MM-DD-YYYY
-export const selectAttendanceAllClass = useCatchAsync(async (req: Request, res: Response) => {
-	const page = req.query._page || 1;
-	const limit = req.query._limit || 10;
-	let date: any = req.query._date;
-	if (date) {
-		date = new Date(formatDate(new Date(date)));
-	} else {
-		date = new Date(formatDate(new Date()));
-	}
-	const result = await StudentServices.getAttendanceAllClass(Number(page), Number(limit), date);
 	return res.status(HttpStatusCode.OK).json(result);
 });
 
