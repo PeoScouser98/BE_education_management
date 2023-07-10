@@ -15,7 +15,6 @@ export interface ITimeTable extends Document {
 		wednesday: Array<IScheduleSlotTime>
 		thursday: Array<IScheduleSlotTime>
 		friday: Array<IScheduleSlotTime>
-		saturday: Array<IScheduleSlotTime>
 	}
 	createdAt: Date
 	updatedAt: Date
@@ -26,6 +25,5 @@ export enum DayInWeekEnum {
 	TUESDAY = 'tuesday',
 	WEDNESSDAY = 'wednesday',
 	THURSDAY = 'thursday',
-	FRIDAY = 'friday',
-	SATURDAY = 'saturday'
+	FRIDAY = 'friday'
 }

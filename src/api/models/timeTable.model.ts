@@ -10,7 +10,7 @@ const ScheduleSlotSchema = new mongoose.Schema(
 		period: {
 			type: Number,
 			require: true,
-			enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			enum: [1, 2, 3, 4, 5, 6, 7, 8]
 		},
 		subject: {
 			type: mongoose.Types.ObjectId,
@@ -50,8 +50,7 @@ const TimeTableSchema = new mongoose.Schema(
 			tuesday: [ScheduleSlotSchema],
 			wednesday: [ScheduleSlotSchema],
 			thursday: [ScheduleSlotSchema],
-			friday: [ScheduleSlotSchema],
-			saturday: [ScheduleSlotSchema]
+			friday: [ScheduleSlotSchema]
 		}
 	},
 	{

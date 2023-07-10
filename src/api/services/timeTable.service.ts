@@ -29,8 +29,7 @@ export const getTeacherTimeTableByClass = async (teacherId: string, classId: str
 				'schedule.tuesday': { $elemMatch: { teacher: teacherId } },
 				'schedule.wednesday': { $elemMatch: { teacher: teacherId } },
 				'schedule.thursday': { $elemMatch: { teacher: teacherId } },
-				'schedule.friday': { $elemMatch: { teacher: teacherId } },
-				'schedule.saturday': { $elemMatch: { teacher: teacherId } }
+				'schedule.friday': { $elemMatch: { teacher: teacherId } }
 			}
 		]
 	}).transform((doc) => {
