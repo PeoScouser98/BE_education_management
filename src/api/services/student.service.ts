@@ -48,165 +48,11 @@ export const updateStudent = async (id: string, data: Partial<Omit<IStudent, '_i
 
 // get student theo class
 export const getStudentByClass = async (classId: string) => {
-	const [currentSchoolYear] = await SchoolYearModel.find().sort({ endAt: -1 })
-	if (!currentSchoolYear)
-		return await StudentModel.find({
-			class: classId,
-			dropoutDate: null,
-			transferSchoolDate: null
-		})
-
-	return await StudentModel.aggregate()
-		.match({
-			class: new mongoose.Types.ObjectId(classId),
-			dropoutDate: null,
-			transferSchoolDate: null
-		})
-		.lookup({
-			from: 'users',
-			localField: 'parents',
-			foreignField: '_id',
-			as: 'parents',
-			pipeline: [
-				{
-					$project: {
-						_id: 1,
-						email: 1,
-						displayName: 1,
-						phone: 1
-					}
-				}
-			]
-		})
-		// .unwind('$parents')
-		.lookup({
-			from: 'student_remarks',
-			localField: '_id',
-			let: { studentId: '$_id' },
-			foreignField: 'student',
-			as: 'remarkAsQualified',
-			pipeline: [
-				{
-					$match: {
-						$expr: {
-							$and: [
-								{
-									$eq: ['$student', '$$studentId']
-								},
-								{
-									$eq: ['$schoolYear', currentSchoolYear._id]
-								}
-							]
-						}
-					}
-				},
-				{
-					$project: {
-						_id: 0,
-						isQualified: 1
-					}
-				}
-			]
-		})
-		.unwind('$remarkAsQualified')
-		.lookup({
-			from: 'subject_transcriptions',
-			localField: '_id',
-			let: { studentId: '$_id' },
-			foreignField: 'student',
-			as: 'completedProgram',
-			pipeline: [
-				{
-					$match: {
-						$expr: {
-							$and: [
-								{ $eq: ['$student', '$$studentId'] },
-								{
-									$eq: ['$schoolYear', currentSchoolYear._id]
-								}
-							]
-						}
-					}
-				}
-			]
-		})
-		.lookup({
-			from: 'classes',
-			localField: 'class',
-			foreignField: '_id',
-			as: 'class',
-			pipeline: [{ $project: { grade: 1, className: 1 } }]
-		})
-		.unwind('$class')
-		.addFields({
-			completedProgram: {
-				$cond: {
-					if: {
-						$or: [
-							{
-								$and: [
-									{ $in: ['$class.grade', [1, 2]] },
-									{ $eq: [{ $size: '$completedProgram' }, 9] },
-									{
-										$eq: [
-											{
-												$size: {
-													$filter: {
-														input: '$completedProgram',
-														as: 'item',
-														cond: { $eq: ['$$item.isPassed', true] }
-													}
-												}
-											},
-											9
-										]
-									}
-								]
-							},
-							{
-								$and: [
-									{ $in: ['$class.grade', [3, 4, 5]] },
-									{ $eq: [{ $size: '$completedProgram' }, 11] },
-									{
-										$eq: [
-											{
-												$size: {
-													$filter: {
-														input: '$completedProgram',
-														as: 'item',
-														cond: { $eq: ['$$item.isPassed', true] }
-													}
-												}
-											},
-											11
-										]
-									}
-								]
-							}
-						]
-					},
-					then: true,
-					else: false
-				}
-			},
-			remarkAsQualified: '$remarkAsQualified.isQualified',
-			parents: '$parents'
-		})
-		.addFields({
-			isGraduated: {
-				$cond: {
-					if: {
-						$and: [
-							{ $eq: ['$remarkAsQualified', true] },
-							{ $eq: ['$completedProgram', true] },
-							{ $eq: ['$class.grade', 5] }
-						]
-					},
-					then: true,
-					else: false
-				}
-			}
-		})
+	return await StudentModel.find({
+		class: classId,
+		dropoutDate: null,
+		transferSchoolDate: null
+	})
 }
 
 // get detail student
@@ -345,8 +191,163 @@ export const getPolicyBeneficiary = async (page: number, limit: number) => {
 	)
 }
 
+const getStudentWithAchievement = async (classId: string) => {
+	const [currentSchoolYear] = await SchoolYearModel.find().sort({ endAt: -1 })
+	return await StudentModel.aggregate()
+		.match({
+			class: new mongoose.Types.ObjectId(classId),
+			dropoutDate: null,
+			transferSchoolDate: null
+		})
+		.lookup({
+			from: 'users',
+			localField: 'parents',
+			foreignField: '_id',
+			as: 'parents',
+			pipeline: [
+				{
+					$project: {
+						_id: 1,
+						email: 1,
+						displayName: 1,
+						phone: 1
+					}
+				}
+			]
+		})
+		.unwind('$parents')
+		.lookup({
+			from: 'student_remarks',
+			localField: '_id',
+			let: { studentId: '$_id' },
+			foreignField: 'student',
+			as: 'remarkAsQualified',
+			pipeline: [
+				{
+					$match: {
+						$expr: {
+							$and: [
+								{
+									$eq: ['$student', '$$studentId']
+								},
+								{
+									$eq: ['$schoolYear', currentSchoolYear._id]
+								}
+							]
+						}
+					}
+				},
+				{
+					$project: {
+						_id: 0,
+						isQualified: 1
+					}
+				}
+			]
+		})
+		.unwind('$remarkAsQualified')
+		.lookup({
+			from: 'subject_transcriptions',
+			localField: '_id',
+			let: { studentId: '$_id' },
+			foreignField: 'student',
+			as: 'completedProgram',
+			pipeline: [
+				{
+					$match: {
+						$expr: {
+							$and: [
+								{ $eq: ['$student', '$$studentId'] },
+								{
+									$eq: ['$schoolYear', currentSchoolYear._id]
+								}
+							]
+						}
+					}
+				}
+			]
+		})
+		.lookup({
+			from: 'classes',
+			localField: 'class',
+			foreignField: '_id',
+			as: 'class',
+			pipeline: [{ $project: { grade: 1, className: 1 } }]
+		})
+		.unwind('$class')
+		.addFields({
+			completedProgram: {
+				$cond: {
+					if: {
+						$or: [
+							{
+								$and: [
+									{ $in: ['$class.grade', [1, 2]] },
+									{ $eq: [{ $size: '$completedProgram' }, 9] },
+									{
+										$eq: [
+											{
+												$size: {
+													$filter: {
+														input: '$completedProgram',
+														as: 'item',
+														cond: { $eq: ['$$item.isPassed', true] }
+													}
+												}
+											},
+											9
+										]
+									}
+								]
+							},
+							{
+								$and: [
+									{ $in: ['$class.grade', [3, 4, 5]] },
+									{ $eq: [{ $size: '$completedProgram' }, 11] },
+									{
+										$eq: [
+											{
+												$size: {
+													$filter: {
+														input: '$completedProgram',
+														as: 'item',
+														cond: { $eq: ['$$item.isPassed', true] }
+													}
+												}
+											},
+											11
+										]
+									}
+								]
+							}
+						]
+					},
+					then: true,
+					else: false
+				}
+			},
+			remarkAsQualified: '$remarkAsQualified.isQualified',
+			parents: '$parents'
+		})
+		.addFields({
+			isGraduated: {
+				$cond: {
+					if: {
+						$and: [
+							{ $eq: ['$remarkAsQualified', true] },
+							{ $eq: ['$completedProgram', true] },
+							{ $eq: ['$class.grade', 5] }
+						]
+					},
+					then: true,
+					else: false
+				}
+			}
+		})
+}
+
 export const promoteStudentsByClass = async (classId: string) => {
-	const studentsInClass = await getStudentByClass(classId)
+	const studentsInClass = await getStudentWithAchievement(classId)
 	const promotedStudents = studentsInClass.filter(
 		(student: IStudent & { remarkAsQualified: boolean; completedProgram: boolean }) =>
 			student.remarkAsQualified && student.completedProgram

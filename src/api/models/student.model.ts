@@ -53,29 +53,6 @@ const StudentSchema = new mongoose.Schema<IStudentDocument>(
 		dropoutDate: {
 			type: Date,
 			default: null
-		},
-		absentDays: {
-			type: [
-				{
-					date: {
-						type: Date,
-						default: new Date()
-					},
-					schoolYear: {
-						type: mongoose.Types.ObjectId,
-						ref: 'SchoolYears'
-					},
-					hasPermision: { type: Boolean, default: false },
-					reason: {
-						type: String,
-						minlength: 8,
-						maxLength: 256,
-						default: 'Không có lý do'
-					}
-				}
-			],
-			_id: false,
-			default: []
 		}
 	},
 	{
