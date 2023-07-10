@@ -20,7 +20,7 @@ export const createUser = async (payload: Partial<IUser> & Array<Partial<IUser>>
 	}
 	// Add a new teacher user
 	if (payload.role === UserRoleEnum.TEACHER) {
-		const existedTeacher = await UserModel.findOne({
+		const existedTeacher = await UserModel.findWithDeleted({
 			$or: [
 				{
 					email: payload.email,
