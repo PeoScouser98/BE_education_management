@@ -4,7 +4,6 @@ import { checkAuthenticated, checkIsHeadmaster, checkIsTeacher } from '../middle
 const router = express.Router()
 
 router.post('/classes', checkAuthenticated, checkIsHeadmaster, ClassController.createClass)
-router.patch('/classes/:id/restore', checkAuthenticated, checkIsHeadmaster, ClassController.restoreClass)
 router.patch('/classes/:id', checkAuthenticated, checkIsHeadmaster, ClassController.updateClass)
 router.delete('/classes/:id', checkAuthenticated, checkIsHeadmaster, ClassController.removeClass)
 router.get('/classes/trash', checkAuthenticated, checkIsHeadmaster, ClassController.getClassTrash)

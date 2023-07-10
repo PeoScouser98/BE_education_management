@@ -24,29 +24,9 @@ export const updateClass = useCatchAsync(async (req: Request, res: Response) => 
 // [DELETE] /api/classes/:id?option= (delete classes)
 export const removeClass = useCatchAsync(async (req: Request, res: Response) => {
 	const id = req.params.id
-	const option = req.query._option || 'soft'
 	if (!id) throw createHttpError(HttpStatusCode.NO_CONTENT)
-	let result
-	switch (option) {
-		case 'soft':
-			result = await ClassService.softDeleteClass(id)
-			break
-		case 'force':
-			result = await ClassService.forceDeleteClass(id)
-			break
-		default:
-			throw createHttpError.InternalServerError('InternalServerError')
-	}
-
+	const result = await ClassService.deleteClass(id)
 	return res.status(result.statusCode).json(result)
-})
-
-// [PUT] /api/class/restore/:id
-export const restoreClass = useCatchAsync(async (req: Request, res: Response) => {
-	const id: string = req.params.id
-	if (!id || !isValidObjectId(id)) throw createHttpError.BadRequest('Invalid class ID !')
-	const result = await ClassService.restoreClass(id)
-	return res.status(HttpStatusCode.CREATED).json(result)
 })
 
 // [GET] /api/classes?_sort=className&_order=desc

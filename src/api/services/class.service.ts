@@ -38,27 +38,7 @@ export const updateClass = async (payload: Partial<Omit<IClass, '_id'>>, classId
 	return await ClassModel.findOneAndUpdate({ _id: classId }, payload, { new: true })
 }
 
-export const softDeleteClass = async (classId: string) => {
-	const existedClass = await ClassModel.findOne({ _id: classId }).populate('totalStudents')
-	if (!existedClass) throw createHttpError.NotFound('Cannot find class to delete')
-	if (existedClass.totalStudents! > 0)
-		throw createHttpError.Conflict('Cannot delete class due to there are students in this class !')
-	await ClassModel.delete({ _id: classId })
-	return {
-		message: 'Moved the class to the trash',
-		statusCode: 200
-	}
-}
-
-export const restoreClass = async (id: string) => {
-	await ClassModel.restore({ _id: id })
-	return {
-		message: 'Class have been restored',
-		statusCode: 200
-	}
-}
-
-export const forceDeleteClass = async (classId: string) => {
+export const deleteClass = async (classId: string) => {
 	const existedClass = await ClassModel.findOne({ _id: classId }).populate('totalStudents')
 	if (!existedClass) throw createHttpError.NotFound('Cannot find class to delete')
 	if (existedClass.totalStudents! > 0)
