@@ -9,7 +9,6 @@ import { validateAttedancePayload } from '../validations/attendance.validation'
 import mongoose, { isValidObjectId } from 'mongoose'
 
 export const saveAttendanceByClass = async (payload: Array<Omit<IAttendance, '_id'>>) => {
-	// validate
 	const { error } = validateAttedancePayload(payload)
 	if (error) throw createHttpError.BadRequest(error.message)
 	const bulkWriteOption: mongodb.AnyBulkWriteOperation<Omit<IAttendance, '_id'>>[] = payload.map(
@@ -25,78 +24,12 @@ export const saveAttendanceByClass = async (payload: Array<Omit<IAttendance, '_i
 			}
 		})
 	)
-	const result = await AttendanceModel.bulkWrite(bulkWriteOption)
+	await AttendanceModel.bulkWrite(bulkWriteOption)
 
 	return { message: 'Save attendance successfully !' }
 }
 
-// Follow attendance of entire school
-export const getAttendanceByClass = async (classId: string, date?: string) => {
-	if (!!date && !moment(date).isValid()) throw createHttpError.BadRequest('Invalid date')
-	const studentsByClass = await StudentModel.find({ class: classId }).distinct('_id')
-	let result = await AttendanceModel.aggregate()
-		.match({
-			student: { $in: studentsByClass },
-			date: moment(date).format('YYYY-MM-DD')
-		})
-		.lookup({
-			from: 'students',
-			localField: 'student',
-			foreignField: '_id',
-			as: 'student',
-			pipeline: [
-				{
-					$project: {
-						_id: 1,
-						fullName: 1
-					}
-				}
-			]
-		})
-		.unwind('$student')
-		.group({
-			_id: { student: '$student', date: '$date' },
-			student: { $first: '$student' },
-			date: { $first: '$date' },
-			attendance: {
-				$push: {
-					k: {
-						$cond: {
-							if: { $eq: ['$session', AttendanceSessionEnum.MORNING] },
-							then: 'morning',
-							else: 'afternoon'
-						}
-					},
-					v: {
-						isPresent: '$isPresent',
-						reason: '$reason'
-					}
-				}
-			}
-		})
-		.addFields({
-			attendance: { $arrayToObject: '$attendance' }
-		})
-		.project({
-			_id: 0,
-			student: 1,
-			attendance: 1
-		})
-		.sort({ createdAt: -1, student: 1 })
-
-	result = result.map((v) => ({
-		...v,
-		morning: v.attendance?.morning,
-		afternoon: v.attendance?.afternoon ?? null,
-		attendance: undefined
-	}))
-	return {
-		date: moment(date).format('DD/MM/YYYY'),
-		result
-	}
-}
-
-export const studentAttendance = async (studentId: string, timeRangeOption?: { from: string; to: string }) => {
+export const getStudentAttendance = async (studentId: string, timeRangeOption?: { from: string; to: string }) => {
 	if (!isValidObjectId(studentId)) throw createHttpError.BadRequest('Invalid student ID')
 	let dateFilter
 	if (timeRangeOption)
@@ -117,9 +50,13 @@ export const getClassAttendanceBySession = async (classId: string, date: string 
 	let attendanceOfClass = await AttendanceModel.find({
 		student: { $in: studentsByClass.map((std) => std._id) },
 		date: moment(date).format('YYYY-MM-DD'),
-		session: AttendanceSessionEnum[ss] as string
+		session: AttendanceSessionEnum[ss]
 	})
-		.populate({ path: 'student', select: '_id fullName', options: { lean: true } })
+		.populate({
+			path: 'student',
+			select: '_id fullName',
+			options: { sort: { fullName: 'asc' }, lean: true }
+		})
 		.select('-session -createdAt -updatedAt -date -_id')
 	if (!attendanceOfClass.length) attendanceOfClass = studentsByClass.map((std) => ({ student: std, isPresent: true }))
 	return {

@@ -1,10 +1,10 @@
-import { AttendanceSessionEnum } from './../../types/attendance.type'
-import { HttpStatusCode } from './../../configs/statusCode.config'
 import { Request, Response } from 'express'
+import createHttpError from 'http-errors'
+import moment from 'moment'
 import useCatchAsync from '../../helpers/useCatchAsync'
 import * as AttendanceService from '../services/attendance.service'
-import moment from 'moment'
-import createHttpError from 'http-errors'
+import { HttpStatusCode } from './../../configs/statusCode.config'
+import { AttendanceSessionEnum } from './../../types/attendance.type'
 
 export const saveAttendanceByClass = useCatchAsync(async (req: Request, res: Response) => {
 	const students = req.body
@@ -29,7 +29,7 @@ export const getStudentAttendance = useCatchAsync(async (req: Request, res: Resp
 			to: moment(to).format('YYYY-MM-DD')
 		}
 	}
-	const studentAttendance = await AttendanceService.studentAttendance(studentId, timeRangeSearchTerm)
+	const studentAttendance = await AttendanceService.getStudentAttendance(studentId, timeRangeSearchTerm)
 	return res.status(HttpStatusCode.OK).json(studentAttendance)
 })
 
