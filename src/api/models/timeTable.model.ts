@@ -1,56 +1,33 @@
 import mongoose from 'mongoose'
 import mongooseAutoPopulate from 'mongoose-autopopulate'
 
-import { ITimeTable } from '../../types/timeTable.type'
-import { ISubject } from '../../types/subject.type'
-import { IUser } from '../../types/user.type'
+import { DayInWeekEnum } from '../../types/timeTable.type'
 
-const ScheduleSlotSchema = new mongoose.Schema(
+const TimeTableSchema = new mongoose.Schema(
 	{
-		period: {
-			type: Number,
-			require: true,
-			enum: [1, 2, 3, 4, 5, 6, 7, 8]
+		class: {
+			type: mongoose.Types.ObjectId,
+			ref: 'Classes',
+			required: true
 		},
 		subject: {
 			type: mongoose.Types.ObjectId,
 			ref: 'Subjects',
+			required: true
+		},
+		dayOfWeek: {
+			type: String,
 			required: true,
-			autopopulate: {
-				select: 'subjectName -_id',
-				options: { lean: true },
-				transform: (doc: Pick<ISubject, 'subjectName'>) => doc?.subjectName ?? ''
-			}
+			enum: Object.values(DayInWeekEnum)
+		},
+		period: {
+			type: Number,
+			enum: [1, 2, 3, 4, 5, 6, 7, 8]
 		},
 		teacher: {
 			type: mongoose.Types.ObjectId,
-			ref: 'Users',
 			required: true,
-			autopopulate: {
-				select: 'displayName -_id',
-				options: { lean: true },
-				transform: (doc: Pick<IUser, 'displayName'>) => doc?.displayName ?? ''
-			}
-		}
-	},
-	{
-		_id: false
-	}
-)
-const TimeTableSchema = new mongoose.Schema(
-	{
-		class: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: 'Classes',
-			required: true,
-			autopopulate: { select: 'className', options: { lean: true } }
-		},
-		schedule: {
-			monday: [ScheduleSlotSchema],
-			tuesday: [ScheduleSlotSchema],
-			wednesday: [ScheduleSlotSchema],
-			thursday: [ScheduleSlotSchema],
-			friday: [ScheduleSlotSchema]
+			ref: 'Users'
 		}
 	},
 	{
@@ -63,6 +40,6 @@ const TimeTableSchema = new mongoose.Schema(
 
 TimeTableSchema.plugin(mongooseAutoPopulate)
 
-const TimeTableModel = mongoose.model<ITimeTable>('TimeTables', TimeTableSchema)
+const TimeTableModel = mongoose.model('TimeTables', TimeTableSchema)
 
 export default TimeTableModel

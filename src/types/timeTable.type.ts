@@ -1,6 +1,7 @@
 import { Document, ObjectId } from 'mongoose'
-import { ISubjectDocument } from './subject.type'
-import { IUserDocument } from './user.type'
+import { ISubject, ISubjectDocument } from './subject.type'
+import { IUser, IUserDocument } from './user.type'
+import { IClass } from './class.type'
 export interface IScheduleSlotTime extends Document {
 	subject: ObjectId | ISubjectDocument | string
 	teacher: ObjectId | IUserDocument | string
@@ -8,16 +9,13 @@ export interface IScheduleSlotTime extends Document {
 }
 
 export interface ITimeTable extends Document {
-	class: ObjectId
-	schedule: {
-		monday: Array<IScheduleSlotTime>
-		tuesday: Array<IScheduleSlotTime>
-		wednesday: Array<IScheduleSlotTime>
-		thursday: Array<IScheduleSlotTime>
-		friday: Array<IScheduleSlotTime>
-	}
-	createdAt: Date
-	updatedAt: Date
+	class: ObjectId | string | Partial<IClass>
+	subject: ObjectId | Partial<ISubject> | string
+	teacher: ObjectId | Partial<IUser> | string
+	period: number
+	dayOfWeek: string | DayInWeekEnum
+	createdAt?: Date
+	updatedAt?: Date
 }
 
 export enum DayInWeekEnum {
