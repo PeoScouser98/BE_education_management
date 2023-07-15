@@ -13,52 +13,28 @@ paths:
                   example:
                      [
                         {
-                           "student": "649b2b57fa0af79f71e3cac1",
-                           "firstSemester": {
-                                 "midtermTest": 8,
-                                 "finalTest": 9
-                           },
-                           "secondSemester": {
-                                 "midtermTest": 6,
-                                 "finalTest": 6
-                           },
-                           "remark":"Học lực tốt, tiếp thu nhanh, tham gia xây dựng bài giảng nhiệt tình"
+                           'student': '649b2b57fa0af79f71e3cac1',
+                           'firstSemester': { 'midtermTest': 8, 'finalTest': 9 },
+                           'secondSemester': { 'midtermTest': 6, 'finalTest': 6 },
+                           'remark': 'Học lực tốt, tiếp thu nhanh, tham gia xây dựng bài giảng nhiệt tình'
                         },
                         {
-                           "student": "649b2b57fa0af79f71e3cabe",
-                           "firstSemester": {
-                                 "midtermTest": 8,
-                                 "finalTest": 9
-                           },
-                           "secondSemester": {
-                                 "midtermTest": 8,
-                                 "finalTest": 8
-                           },
-                           "remark":"Học lực tốt, tiếp thu nhanh, tham gia xây dựng bài giảng nhiệt tình"
+                           'student': '649b2b57fa0af79f71e3cabe',
+                           'firstSemester': { 'midtermTest': 8, 'finalTest': 9 },
+                           'secondSemester': { 'midtermTest': 8, 'finalTest': 8 },
+                           'remark': 'Học lực tốt, tiếp thu nhanh, tham gia xây dựng bài giảng nhiệt tình'
                         },
                         {
-                           "student": "649b2b57fa0af79f71e3cabf",
-                           "firstSemester": {
-                                 "midtermTest": 6,
-                                 "finalTest": 9
-                           },
-                           "secondSemester": {
-                                 "midtermTest": 8,
-                                 "finalTest": 7
-                           },
-                           "remark":"Học lực tốt, tiếp thu nhanh, tham gia xây dựng bài giảng nhiệt tình"
+                           'student': '649b2b57fa0af79f71e3cabf',
+                           'firstSemester': { 'midtermTest': 6, 'finalTest': 9 },
+                           'secondSemester': { 'midtermTest': 8, 'finalTest': 7 },
+                           'remark': 'Học lực tốt, tiếp thu nhanh, tham gia xây dựng bài giảng nhiệt tình'
                         },
                         {
-                           "student": "649b2b57fa0af79f71e3cac0",
-                           "firstSemester": {
-                                 "midtermTest": 7,
-                                 "finalTest": 9
-                           },
-                           "secondSemester": {
-                                 "midtermTest": 9,
-                                 "finalTest": 4
-                           },
-                           "remark":"Học lực tốt, tiếp thu nhanh, tham gia xây dựng bài giảng nhiệt tình"
+                           'student': '649b2b57fa0af79f71e3cac0',
+                           'firstSemester': { 'midtermTest': 7, 'finalTest': 9 },
+                           'secondSemester': { 'midtermTest': 9, 'finalTest': 4 },
+                           'remark': 'Học lực tốt, tiếp thu nhanh, tham gia xây dựng bài giảng nhiệt tình'
                         }
                      ]
 
@@ -72,52 +48,47 @@ paths:
                         properties:
                            ok:
                               type: number
-                           writeErrors: 
+                           writeErrors:
                               type: array
-                           writeConcernErrors: 
+                           writeConcernErrors:
                               type: array
-                           insertedIds: 
+                           insertedIds:
                               type: array
-                           nInserted: 
+                           nInserted:
                               type: number
-                           nUpserted: 
+                           nUpserted:
                               type: number
-                           nMatched: 
+                           nMatched:
                               type: number
-                           nModified: 
+                           nModified:
                               type: number
-                           nRemoved: 
+                           nRemoved:
                               type: number
-                           upserted: 
+                           upserted:
                               type: array
-                           opTime: 
+                           opTime:
                               type: object
                               properties:
-                                 ts: 
+                                 ts:
                                     type: object
                                     properties:
-                                       $timestamp: 
+                                       $timestamp:
                                           type: string
-                                 t: 
+                                 t:
                                     type: number
-                     example: 
+                     example:
                         {
-                           "ok": 1,
-                           "writeErrors": [],
-                           "writeConcernErrors": [],
-                           "insertedIds": [],
-                           "nInserted": 0,
-                           "nUpserted": 0,
-                           "nMatched": 4,
-                           "nModified": 4,
-                           "nRemoved": 0,
-                           "upserted": [],
-                           "opTime": {
-                              "ts": {
-                                 "$timestamp": "7250933294286503947"
-                              },
-                              "t": 138
-                           }
+                           'ok': 1,
+                           'writeErrors': [],
+                           'writeConcernErrors': [],
+                           'insertedIds': [],
+                           'nInserted': 0,
+                           'nUpserted': 0,
+                           'nMatched': 4,
+                           'nModified': 4,
+                           'nRemoved': 0,
+                           'upserted': [],
+                           'opTime': { 'ts': { '$timestamp': '7250933294286503947' }, 't': 138 }
                         }
             400:
                description: 'Có thể do các nguyên nhân sau: id class hoặc subject không đúng type objectId, k thỏa mãn validate (cụ thể đọc ở message trả về)'
@@ -152,80 +123,65 @@ paths:
          summary: Đăng nhập giới vai trò là giáo viên bộ môn của học sinh
          description: Lấy tất cả bảng điểm của lớp học đó
          responses:
-            200: 
+            200:
                description: Lấy tất cả bảng điểm thành công
                content:
                   application/json:
                      example:
                         [
                            {
-                              "student": {
-                                 "_id": "6490a537831f042be2f93fa8",
-                                 "class": "645227dcf950ab74cb145cf1",
-                                 "fullName": "Student 1"
-                              },
-                              "transcript": [
+                              'student':
                                  {
-                                 "subject": {
-                                    "_id": "649889af052ac388b19db214",
-                                    "subjectName": "Tiếng Việt"
+                                    '_id': '6490a537831f042be2f93fa8',
+                                    'class': '645227dcf950ab74cb145cf1',
+                                    'fullName': 'Student 1'
                                  },
-                                 "firstSemester": {
-                                    "finalTest": 7
-                                 },
-                                 "secondSemester": {
-                                    "finalTest": 7
-                                 },
-                                 "isPassed": true,
-                                 "remark": "none"
-                                 }
-                              ]
+                              'transcript':
+                                 [
+                                    {
+                                       'subject': { '_id': '649889af052ac388b19db214', 'subjectName': 'Tiếng Việt' },
+                                       'firstSemester': { 'finalTest': 7 },
+                                       'secondSemester': { 'finalTest': 7 },
+                                       'isPassed': true,
+                                       'remark': 'none'
+                                    }
+                                 ]
                            },
                            {
-                              "student": {
-                                 "_id": "6490a537831f042be2f93fa9",
-                                 "class": "645227dcf950ab74cb145cf1",
-                                 "fullName": "Student 2"
-                              },
-                              "transcript": [
+                              'student':
                                  {
-                                 "subject": {
-                                    "_id": "649889af052ac388b19db214",
-                                    "subjectName": "Tiếng Việt"
+                                    '_id': '6490a537831f042be2f93fa9',
+                                    'class': '645227dcf950ab74cb145cf1',
+                                    'fullName': 'Student 2'
                                  },
-                                 "firstSemester": {
-                                    "finalTest": 7
-                                 },
-                                 "secondSemester": {
-                                    "finalTest": 6
-                                 },
-                                 "isPassed": true,
-                                 "remark": "none"
-                                 }
-                              ]
+                              'transcript':
+                                 [
+                                    {
+                                       'subject': { '_id': '649889af052ac388b19db214', 'subjectName': 'Tiếng Việt' },
+                                       'firstSemester': { 'finalTest': 7 },
+                                       'secondSemester': { 'finalTest': 6 },
+                                       'isPassed': true,
+                                       'remark': 'none'
+                                    }
+                                 ]
                            },
                            {
-                              "student": {
-                                 "_id": "6490a537831f042be2f93faa",
-                                 "class": "645227dcf950ab74cb145cf1",
-                                 "fullName": "Student 3"
-                              },
-                              "transcript": [
+                              'student':
                                  {
-                                 "subject": {
-                                    "_id": "649889af052ac388b19db214",
-                                    "subjectName": "Tiếng Việt"
+                                    '_id': '6490a537831f042be2f93faa',
+                                    'class': '645227dcf950ab74cb145cf1',
+                                    'fullName': 'Student 3'
                                  },
-                                 "firstSemester": {
-                                    "finalTest": 6
-                                 },
-                                 "secondSemester": {
-                                    "finalTest": 5
-                                 },
-                                 "isPassed": false,
-                                 "remark": "none"
-                                 }
-                              ]
+                              'transcript':
+                                 [
+                                    {
+                                       'subject': { '_id': '649889af052ac388b19db214', 'subjectName': 'Tiếng Việt' },
+                                       'firstSemester': { 'finalTest': 6 },
+                                       'secondSemester': { 'finalTest': 5 },
+                                       'isPassed': false,
+                                       'remark': 'none'
+                                    }
+                                 ]
                            }
                         ]
             400:
@@ -234,7 +190,7 @@ paths:
                   application/json:
                      schema:
                         $ref: '#/components/schemas/HttpError'
-                     example: {"message": "Invalid class ID","statusCode": 400}
+                     example: { 'message': 'Invalid class ID', 'statusCode': 400 }
 
    /transcripts/class/:classId/:subjectId:
       get:

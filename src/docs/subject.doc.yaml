@@ -14,18 +14,18 @@ paths:
                      properties:
                         subjectName:
                            type: string
-                        subjectCode: 
+                        subjectCode:
                            type: string
-                        isMainSubject: 
+                        isMainSubject:
                            type: boolean
-                        isElectiveSubject: 
+                        isElectiveSubject:
                            type: boolean
-                  example: 
-                     { 
-                        "subjectName": "Giáo Dục Thể Chất",
-                        "subjectCode": "GDTC-C1",
-                        "isMainSubject": false,
-                        "isElectiveSubject": true,
+                  example:
+                     {
+                        'subjectName': 'Giáo Dục Thể Chất',
+                        'subjectCode': 'GDTC-C1',
+                        'isMainSubject': false,
+                        'isElectiveSubject': true
                      }
 
          responses:
@@ -37,21 +37,15 @@ paths:
                         $ref: '#/components/schemas/Subject'
                      example:
                         {
-                           "subjectName": "Môn Tết",
-                           "subjectCode": "TE-C2",
-                           "appliedForGrades": [
-                              1,
-                              2,
-                              3,
-                              4,
-                              5
-                           ],
-                           "isMainSubject": false,
-                           "isElectiveSubject": false,
-                           "_id": "64a050bacfded534c734183f",
-                           "deleted": false,
-                           "createdAt": "2023-07-01T16:13:46.769Z",
-                           "updatedAt": "2023-07-01T16:13:46.769Z"
+                           'subjectName': 'Môn Tết',
+                           'subjectCode': 'TE-C2',
+                           'appliedForGrades': [1, 2, 3, 4, 5],
+                           'isMainSubject': false,
+                           'isElectiveSubject': false,
+                           '_id': '64a050bacfded534c734183f',
+                           'deleted': false,
+                           'createdAt': '2023-07-01T16:13:46.769Z',
+                           'updatedAt': '2023-07-01T16:13:46.769Z'
                         }
             204:
                description: Không nhận được request body
@@ -86,39 +80,27 @@ paths:
                      example:
                         [
                            {
-                              "deleted": false,
-                              "_id": "649889d3f132383b190244e5",
-                              "subjectName": "Giáo Dục Thể Chất",
-                              "subjectCode": "GDTC-C1",
-                              "appliedForGrades": [
-                                 1,
-                                 2,
-                                 3,
-                                 4,
-                                 5
-                              ],
-                              "isMainSubject": false,
-                              "isElectiveSubject": false,
-                              "createdAt": "2023-06-25T18:39:15.215Z",
-                              "updatedAt": "2023-06-25T18:42:44.726Z"
+                              'deleted': false,
+                              '_id': '649889d3f132383b190244e5',
+                              'subjectName': 'Giáo Dục Thể Chất',
+                              'subjectCode': 'GDTC-C1',
+                              'appliedForGrades': [1, 2, 3, 4, 5],
+                              'isMainSubject': false,
+                              'isElectiveSubject': false,
+                              'createdAt': '2023-06-25T18:39:15.215Z',
+                              'updatedAt': '2023-06-25T18:42:44.726Z'
                            },
                            {
-                              "deleted": false,
-                              "_id": "64988b534c9bcbc4a30990ed",
-                              "subjectName": "Hoạt Động Trải Nghiệm",
-                              "subjectCode": "NDTN-C1",
-                              "appliedForGrades": [
-                                 1,
-                                 2,
-                                 3,
-                                 4,
-                                 5
-                              ],
-                              "isMainSubject": false,
-                              "isElectiveSubject": false,
-                              "createdAt": "2023-06-25T18:45:39.422Z",
-                              "updatedAt": "2023-06-25T18:45:39.422Z"
-                           },   
+                              'deleted': false,
+                              '_id': '64988b534c9bcbc4a30990ed',
+                              'subjectName': 'Hoạt Động Trải Nghiệm',
+                              'subjectCode': 'NDTN-C1',
+                              'appliedForGrades': [1, 2, 3, 4, 5],
+                              'isMainSubject': false,
+                              'isElectiveSubject': false,
+                              'createdAt': '2023-06-25T18:45:39.422Z',
+                              'updatedAt': '2023-06-25T18:45:39.422Z'
+                           }
                         ]
 
    /subjects/:id:
@@ -147,21 +129,15 @@ paths:
                         $ref: '#/components/schemas/Subject'
                      example:
                         {
-                           "_id": "64a050bacfded534c734183f",
-                           "subjectName": "Môn Testt",
-                           "subjectCode": "TE-C2",
-                           "appliedForGrades": [
-                              1,
-                              2,
-                              3,
-                              4,
-                              5
-                           ],
-                           "isMainSubject": false,
-                           "isElectiveSubject": false,
-                           "deleted": false,
-                           "createdAt": "2023-07-01T16:13:46.769Z",
-                           "updatedAt": "2023-07-01T16:32:16.792Z"
+                           '_id': '64a050bacfded534c734183f',
+                           'subjectName': 'Môn Testt',
+                           'subjectCode': 'TE-C2',
+                           'appliedForGrades': [1, 2, 3, 4, 5],
+                           'isMainSubject': false,
+                           'isElectiveSubject': false,
+                           'deleted': false,
+                           'createdAt': '2023-07-01T16:13:46.769Z',
+                           'updatedAt': '2023-07-01T16:32:16.792Z'
                         }
             204:
                description: Không nhận được data (req body)
@@ -232,19 +208,13 @@ paths:
                         $ref: '#/components/schemas/Subject'
                      example:
                         {
-                           "_id": "64a050bacfded534c734183f",
-                           "subjectName": "Môn Testt",
-                           "subjectCode": "TE-C2",
-                           "appliedForGrades": [
-                              1,
-                              2,
-                              3,
-                              4,
-                              5
-                           ],
-                           "isMainSubject": false,
-                           "isElectiveSubject": false,
-                           "deleted": false,
-                           "createdAt": "2023-07-01T16:13:46.769Z",
-                           "updatedAt": "2023-07-01T16:32:16.792Z"
+                           '_id': '64a050bacfded534c734183f',
+                           'subjectName': 'Môn Testt',
+                           'subjectCode': 'TE-C2',
+                           'appliedForGrades': [1, 2, 3, 4, 5],
+                           'isMainSubject': false,
+                           'isElectiveSubject': false,
+                           'deleted': false,
+                           'createdAt': '2023-07-01T16:13:46.769Z',
+                           'updatedAt': '2023-07-01T16:32:16.792Z'
                         }

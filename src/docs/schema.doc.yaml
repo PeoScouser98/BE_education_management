@@ -538,7 +538,7 @@ components:
             conduct:
                type: string
                required: true
-               enum: 
+               enum:
                   - Yếu
                   - Trung bình
                   - Khá
@@ -547,13 +547,13 @@ components:
             proficiency:
                type: string
                required: true
-               enum: 
+               enum:
                   - Yếu
                   - Trung bình
                   - Khá
                   - Tốt
                description: 'Đánh giá phẩm chất'
-            remark: 
+            remark:
                type: string
             remarkedBy:
                type: ObjectId
@@ -564,7 +564,7 @@ components:
             updatedAt:
                type: Date
                example: '2023-03-14T17:02:24.526+00:00'
-           
+
       HttpError:
          type: object
          properties:

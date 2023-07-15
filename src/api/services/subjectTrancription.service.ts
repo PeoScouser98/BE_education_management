@@ -108,7 +108,7 @@ export const getStudentTranscript = async (id: string | ObjectId, schoolYear: st
 	}
 
 	const studentClass = student.class as Partial<IClass>
-	const studentGrade = studentClass?.grade!
+	const studentGrade = studentClass?.grade as number
 	const totalSubjectsOfTranscript = [1, 2].includes(studentGrade) ? 9 : 11
 	const validSchoolYearsStdTranscripts = await getValidSchoolYearOfStudentTranscript(student._id.toString())
 

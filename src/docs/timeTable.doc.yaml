@@ -1487,8 +1487,7 @@ paths:
                   application/json:
                      schema:
                         $ref: '#/components/schemas/TimeTable'
-                     example:
-                        null
+                     example: null
             400:
                description: Thiếu, chưa đúng id class || class đó không tồn tại
                content:

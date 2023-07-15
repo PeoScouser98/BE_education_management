@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 // so sánh 2 ngày với nhau
 export const compareDates = (date1: Date, date2: Date): number => {
 	try {
@@ -38,11 +40,24 @@ export const formatDate = (date: Date): string => {
 }
 
 export const toCapitalize = (value: string) => {
-	if (!value || typeof value !== 'string') return
 	value = value.trim().replace(/\s+/g, ' ')
 	const subString = value.split(' ')
-	const result = subString.map((str) => str.at(0)!.toUpperCase() + str.slice(1).toLowerCase()).join(' ')
+	const result = subString.map((str) => str.at(0)?.toUpperCase() + str.slice(1).toLowerCase()).join(' ')
 	return result
+}
+
+export const getFileSize = (fileSize: number | string): string => {
+	fileSize = +fileSize
+	switch (true) {
+		case fileSize / 1000 > 1:
+			return Math.round(fileSize / 1000) + 'kb'
+		case fileSize / 1000000 > 1:
+			return Math.round(fileSize / 1000000) + 'mb'
+		case fileSize / 1000000000 > 1:
+			return Math.round(fileSize / 1000000) + 'gb'
+		default:
+			return fileSize + 'b'
+	}
 }
 
 export const toUpperCase = (value: string) => {
