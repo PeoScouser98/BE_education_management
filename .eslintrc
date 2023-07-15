@@ -6,7 +6,7 @@
 	"rules": {
 		"no-useless-catch": "warn",
 		"prettier/prettier": [
-			"error",
+			"warn",
 			{
 				"useTabs": true,
 				"tabWidth": 3,
