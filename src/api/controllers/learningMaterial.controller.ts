@@ -1,14 +1,17 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable no-mixed-spaces-and-tabs */
 import 'dotenv/config'
 import { Request, Response } from 'express'
 import createHttpError from 'http-errors'
 import { PaginateOptions } from 'mongoose'
+import { HttpStatusCode } from '../../configs/statusCode.config'
 import { multiFieldSortObjectParser } from '../../helpers/queryParams'
+import { getFileSize } from '../../helpers/toolkit'
+import useCatchAsync from '../../helpers/useCatchAsync'
+import { ILearningMaterial } from '../../types/learningMaterial.type'
 import * as googleDriveService from '../services/googleDrive.service'
 import * as learningMaterialService from '../services/learningMaterial.service'
 import { checkValidMimeType } from './../validations/file.validations'
-import { HttpStatusCode } from '../../configs/statusCode.config'
-import useCatchAsync from '../../helpers/useCatchAsync'
 
 export const getFiles = useCatchAsync(async (req: Request, res: Response) => {
 	const sort = multiFieldSortObjectParser({
@@ -36,7 +39,7 @@ export const getFiles = useCatchAsync(async (req: Request, res: Response) => {
 
 export const uploadFile = useCatchAsync(async (req: Request, res: Response) => {
 	const [file] = req.files as Express.Multer.File[]
-
+	const user = req.profile
 	if (!file) {
 		throw createHttpError.BadRequest('File must be provided!')
 	}
@@ -45,14 +48,18 @@ export const uploadFile = useCatchAsync(async (req: Request, res: Response) => {
 	}
 
 	const uploadedFile = await googleDriveService.uploadFile(file, process.env.FOLDER_ID!)
-
-	const newFile = {
-		fileId: uploadedFile?.data.id,
-		fileName: file.originalname,
-		mimeType: file.mimetype,
-		subject: req.body.subject,
-		grade: +req.body.grade
+	if (!uploadedFile) {
+		throw createHttpError.UnprocessableEntity('Failed to upload file')
 	}
+	const newFile = {
+		fileId: uploadedFile.data?.id as string,
+		title: req.body.title,
+		mimeType: file.mimetype,
+		fileSize: getFileSize(file.size),
+		subject: req.body.subject,
+		uploadedBy: user._id
+	} as Omit<ILearningMaterial, '_id' | 'downloadUrl'>
+
 	const savedFile = await learningMaterialService.saveFile(newFile)
 
 	return res.status(HttpStatusCode.CREATED).json(savedFile)

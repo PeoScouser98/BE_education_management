@@ -1,7 +1,9 @@
-import mongoose, { FilterQuery, MongooseError, PaginateOptions } from 'mongoose'
+import { FilterQuery, PaginateOptions } from 'mongoose'
+import { ILearningMaterial } from '../../types/learningMaterial.type'
 import LearningMaterialModel from '../models/learningMaterial.model'
 import { deleteFile } from './googleDrive.service'
-import { ILearningMaterial } from '../../types/learningMaterial.type'
+import { validateNewLearningMaterial } from '../validations/learningMaterial.validation'
+import createHttpError from 'http-errors'
 
 // Get files
 export const getFiles = async (filterQuery: FilterQuery<ILearningMaterial> | undefined, query: PaginateOptions) => {
@@ -9,7 +11,9 @@ export const getFiles = async (filterQuery: FilterQuery<ILearningMaterial> | und
 }
 
 // Save file to database
-export const saveFile = async (payload: Pick<ILearningMaterial, 'fileName' & 'mimeType' & 'subject' & 'grade'>) => {
+export const saveFile = async (payload: Omit<ILearningMaterial, '_id' | 'downloadUrl'>) => {
+	const { error } = validateNewLearningMaterial(payload)
+	if (error) throw createHttpError.BadRequest(error.message)
 	return await new LearningMaterialModel(payload).save()
 }
 

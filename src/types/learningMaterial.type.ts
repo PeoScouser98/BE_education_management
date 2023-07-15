@@ -1,15 +1,17 @@
 import { Model, PaginateModel } from 'mongoose'
 import { ObjectId } from 'mongoose'
 import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete'
+import { IUser } from './user.type'
 
 export interface ILearningMaterial {
 	_id: string
 	subject: ObjectId
-	grade: number
 	fileId: string
-	fileName: string
+	title: string
+	fileSize: string | string
 	mimeType: string
 	downloadUrl: string
+	uploadedBy: string | ObjectId | Pick<IUser, '_id' | 'displayName'>
 }
 export interface ILearningMaterialDocument extends ILearningMaterial, Omit<SoftDeleteDocument, '_id'> {}
 export type TLearningMaterialModel = Model<ILearningMaterial>
