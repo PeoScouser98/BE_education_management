@@ -56,7 +56,7 @@ const LearningMaterialSchema = new mongoose.Schema<ILearningMaterialDocument>(
 LearningMaterialSchema.plugin(mongooseAutoPopulate)
 LearningMaterialSchema.plugin(mongoosePaginate)
 LearningMaterialSchema.plugin(mongooseDelete, {
-	overrideMethods: ['find', 'findOne'],
+	overrideMethods: true,
 	deletedAt: true
 })
 

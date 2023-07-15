@@ -1,13 +1,27 @@
+import createHttpError from 'http-errors'
 import { FilterQuery, PaginateOptions } from 'mongoose'
 import { ILearningMaterial } from '../../types/learningMaterial.type'
 import LearningMaterialModel from '../models/learningMaterial.model'
-import { deleteFile } from './googleDrive.service'
 import { validateNewLearningMaterial } from '../validations/learningMaterial.validation'
-import createHttpError from 'http-errors'
+import { deleteFile } from './googleDrive.service'
 
 // Get files
-export const getFiles = async (filterQuery: FilterQuery<ILearningMaterial> | undefined, query: PaginateOptions) => {
+export const getFiles = async (filterQuery: FilterQuery<ILearningMaterial>, query: PaginateOptions) => {
 	return await LearningMaterialModel.paginate(filterQuery, query)
+}
+
+export const getDeletedFile = async (query: PaginateOptions) => {
+	const result = await LearningMaterialModel.paginate(
+		{},
+		{
+			...query,
+			customFind: 'findDeleted',
+			useCustomCountFn() {
+				return Promise.resolve(LearningMaterialModel.countDeleted())
+			}
+		}
+	)
+	return result
 }
 
 // Save file to database

@@ -19,7 +19,6 @@ export const multiFieldSortObjectParser = (query: Queries) => {
 	try {
 		if (!query) return
 		const { error } = checkIsValidSortObject(query)
-		console.log(error?.message)
 		if (error) return
 		const sortFields = query._sort.split(',') // Giả sử giá trị của query string là 'field1,field2'
 		const orders = query._order.split(',') // Giả sử giá trị của query string là 'field1,field2'

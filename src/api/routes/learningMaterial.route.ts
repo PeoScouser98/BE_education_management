@@ -1,29 +1,40 @@
-import * as learningMaterialController from '../controllers/learningMaterial.controller'
+import * as LearningMaterialController from '../controllers/learningMaterial.controller'
 import express from 'express'
 import multer from 'multer'
 import { checkAuthenticated, checkIsTeacher } from '../middlewares/authGuard.middleware'
 const upload = multer()
 const router = express.Router()
 
+router.get(
+	'/learning-materials/get-by-subject/:subjectId',
+	checkAuthenticated,
+	checkIsTeacher,
+	LearningMaterialController.getFiles
+)
 router.post(
 	'/learning-materials/upload',
 	checkAuthenticated,
 	checkIsTeacher,
 	upload.any(),
-	learningMaterialController.uploadFile
+	LearningMaterialController.uploadFile
 )
-router.get('/learning-materials', checkAuthenticated, checkIsTeacher, learningMaterialController.getFiles)
 router.patch(
 	'/learning-materials/:fileId/edit',
 	checkAuthenticated,
 	checkIsTeacher,
-	learningMaterialController.updateFile
+	LearningMaterialController.updateFile
+)
+router.patch(
+	'/learning-materials/:fileId/restore',
+	checkAuthenticated,
+	checkIsTeacher,
+	LearningMaterialController.restoreFile
 )
 router.delete(
 	'/learning-materials/:fileId/delete',
 	checkAuthenticated,
 	checkIsTeacher,
-	learningMaterialController.deleteFile
+	LearningMaterialController.deleteFile
 )
 
 export default router

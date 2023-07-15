@@ -10,7 +10,7 @@ import { getFileSize } from '../../helpers/toolkit'
 import useCatchAsync from '../../helpers/useCatchAsync'
 import { ILearningMaterial } from '../../types/learningMaterial.type'
 import * as googleDriveService from '../services/googleDrive.service'
-import * as learningMaterialService from '../services/learningMaterial.service'
+import * as LearningMaterialService from '../services/learningMaterial.service'
 import { checkValidMimeType } from './../validations/file.validations'
 
 export const getFiles = useCatchAsync(async (req: Request, res: Response) => {
@@ -20,21 +20,25 @@ export const getFiles = useCatchAsync(async (req: Request, res: Response) => {
 	})
 
 	const query: PaginateOptions = {
-		limit: +req.query._limit! || 20,
-		page: +req.query._page!,
+		limit: +req.query._limit! || 10,
+		page: +req.query._page! || 1,
 		sort: sort || {}
 	}
 
-	if (!req.query._grade && !req.query._subject) {
-		const allFiles = await learningMaterialService.getFiles({ deleted: false }, query)
-		return res.status(HttpStatusCode.OK).json(allFiles)
-	} else {
-		const files = await learningMaterialService.getFiles(
-			{ subject: req.query._subject, grade: req.query._grade },
-			query
-		)
-		return res.status(HttpStatusCode.OK).json(files)
+	let isDeletedFilterOption = req.query._deleted
+	if (!isDeletedFilterOption) {
+		throw createHttpError.BadRequest('Missing "_deleted" params !')
 	}
+	isDeletedFilterOption = JSON.parse(isDeletedFilterOption.toString())
+	if (typeof isDeletedFilterOption !== 'boolean') {
+		throw createHttpError.BadRequest('"_deleted" param should be "true" or "false"')
+	}
+	if (isDeletedFilterOption) {
+		const deletedFiles = await LearningMaterialService.getDeletedFile(query)
+		return res.status(HttpStatusCode.OK).json(deletedFiles)
+	}
+	const allFiles = await LearningMaterialService.getFiles({ subject: req.params.subjectId, deleted: false }, query)
+	return res.status(HttpStatusCode.OK).json(allFiles)
 })
 
 export const uploadFile = useCatchAsync(async (req: Request, res: Response) => {
@@ -60,32 +64,36 @@ export const uploadFile = useCatchAsync(async (req: Request, res: Response) => {
 		uploadedBy: user._id
 	} as Omit<ILearningMaterial, '_id' | 'downloadUrl'>
 
-	const savedFile = await learningMaterialService.saveFile(newFile)
+	const savedFile = await LearningMaterialService.saveFile(newFile)
 
 	return res.status(HttpStatusCode.CREATED).json(savedFile)
 })
 
 export const updateFile = useCatchAsync(async (req: Request, res: Response) => {
-	const updatedFile = await learningMaterialService.updateFile(req.params.fileId, req.body)
+	const updatedFile = await LearningMaterialService.updateFile(req.params.fileId, req.body)
 	return res.status(HttpStatusCode.CREATED).json(updatedFile)
 })
 
 export const deleteFile = useCatchAsync(async (req: Request, res: Response) => {
-	if (req.query.hard_delete) {
-		const deletedFileInDb = await learningMaterialService.hardDeleteFile(req.params.fileId)
-		const deletedFile = await googleDriveService.deleteFile(req.params.fileId)
+	if (!req.query._hard) {
+		throw createHttpError.BadRequest('Missing delete option param "_hard"')
+	}
+	const isHardDeleteOption = req.query._hard && req.query._hard.toString() == 'true'
 
+	if (isHardDeleteOption) {
+		const deletedFileInDb = await LearningMaterialService.hardDeleteFile(req.params.fileId)
+		const deletedFile = await googleDriveService.deleteFile(req.params.fileId)
 		return res.status(HttpStatusCode.NO_CONTENT).json({
 			deletedFile,
 			deletedFileInDb
 		})
 	} else {
-		const tempDeletedFile = await learningMaterialService.softDeleteFile(req.params.fileId)
+		const tempDeletedFile = await LearningMaterialService.softDeleteFile(req.params.fileId)
 		return res.status(HttpStatusCode.NO_CONTENT).json(tempDeletedFile)
 	}
 })
 
 export const restoreFile = useCatchAsync(async (req: Request, res: Response) => {
-	const restoredFile = await learningMaterialService.restoreDeletedFile(req.params.fileId)
+	const restoredFile = await LearningMaterialService.restoreDeletedFile(req.params.fileId)
 	return res.status(HttpStatusCode.OK).json(restoredFile)
 })
