@@ -62,15 +62,16 @@ export const createParentsAccount = useCatchAsync(async (req: Request, res: Resp
 					const token = jwt.sign({ auth: recipient?.email }, process.env.ACCESS_TOKEN_SECRET!, {
 						expiresIn: '7d'
 					})
-					sendMail(
-						getVerificationEmailTemplate({
-							redirectDomain: domain,
-							token: token,
-							user: recipient as Pick<IUser, 'email' | 'displayName' | 'role'>
-						})
+
+					resolve(
+						sendMail(
+							getVerificationEmailTemplate({
+								redirectDomain: domain,
+								token: token,
+								user: recipient as Pick<IUser, 'email' | 'displayName' | 'role'>
+							})
+						)
 					)
-						.then((info) => resolve(info))
-						.catch((error) => resolve(error))
 				})
 		)
 
