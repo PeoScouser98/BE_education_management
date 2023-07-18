@@ -11,6 +11,7 @@ import SubjectRouter from './subject.route'
 import LearningMaterialRouter from './learningMaterial.route'
 import PermissionRouter from './permission.route'
 import AttendanceRouter from './attendance.route'
+import StatisticsRouter from './statistics.route'
 
 const rootRouters: Array<Router> = [
 	ClassRouter,
@@ -24,7 +25,8 @@ const rootRouters: Array<Router> = [
 	TrancriptRouter,
 	TimeTableRouter,
 	StudentConductRouter,
-	AttendanceRouter
+	AttendanceRouter,
+	StatisticsRouter
 ]
 const router = express.Router()
 
