@@ -20,14 +20,17 @@ export const createUser = async (payload: Partial<IUser> & Array<Partial<IUser>>
 	}
 	// Add a new teacher user
 	if (payload.role === UserRoleEnum.TEACHER) {
-		const existedTeacher = await UserModel.findWithDeleted({
+		const existedTeacher = await UserModel.exists({
 			$or: [
 				{
-					email: payload.email,
+					email: payload.email
+				},
+				{
 					phone: payload.phone
 				}
 			]
 		})
+		console.log('existedTeacher', existedTeacher)
 		if (existedTeacher) {
 			throw createHttpError.BadRequest(`Teacher's email or phone number cannot be duplicated!`)
 		}
