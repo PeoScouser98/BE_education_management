@@ -1,44 +1,67 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import createHttpError from 'http-errors'
 import _ from 'lodash'
 import mongoose from 'mongoose'
 import { ITimeTable } from '../../types/timeTable.type'
 import TimeTableModel from '../models/timeTable.model'
-// import * as mongodb from 'mongodb'
+import { validateTimeTableData } from '../validations/timeTable.validation'
 
-export const saveTimeTableByClass = async (
-	payload: { [key: string]: Pick<ITimeTable, 'subject' | 'teacher' | 'period'>[] },
-	classId: string
-) => {
+export const saveTimeTableByClass = async (payload: { [key: string]: Partial<ITimeTable>[] }, classId: string) => {
 	const schedule = _.flatMap(payload, (items, dayOfWeek) =>
-		items.map((item) => ({
-			...item,
-			class: classId,
-			dayOfWeek: dayOfWeek
-		}))
-	) as Array<Omit<ITimeTable, '_id'>>
+		items.map((item) => {
+			const { createdAt, updatedAt, ...rest } = item
+			return { dayOfWeek, class: classId, ...rest }
+		})
+	)
 
-	const existedLectureCount = await schedule.reduce<Promise<number>>(async (accumulator, currentValue) => {
-		const extCount = await TimeTableModel.count({
+	const existedLectures = await schedule.reduce<Promise<Partial<ITimeTable>[]>>(async (accumulator, currentValue) => {
+		const extLecture = await TimeTableModel.findOne({
 			class: { $ne: currentValue.class },
 			period: currentValue.period,
-			teacher: currentValue.teacher
+			teacher: currentValue.teacher,
+			dayOfWeek: currentValue.dayOfWeek
 		})
-		const currAcc = await Promise.resolve(accumulator)
-		return currAcc + extCount
-	}, Promise.resolve(0))
 
-	if (existedLectureCount > 0) {
-		throw createHttpError.Conflict('Duplicated lecture in your time table !')
+		const currAcc = await Promise.resolve(accumulator)
+		if (extLecture) currAcc.push(extLecture.toObject())
+		return currAcc
+	}, Promise.resolve([]))
+
+	if (existedLectures.length > 0) {
+		const errData = payload
+		Object.keys(errData).forEach((dayOfWeek) => {
+			existedLectures.forEach((i) => {
+				if (i.dayOfWeek === dayOfWeek) {
+					errData[dayOfWeek] = errData[dayOfWeek].map((j) => {
+						if (j.period === i.period) {
+							return {
+								...j,
+								subject: '',
+								teacher: ''
+							}
+						} else return j
+					})
+				}
+			})
+		})
+		return {
+			error: createHttpError.Conflict('Một sô giáo viên đã bị trùng lịch dạy'),
+			errData: errData,
+			payload: payload
+		}
+	}
+	const { error } = validateTimeTableData(schedule)
+	if (error) {
+		throw createHttpError.BadRequest(error.message)
 	}
 
+	// * Using mongodb.AnyBulkWriteOperation<T> causes lagging for Typescript intellisense
 	const bulkWriteOptions: any = schedule.map((scd) => {
 		return {
 			updateOne: {
 				filter: {
-					teacher: scd.teacher,
-					dayOfWeek: scd.dayOfWeek,
-					period: scd.period,
-					class: new mongoose.Types.ObjectId(classId.toString())
+					_id: new mongoose.Types.ObjectId(scd._id)
 				},
 				update: scd,
 				upsert: true
@@ -47,8 +70,11 @@ export const saveTimeTableByClass = async (
 	})
 
 	await TimeTableModel.bulkWrite(bulkWriteOptions)
-
-	return schedule
+	return {
+		originalData: schedule,
+		errData: null,
+		error: null
+	}
 }
 
 export const getTimeTableDetail = async (classId: string) => {
@@ -65,7 +91,7 @@ export const getTimetableByClass = async (classId: string) => {
 	return _.groupBy(data, 'dayOfWeek')
 }
 
-export const getTeacherTimeTableByClass = async (teacherId: string) => {
+export const getTeacherTimeTable = async (teacherId: string) => {
 	const result = await TimeTableModel.find({
 		teacher: teacherId
 	})

@@ -1,17 +1,15 @@
 import { Request, Response } from 'express'
 import createHttpError from 'http-errors'
-import * as TimeTableService from '../services/timeTable.service'
-import { validateTimeTableData } from '../validations/timeTable.validation'
-import { HttpStatusCode } from './../../configs/statusCode.config'
 import useCatchAsync from '../../helpers/useCatchAsync'
-import { isValidObjectId } from 'mongoose'
+import * as TimeTableService from '../services/timeTable.service'
+import { HttpStatusCode } from './../../configs/statusCode.config'
 
 // [PUT]: /time-table/:classId
 export const saveTimeTable = useCatchAsync(async (req: Request, res: Response) => {
-	const { error } = validateTimeTableData(req.body)
-	if (error) throw createHttpError.BadRequest(error.message)
-	const newTimeTable = await TimeTableService.saveTimeTableByClass(req.body, req.params.classId)
-	return res.status(HttpStatusCode.CREATED).json(newTimeTable)
+	const result = await TimeTableService.saveTimeTableByClass(req.body, req.params.classId)
+	const { error } = result
+	if (error) return res.status(error.statusCode).json(result)
+	return res.status(HttpStatusCode.CREATED).json(result)
 })
 
 // [GET] /time-table/:classId
@@ -28,8 +26,7 @@ export const getTimeTableByClass = useCatchAsync(async (req: Request, res: Respo
 
 // [GET] /time-table
 export const getTeacherTimetable = useCatchAsync(async (req: Request, res: Response) => {
-	const classId = req.query._classId as string
-	if (!classId || !isValidObjectId(classId)) throw createHttpError.BadRequest('Invalid class ID')
-	const teacherTimetable = await TimeTableService.getTeacherTimeTableByClass(req.params.teacherId)
+	const teacherId = req.profile._id as string
+	const teacherTimetable = await TimeTableService.getTeacherTimeTable(teacherId)
 	return res.status(HttpStatusCode.OK).json(teacherTimetable)
 })

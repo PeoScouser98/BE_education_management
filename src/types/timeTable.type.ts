@@ -14,8 +14,8 @@ export interface ITimeTable extends Document {
 	teacher: ObjectId | Partial<IUser> | string
 	period: number
 	dayOfWeek: string | DayInWeekEnum
-	createdAt?: Date
-	updatedAt?: Date
+	createdAt: Date
+	updatedAt: Date
 }
 
 export enum DayInWeekEnum {
