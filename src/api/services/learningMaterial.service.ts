@@ -10,18 +10,25 @@ export const getFiles = async (filterQuery: FilterQuery<ILearningMaterial>, quer
 	return await LearningMaterialModel.paginate(filterQuery, query)
 }
 
-export const getDeletedFile = async (query: PaginateOptions) => {
-	const result = await LearningMaterialModel.paginate(
-		{},
+export const getOneFile = async (id: string) => await LearningMaterialModel.findOne({ _id: id })
+
+export const getDeletedFilesByUser = async (userId: string, query: PaginateOptions) => {
+	const deletedFiles = await LearningMaterialModel.paginate(
+		{ uploadedBy: userId },
 		{
 			...query,
 			customFind: 'findDeleted',
 			useCustomCountFn() {
-				return Promise.resolve(LearningMaterialModel.countDeleted())
+				return Promise.resolve(LearningMaterialModel.countDeleted({ uploadedBy: userId }))
 			}
 		}
 	)
-	return result
+	return deletedFiles
+}
+
+export const getUploadedFilesByUser = async (userId: string, query: PaginateOptions) => {
+	const files = await LearningMaterialModel.paginate({ uploadedBy: userId }, query)
+	return files
 }
 
 // Save file to database
