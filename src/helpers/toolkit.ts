@@ -46,17 +46,17 @@ export const toCapitalize = (value: string) => {
 	return result
 }
 
-export const getFileSize = (fileSize: number | string): string => {
+export const getFileSize = (fileSize: number): string => {
 	fileSize = +fileSize
 	switch (true) {
-		case fileSize / 1000 > 1:
-			return Math.round(fileSize / 1000) + 'kb'
-		case fileSize / 1000000 > 1:
-			return Math.round(fileSize / 1000000) + 'mb'
 		case fileSize / 1000000000 > 1:
-			return Math.round(fileSize / 1000000) + 'gb'
+			return (fileSize / 1000000000).toFixed(2) + 'gb'
+		case fileSize / 1000000 > 1:
+			return (fileSize / 1000000).toFixed(2) + 'mb'
+		case fileSize / 1000 > 1:
+			return (fileSize / 1000).toFixed(2) + 'kb'
 		default:
-			return fileSize + 'b'
+			return fileSize + 'bytes'
 	}
 }
 
