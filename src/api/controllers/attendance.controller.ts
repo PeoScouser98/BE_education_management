@@ -8,7 +8,16 @@ import { AttendanceSessionEnum } from './../../types/attendance.type'
 
 export const saveAttendanceByClass = useCatchAsync(async (req: Request, res: Response) => {
 	const students = req.body
-	const result = await AttendanceService.saveAttendanceByClass(students)
+	const session = req.query._ss
+	if (!session) throw createHttpError.BadRequest('"_ss" param must be provided !')
+
+	if (
+		!Object.keys(AttendanceSessionEnum)
+			.map((ss) => ss.toLowerCase())
+			.includes(session.toString())
+	)
+		throw createHttpError.BadRequest('"_ss" must be "morning" or "afternoon"')
+	const result = await AttendanceService.saveAttendanceByClass(students, session.toString().toUpperCase())
 	return res.status(HttpStatusCode.CREATED).json(result)
 })
 
@@ -39,8 +48,9 @@ export const getClassAttendanceBySession = useCatchAsync(async (req: Request, re
 	if (!session) throw createHttpError.BadRequest('Session is required for searching!')
 	if (!Object.keys(AttendanceSessionEnum).includes(session.toString().toUpperCase()))
 		throw createHttpError.BadRequest('Invalid session filter value! Valid values are "morning", "afternoon"')
+	const headTeacherId = req.profile._id as string
 	const result = await AttendanceService.getClassAttendanceBySession(
-		req.params.classId,
+		headTeacherId,
 		date,
 		session.toString().toUpperCase()
 	)
