@@ -16,6 +16,13 @@ const ArticleSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        userPosts: {
+            type: String,
+            required: true,
+        },
+        userPicture: {
+            type: String,
+        }
     },
     {
         timestamps: true,
@@ -27,11 +34,11 @@ const ArticleSchema = new mongoose.Schema(
 ArticleSchema.plugin(mongoosePaginate)
 
 ArticleSchema.pre('save', function (next) {
-	this.title = toCapitalize(this.title)
-	next()
+    this.title = toCapitalize(this.title)
+    next()
 })
 
 
-const AttendanceModel = mongoose.model<IArticle>('Attendance', ArticleSchema)
+const ArticleModel = mongoose.model<IArticle>('Article', ArticleSchema)
 
-export default AttendanceModel
+export default ArticleModel

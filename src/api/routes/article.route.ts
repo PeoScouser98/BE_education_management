@@ -1,11 +1,13 @@
 import express from 'express'
-import { checkAuthenticated, checkIsHeadmaster, checkIsTeacher } from '../middlewares/authGuard.middleware'
+import { checkAuthenticated, checkIsHeadmaster } from '../middlewares/authGuard.middleware'
+import * as ArticleController from '../controllers/article.controller'
 const router = express.Router()
 
-// router.post('/article', checkAuthenticated, checkIsHeadmaster)
-// router.patch('/article/:id', checkAuthenticated, checkIsHeadmaster)
-// router.delete('/article/:id', checkAuthenticated, checkIsHeadmaster )
-// router.get('/article', checkAuthenticated)
-// router.get('/article/:id', checkAuthenticated)
+router.post('/article', checkAuthenticated, checkIsHeadmaster, ArticleController.createArticle)
+router.patch('/article/:id', checkAuthenticated, checkIsHeadmaster, ArticleController.updateArticle)
+router.delete('/article/:id', checkAuthenticated, checkIsHeadmaster, ArticleController.deleteArticle)
+router.get('/article', checkAuthenticated, ArticleController.getAllArticle)
+router.get('/article/search', checkAuthenticated, ArticleController.searchArticle)
+router.get('/article/:id', checkAuthenticated, ArticleController.getArticle)
 
 export default router
