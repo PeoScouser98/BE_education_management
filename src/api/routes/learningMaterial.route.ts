@@ -36,5 +36,17 @@ router.delete(
 	checkIsTeacher,
 	LearningMaterialController.deleteFile
 )
+router.get(
+	'/learning-materials/user-uploaded',
+	checkAuthenticated,
+	checkIsTeacher,
+	LearningMaterialController.getUserUploadedFiles
+)
+router.get(
+	'/learning-materials/user-deleted',
+	checkAuthenticated,
+	checkIsTeacher,
+	LearningMaterialController.getFilesUserDeleted
+)
 
 export default router

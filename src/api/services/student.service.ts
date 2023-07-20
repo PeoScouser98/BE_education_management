@@ -1,5 +1,5 @@
 import createHttpError from 'http-errors'
-import mongoose, { ObjectId, isValidObjectId } from 'mongoose'
+import mongoose, { FilterQuery, ObjectId, isValidObjectId } from 'mongoose'
 import { IAttendance } from '../../types/attendance.type'
 import { IStudent, StudentStatusEnum } from '../../types/student.type'
 import { IUser } from '../../types/user.type'
@@ -44,15 +44,6 @@ export const updateStudent = async (id: string, data: Partial<Omit<IStudent, '_i
 		throw createHttpError.NotFound('Student does not exist!')
 	}
 	return await StudentModel.findOneAndUpdate({ _id: id }, data, { new: true })
-}
-
-// get student theo class
-export const getStudentByClass = async (classId: string) => {
-	return await StudentModel.find({
-		class: classId,
-		dropoutDate: null,
-		transferSchoolDate: null
-	})
 }
 
 // get detail student
@@ -145,7 +136,7 @@ export const getStudentTransferSchool = async (year: number | 'all', page: numbe
 }
 
 export const getStudentDropout = async (year: 'all' | number, page: number, limit: number) => {
-	let condition: any = {
+	let condition: FilterQuery<IStudent> = {
 		$expr: { $eq: [{ $year: '$dropoutDate' }, year] }
 	}
 
@@ -191,7 +182,7 @@ export const getPolicyBeneficiary = async (page: number, limit: number) => {
 	)
 }
 
-const getStudentWithAchievement = async (classId: string) => {
+export const getStudentsByClass = async (classId: string) => {
 	const [currentSchoolYear] = await SchoolYearModel.find().sort({ endAt: -1 })
 	return await StudentModel.aggregate()
 		.match({
@@ -245,7 +236,10 @@ const getStudentWithAchievement = async (classId: string) => {
 				}
 			]
 		})
-		.unwind('$remarkAsQualified')
+		.unwind({
+			path: '$remarkAsQualified',
+			preserveNullAndEmptyArrays: true
+		})
 		.lookup({
 			from: 'subject_transcriptions',
 			localField: '_id',
@@ -275,6 +269,7 @@ const getStudentWithAchievement = async (classId: string) => {
 			pipeline: [{ $project: { grade: 1, className: 1 } }]
 		})
 		.unwind('$class')
+
 		.addFields({
 			completedProgram: {
 				$cond: {
@@ -326,7 +321,7 @@ const getStudentWithAchievement = async (classId: string) => {
 					else: false
 				}
 			},
-			remarkAsQualified: '$remarkAsQualified.isQualified',
+			remarkAsQualified: { $ifNull: ['$remarkAsQualified.isQualified', false] },
 			parents: '$parents'
 		})
 		.addFields({
@@ -347,12 +342,11 @@ const getStudentWithAchievement = async (classId: string) => {
 }
 
 export const promoteStudentsByClass = async (classId: string) => {
-	const studentsInClass = await getStudentWithAchievement(classId)
+	const studentsInClass = await getStudentsByClass(classId)
 	const promotedStudents = studentsInClass.filter(
 		(student: IStudent & { remarkAsQualified: boolean; completedProgram: boolean }) =>
 			student.remarkAsQualified && student.completedProgram
 	)
-	console.log('promotedStudents', promotedStudents)
 	const isAbleToPromoted =
 		promotedStudents.length > 0 &&
 		promotedStudents.every((student) => student.class?.grade === 5 && student.class !== null)
