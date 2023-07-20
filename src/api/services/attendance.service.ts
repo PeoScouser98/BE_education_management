@@ -47,10 +47,9 @@ export const getStudentAttendance = async (studentId: string, timeRangeOption?: 
 // Reset form save attandance by class
 export const getClassAttendanceBySession = async (headTeacher: string, date: string | undefined, session: string) => {
 	if (!!date && !moment(date).isValid()) throw createHttpError.BadRequest('Invalid date')
-	const attendanceClass = await ClassModel.findOne({ headTeacher: headTeacher }).select('_id className')
-	const studentsByClass = (await StudentModel.find({ class: attendanceClass?._id })
-		.select('_id fullName')
-		.lean()) as Array<Pick<IStudent, '_id' | 'fullName'>>
+	const classId = await ClassModel.findOne({ headTeacher: headTeacher }).distinct('_id')
+	console.log('classId', classId)
+	const studentsByClass = await StudentModel.find({ class: classId }).select('_id fullName').lean()
 	let attendanceOfClass = (await AttendanceModel.find({
 		student: { $in: studentsByClass.map((std) => std._id) },
 		date: moment(date).format('YYYY-MM-DD'),
@@ -65,10 +64,13 @@ export const getClassAttendanceBySession = async (headTeacher: string, date: str
 
 	if (!attendanceOfClass.length)
 		attendanceOfClass = studentsByClass.map(
-			(std) => ({ student: std, isPresent: true } as Pick<IAttendance, 'student' | 'isPresent'>)
+			(std) =>
+				({
+					...std,
+					isPresent: true
+				} as Pick<IAttendance, 'student' | 'isPresent'>)
 		)
 	return {
-		class: attendanceClass?.className,
 		session: AttendanceSessionEnum[session as keyof typeof AttendanceSessionEnum],
 		date: moment(date).format('DD/MM/YYYY'),
 		attendances: attendanceOfClass
