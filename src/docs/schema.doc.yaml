@@ -458,6 +458,7 @@ components:
             deleted:
                type: boolean
                default: false
+
       TimeTable:
          type: object
          properties:
@@ -524,6 +525,7 @@ components:
                type: string
             updatedAt:
                type: string
+
       Remark:
          type: object
          properties:
@@ -565,6 +567,39 @@ components:
                type: Date
                example: '2023-03-14T17:02:24.526+00:00'
 
+      Article:
+         type: object
+         properties:
+            _id:
+               type: string
+               example: '637ec5ce577ebd6709c65124'
+            title:
+               type: string
+               description: 'Tiêu đề bản tin'
+               example: 'Thông báo BHYT'
+            content:
+               type: string
+               description: 'Nội dung'
+               example: '<p>Hello</p>'
+            synopsis:
+               type: string
+               description: 'Nội dung tóm tắt'
+               example: 'Thông báo'
+            userPosts:
+               type: string
+               description: 'Tên người đăng'
+               example: 'Compunctor_12'
+            userPicture:
+               type: string
+               description: "Avatar người đăng"
+               example: "https://lh3.googleusercontent.com/a/AAcHTted-AUwzxogw_PqbSLNNHJuVj8wN3h6gkuv2eSCEBA3Z9A=s96-c"
+            createdAt:
+               type: Date
+               example: '2023-03-14T17:02:24.526+00:00'
+            updatedAt:
+               type: Date
+               example: '2023-03-14T17:02:24.526+00:00'
+          
       HttpError:
          type: object
          properties:

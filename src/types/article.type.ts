@@ -3,6 +3,7 @@ export interface IArticle extends Document {
 	_id: ObjectId
 	title: string
     content: string
+	synopsis: string
 	userPosts: string
 	userPicture: string
 }
