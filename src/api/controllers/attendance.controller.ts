@@ -25,7 +25,7 @@ export const getStudentAttendance = useCatchAsync(async (req: Request, res: Resp
 			throw createHttpError.BadRequest('End of time range must be greater than start of the one !')
 		}
 		timeRangeSearchTerm = {
-			from: moment(from).format('YYYY-DD-MM'),
+			from: moment(from).format('YYYY-MM-DD'),
 			to: moment(to).format('YYYY-MM-DD')
 		}
 	}
