@@ -5,6 +5,7 @@ export const validateArticleData = (data: Omit<IArticle, '_id'>) => {
 	const schema = Joi.object({
 		title: Joi.string().required(),
 		content: Joi.string().required(),
+		synopsis: Joi.string().optional(),
 		userPosts: Joi.string().required(),
 		userPicture: Joi.string().required(),
 	})
@@ -15,8 +16,9 @@ export const validateArticleEdit = (data: Partial<Omit<IArticle, '_id'>>) => {
 	const schema = Joi.object({
 		title: Joi.string().required(),
 		content: Joi.string().required(),
-		userPosts: Joi.string().optional(),
-		userPicture: Joi.string().optional(),
+		synopsis: Joi.string().optional(),
+		userPosts: Joi.string().required(),
+		userPicture: Joi.string().required(),
 	})
 	return schema.validate(data)
 }

@@ -4,7 +4,6 @@ import mongoosePaginate from 'mongoose-paginate-v2'
 import { IArticle } from '../../types/article.type'
 import { toCapitalize } from '../../helpers/toolkit'
 
-
 const ArticleSchema = new mongoose.Schema(
     {
         title: {
@@ -15,6 +14,9 @@ const ArticleSchema = new mongoose.Schema(
         content: {
             type: String,
             required: true,
+        },
+        synopsis: {
+            type: String,
         },
         userPosts: {
             type: String,
@@ -27,7 +29,6 @@ const ArticleSchema = new mongoose.Schema(
     {
         timestamps: true,
         versionKey: false,
-        expires: '30d' // auto delete after 37 weeks
     }
 )
 
