@@ -2,7 +2,7 @@ import express from 'express'
 import {
 	createStudent,
 	updateStudent,
-	getStudentByClass,
+	getStudentsByClass,
 	getStudentDetail,
 	serviceStudent,
 	getStudentLeftSchool,
@@ -20,7 +20,7 @@ router.get('/students/left-school', checkAuthenticated, checkIsTeacher, getStude
 router.get('/students/detail/:id', checkAuthenticated, getStudentDetail)
 router.get(
 	'/students/:classId', //checkAuthenticated, checkIsTeacher,
-	getStudentByClass
+	getStudentsByClass
 )
 router.patch('/students/graduation-promote/:classId', checkAuthenticated, checkIsHeadmaster, promoteStudentsByClass)
 router.post('/students', checkAuthenticated, checkIsHeadmaster, createStudent)

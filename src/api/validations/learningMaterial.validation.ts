@@ -5,7 +5,7 @@ export const validateNewLearningMaterial = (payload: Omit<ILearningMaterial, '_i
 	const schema = Joi.object({
 		title: Joi.string().required(),
 		fileId: Joi.string().required(),
-		fileSize: Joi.string().required(),
+		fileSize: Joi.number().min(1).required(),
 		subject: Joi.string().required(),
 		uploadedBy: Joi.string().required(),
 		mimeType: Joi.string().required()

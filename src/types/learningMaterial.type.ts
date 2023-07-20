@@ -8,7 +8,7 @@ export interface ILearningMaterial {
 	subject: ObjectId
 	fileId: string
 	title: string
-	fileSize: string | string
+	fileSize: number
 	mimeType: string
 	downloadUrl: string
 	uploadedBy: string | ObjectId | Pick<IUser, '_id' | 'displayName'>

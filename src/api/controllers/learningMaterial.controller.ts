@@ -25,20 +25,24 @@ export const getFiles = useCatchAsync(async (req: Request, res: Response) => {
 		sort: sort || {}
 	}
 
-	let isDeletedFilterOption = req.query._deleted
-	if (!isDeletedFilterOption) {
-		throw createHttpError.BadRequest('Missing "_deleted" params !')
-	}
-	isDeletedFilterOption = JSON.parse(isDeletedFilterOption.toString())
-	if (typeof isDeletedFilterOption !== 'boolean') {
-		throw createHttpError.BadRequest('"_deleted" param should be "true" or "false"')
-	}
-	if (isDeletedFilterOption) {
-		const deletedFiles = await LearningMaterialService.getDeletedFile(query)
-		return res.status(HttpStatusCode.OK).json(deletedFiles)
-	}
 	const allFiles = await LearningMaterialService.getFiles({ subject: req.params.subjectId, deleted: false }, query)
 	return res.status(HttpStatusCode.OK).json(allFiles)
+})
+
+export const getFilesUserDeleted = useCatchAsync(async (req: Request, res: Response) => {
+	const sort = multiFieldSortObjectParser({
+		_sort: req.query._sort as string,
+		_order: req.query._order as string
+	})
+
+	const query: PaginateOptions = {
+		limit: +req.query._limit! || 10,
+		page: +req.query._page! || 1,
+		sort: sort || {}
+	}
+	const user = req.profile._id as string
+	const deletedFiles = await LearningMaterialService.getDeletedFilesByUser(user, query)
+	return res.status(HttpStatusCode.OK).json(deletedFiles)
 })
 
 export const uploadFile = useCatchAsync(async (req: Request, res: Response) => {
@@ -59,7 +63,7 @@ export const uploadFile = useCatchAsync(async (req: Request, res: Response) => {
 		fileId: uploadedFile.data?.id as string,
 		title: req.body.title,
 		mimeType: file.mimetype,
-		fileSize: getFileSize(file.size),
+		fileSize: file.size,
 		subject: req.body.subject,
 		uploadedBy: user._id
 	} as Omit<ILearningMaterial, '_id' | 'downloadUrl'>
@@ -67,6 +71,22 @@ export const uploadFile = useCatchAsync(async (req: Request, res: Response) => {
 	const savedFile = await LearningMaterialService.saveFile(newFile)
 
 	return res.status(HttpStatusCode.CREATED).json(savedFile)
+})
+
+export const getUserUploadedFiles = useCatchAsync(async (req: Request, res: Response) => {
+	const sort = multiFieldSortObjectParser({
+		_sort: req.query._sort as string,
+		_order: req.query._order as string
+	})
+
+	const query: PaginateOptions = {
+		limit: +req.query._limit! || 10,
+		page: +req.query._page! || 1,
+		sort: sort || {}
+	}
+	const user = req.profile._id as string
+	const userUploadedFiles = await LearningMaterialService.getUploadedFilesByUser(user, query)
+	return res.status(HttpStatusCode.OK).json(userUploadedFiles)
 })
 
 export const updateFile = useCatchAsync(async (req: Request, res: Response) => {
@@ -78,7 +98,7 @@ export const deleteFile = useCatchAsync(async (req: Request, res: Response) => {
 	if (!req.query._hard) {
 		throw createHttpError.BadRequest('Missing delete option param "_hard"')
 	}
-	const isHardDeleteOption = req.query._hard && req.query._hard.toString() == 'true'
+	const isHardDeleteOption = req.query._hard && JSON.parse(req.query._hard.toString()) === true
 
 	if (isHardDeleteOption) {
 		const deletedFileInDb = await LearningMaterialService.hardDeleteFile(req.params.fileId)

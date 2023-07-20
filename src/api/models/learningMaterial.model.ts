@@ -25,7 +25,7 @@ const LearningMaterialSchema = new mongoose.Schema<ILearningMaterialDocument>(
 			trim: true
 		},
 		fileSize: {
-			type: String,
+			type: Number,
 			required: true,
 			trim: true,
 			lowercase: true

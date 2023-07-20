@@ -2,7 +2,6 @@ import { Request, Response } from 'express'
 import createHttpError from 'http-errors'
 import { isValidObjectId } from 'mongoose'
 import { HttpStatusCode } from '../../configs/statusCode.config'
-import { formatDate } from '../../helpers/toolkit'
 import useCatchAsync from '../../helpers/useCatchAsync'
 import { IStudent } from '../../types/student.type'
 import * as StudentServices from '../services/student.service'
@@ -23,9 +22,9 @@ export const updateStudent = useCatchAsync(async (req: Request, res: Response) =
 })
 
 // [GET] /api/students/:classId
-export const getStudentByClass = useCatchAsync(async (req: Request, res: Response) => {
+export const getStudentsByClass = useCatchAsync(async (req: Request, res: Response) => {
 	const classId = req.params.classId
-	const result = await StudentServices.getStudentByClass(classId)
+	const result = await StudentServices.getStudentsByClass(classId)
 	return res.status(HttpStatusCode.OK).json(result)
 })
 
@@ -94,7 +93,7 @@ export const getPolicyBeneficiary = useCatchAsync(async (req: Request, res: Resp
 })
 
 export const getStudentsByParents = useCatchAsync(async (req: Request, res: Response) => {
-	const parentsId = req.profile?._id!
+	const parentsId = req.profile?._id as string
 	const children = await StudentServices.getStudentsByParents(parentsId)
 	return res.status(HttpStatusCode.OK).json(children)
 })
