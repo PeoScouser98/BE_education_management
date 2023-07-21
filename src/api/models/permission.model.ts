@@ -12,13 +12,13 @@ import { UserRoleEnum } from '../../types/user.type'
 const PermissionSchema = new mongoose.Schema<IPermission>({
 	role: {
 		type: String,
-		require: true,
+		required: true,
 		trim: true,
 		enum: UserRoleEnum
 	},
 	type: {
 		type: String,
-		require: true,
+		required: true,
 		trim: true
 	},
 

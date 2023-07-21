@@ -19,7 +19,7 @@ const StudentSchema = new mongoose.Schema<IStudentDocument>(
 		},
 		fullName: {
 			type: String,
-			require: true,
+			required: true,
 			trim: true,
 			minLength: 6
 		},
@@ -30,12 +30,12 @@ const StudentSchema = new mongoose.Schema<IStudentDocument>(
 		},
 		gender: {
 			type: String,
-			require: true,
+			required: true,
 			enum: Object.values(UserGenderEnum)
 		},
 		dateOfBirth: {
 			type: Date,
-			require: true
+			required: true
 		},
 		isPolicyBeneficiary: {
 			type: Boolean,

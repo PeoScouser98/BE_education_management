@@ -7,7 +7,7 @@ const ClassSchema = new mongoose.Schema<IClassDocument>(
 	{
 		className: {
 			type: String,
-			require: true,
+			required: true,
 			trim: true,
 			uppercase: true,
 			unique: true
@@ -15,7 +15,7 @@ const ClassSchema = new mongoose.Schema<IClassDocument>(
 		grade: {
 			type: Number,
 			enum: [1, 2, 3, 4, 5],
-			require: true
+			required: true
 		},
 		headTeacher: {
 			type: mongoose.Types.ObjectId,
