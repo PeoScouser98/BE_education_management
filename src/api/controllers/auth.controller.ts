@@ -24,12 +24,12 @@ export const signinWithGoogle = useCatchAsync(async (req: Request, res: Response
 	}
 	const loginTicket = await oauth2Client.verifyIdToken({ idToken })
 	const payload = loginTicket.getPayload()
-	const user = await getUserByEmail(payload?.email!)
+	const user = await getUserByEmail(payload?.email || '')
 	if (!user) {
 		throw createHttpError.NotFound('Cannot find user')
 	}
 	user.picture = payload?.picture
-	const userPermissions = await getPermissionByRole(user?.role!)
+	const userPermissions = await getPermissionByRole(user.role as string)
 	const accessToken = jwt.sign({ payload: user }, process.env.ACCESS_TOKEN_SECRET!, {
 		expiresIn: '1h'
 	})
@@ -79,7 +79,7 @@ export const googleLoginTest = useCatchAsync(async (req: Request, res: Response)
 	const payload = await (
 		await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: oauth2Token } })
 	).json()
-	const user = await getUserByEmail(payload?.email!)
+	const user = await getUserByEmail(payload?.email)
 	if (!user) {
 		throw createHttpError.NotFound('Cannot find user')
 	}
