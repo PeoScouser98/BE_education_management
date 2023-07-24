@@ -30,7 +30,6 @@ export const createUser = async (payload: Partial<IUser> & Array<Partial<IUser>>
 				}
 			]
 		})
-		console.log('existedTeacher', existedTeacher)
 		if (existedTeacher) {
 			throw createHttpError.BadRequest(`Teacher's email or phone number cannot be duplicated!`)
 		}
@@ -96,28 +95,15 @@ export const getTeacherUsersByStatus = async (status?: string) => {
 				employmentStatus: true
 			})
 
-		// Inactivate user
-		case 'quited':
-			return await UserModel.findWithDeleted({
-				role: UserRoleEnum.TEACHER,
-				deleted: true,
-				isVerified: true,
-				employmentStatus: false
-			})
-
 		default:
-			return await UserModel.findWithDeleted({
+			return await UserModel.find({
 				role: UserRoleEnum.TEACHER
 			})
 	}
 }
 
 export const deactivateTeacherUser = async (userId: string) => {
-	return await UserModel.findOneAndUpdate(
-		{ _id: userId, role: UserRoleEnum.TEACHER },
-		{ employmentStatus: false, deleted: true },
-		{ new: true }
-	).lean()
+	return await UserModel.findOneAndDelete({ _id: userId, role: UserRoleEnum.TEACHER })
 }
 
 export const getParentsUserByClass = async (classId: string) => {

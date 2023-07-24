@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import bcrypt, { genSaltSync } from 'bcrypt'
 import 'dotenv/config'
 import mongoose from 'mongoose'
-import mongooseDelete from 'mongoose-delete'
 import mongooseAutoPopulate from 'mongoose-autopopulate'
+import mongooseDelete from 'mongoose-delete'
 
-import { TSoftDeleteUserModel, IUser, IUserDocument, UserGenderEnum, UserRoleEnum } from '../../types/user.type'
 import mongooseLeanVirtuals from 'mongoose-lean-virtuals'
 import { toCapitalize } from '../../helpers/toolkit'
+import { IUser, IUserDocument, UserGenderEnum, UserRoleEnum } from '../../types/user.type'
 
 const UserSchema = new mongoose.Schema<IUser>(
 	{
@@ -112,7 +113,7 @@ UserSchema.plugin(mongooseDelete, {
 UserSchema.plugin(mongooseLeanVirtuals)
 UserSchema.plugin(mongooseAutoPopulate)
 
-const UserModel = mongoose.model<IUserDocument, TSoftDeleteUserModel>('Users', UserSchema)
+const UserModel = mongoose.model<IUserDocument>('Users', UserSchema)
 UserModel.createIndexes()
 
 export default UserModel

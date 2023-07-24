@@ -3,9 +3,11 @@
 import createHttpError from 'http-errors'
 import _ from 'lodash'
 import mongoose from 'mongoose'
-import { ITimeTable } from '../../types/timeTable.type'
+import { DayInWeekEnum, ITimeTable } from '../../types/timeTable.type'
 import TimeTableModel from '../models/timeTable.model'
 import { validateTimeTableData } from '../validations/timeTable.validation'
+import { ISubject } from '../../types/subject.type'
+import { IClass } from '../../types/class.type'
 
 export const saveTimeTableByClass = async (payload: { [key: string]: Partial<ITimeTable>[] }, classId: string) => {
 	const schedule = _.flatMap(payload, (items, dayOfWeek) =>
@@ -92,10 +94,44 @@ export const getTimetableByClass = async (classId: string) => {
 }
 
 export const getTeacherTimeTable = async (teacherId: string) => {
-	const result = await TimeTableModel.find({
-		teacher: teacherId
-	})
-		.populate({ path: 'class', select: '_id className', options: { lean: true } })
-		.populate({ path: 'subject', select: '_id subjectName', options: { lean: true } })
-	return _.groupBy(result, 'dayOfWeek')
+	const result = await TimeTableModel.aggregate()
+		.match({ teacher: new mongoose.Types.ObjectId(teacherId) })
+		.lookup({
+			from: 'classes',
+			localField: 'class',
+			foreignField: '_id',
+			as: 'class'
+		})
+		.lookup({
+			from: 'subjects',
+			localField: 'subject',
+			foreignField: '_id',
+			as: 'subject'
+		})
+		.project({
+			dayOfWeek: 1,
+			period: 1,
+			class: { $arrayElemAt: ['$class.className', 0] },
+			subject: { $arrayElemAt: ['$subject.subjectName', 0] }
+		})
+		.group({
+			_id: '$dayOfWeek',
+			schedules: {
+				$push: {
+					dayOfWeek: '$dayOfWeek',
+					period: '$period',
+					class: '$class',
+					subject: '$subject'
+				}
+			}
+		})
+		.sort({ _id: 1, 'schedules.period': 1 })
+
+	const timetable = result.reduce((acc, curr) => {
+		acc[curr._id] = curr.schedules
+		return acc
+	}, {})
+
+	return timetable
+	// return result
 }
