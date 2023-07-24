@@ -186,7 +186,7 @@ paths:
                   application/json:
                      schema:
                         $ref: '#/components/schemas/HttpError'
-                     example: { statusCode: 400, message: "invalid field" }
+                     example: { statusCode: 400, message: 'invalid field' }
             404:
                description: Article không tồn tại
                content:
@@ -211,7 +211,6 @@ paths:
                         properties:
                            message:
                               type: string
-                     example:
-                        { message: Article has been permanently deleted }
+                     example: { message: Article has been permanently deleted }
             204:
                description: không truyền id

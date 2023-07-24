@@ -7,7 +7,7 @@ export const validateArticleData = (data: Omit<IArticle, '_id'>) => {
 		content: Joi.string().required(),
 		synopsis: Joi.string().optional(),
 		userPosts: Joi.string().required(),
-		userPicture: Joi.string().required(),
+		userPicture: Joi.string().required()
 	})
 	return schema.validate(data)
 }
@@ -18,7 +18,7 @@ export const validateArticleEdit = (data: Partial<Omit<IArticle, '_id'>>) => {
 		content: Joi.string().required(),
 		synopsis: Joi.string().optional(),
 		userPosts: Joi.string().required(),
-		userPicture: Joi.string().required(),
+		userPicture: Joi.string().required()
 	})
 	return schema.validate(data)
 }

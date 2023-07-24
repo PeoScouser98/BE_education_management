@@ -591,15 +591,15 @@ components:
                example: 'Compunctor_12'
             userPicture:
                type: string
-               description: "Avatar người đăng"
-               example: "https://lh3.googleusercontent.com/a/AAcHTted-AUwzxogw_PqbSLNNHJuVj8wN3h6gkuv2eSCEBA3Z9A=s96-c"
+               description: 'Avatar người đăng'
+               example: 'https://lh3.googleusercontent.com/a/AAcHTted-AUwzxogw_PqbSLNNHJuVj8wN3h6gkuv2eSCEBA3Z9A=s96-c'
             createdAt:
                type: Date
                example: '2023-03-14T17:02:24.526+00:00'
             updatedAt:
                type: Date
                example: '2023-03-14T17:02:24.526+00:00'
-          
+
       HttpError:
          type: object
          properties:
