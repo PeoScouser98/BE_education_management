@@ -47,8 +47,7 @@ export const insertSubjectTranscriptByClass = async (
 			filter: {
 				student: item.student,
 				subject: subjectId,
-				// schoolYear: currentSchoolYear
-				schoolYear: '6493e4fc7b4f808ce2e4cdcb'
+				schoolYear: currentSchoolYear?._id
 			},
 			update: item,
 			upsert: true

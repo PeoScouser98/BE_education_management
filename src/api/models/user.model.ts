@@ -17,31 +17,31 @@ const UserSchema = new mongoose.Schema<IUser>(
 		},
 		phone: {
 			type: String,
-			require: true,
+			required: true,
 			unique: true
 		},
 		displayName: {
 			type: String,
-			require: true,
+			required: true,
 			trim: true
 		},
 		dateOfBirth: {
 			type: Date,
-			require: true
+			required: true
 		},
 		address: {
 			type: String,
-			require: true
+			required: true
 		},
 		gender: {
 			type: String,
-			require: true,
+			required: true,
 			enum: Object.values(UserGenderEnum)
 		},
 		picture: {
 			type: String,
 			trim: true,
-			require: true
+			required: true
 		},
 		eduBackground: {
 			type: {
@@ -59,7 +59,7 @@ const UserSchema = new mongoose.Schema<IUser>(
 		role: {
 			type: String,
 			trim: true,
-			require: true,
+			required: true,
 			enum: Object.values(UserRoleEnum)
 		},
 		isVerified: {
