@@ -10,13 +10,13 @@ const LearningMaterialSchema = new mongoose.Schema<ILearningMaterialDocument>(
 		subject: {
 			type: mongoose.Types.ObjectId,
 			ref: 'Subjects',
-			require: true,
+			required: true,
 			autopopulate: true
 		},
 
 		fileId: {
 			type: String,
-			require: true,
+			required: true,
 			trim: true
 		},
 		title: {
