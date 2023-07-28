@@ -4,11 +4,10 @@ import moment from 'moment'
 import mongoose, { isValidObjectId } from 'mongoose'
 import { IAttendance } from '../../types/attendance.type'
 import AttendanceModel from '../models/attendance.model'
+import ClassModel from '../models/class.model'
 import StudentModel from '../models/student.model'
 import { validateAttedancePayload } from '../validations/attendance.validation'
 import { AttendanceSessionEnum } from './../../types/attendance.type'
-import ClassModel from '../models/class.model'
-import { IStudent } from '../../types/student.type'
 
 export const saveAttendanceByClass = async (payload: Array<Omit<IAttendance, '_id'>>, session: string) => {
 	const { error } = validateAttedancePayload(payload)
