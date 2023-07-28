@@ -22,13 +22,19 @@ export const getStdPercentageByGrade = async () => {
 				label: 'Tỉ lệ học sinh giữa các khối',
 				data: data,
 				backgroundColor: [
-					'rgba(26,50,71,1)',
-					'rgba(81,112,129,1)',
-					'rgba(168,168,168,1)',
-					'rgba(97,155,184,1)',
-					'rgba(31,105,142,1)'
+					'rgba(16, 185, 129, 1)',
+					'rgba(79, 70, 229, 1)',
+					'rgba(25, 118, 210, 1)',
+					'rgba(231, 31, 105, 1)',
+					'rgba(248, 179, 26, 1)'
 				],
-				borderColor: [],
+				borderColor: [
+					'rgba(16, 185, 129,0.8)',
+					'rgba(79, 70, 229,0.8)',
+					'rgba(25, 118, 210,0.8)',
+					'rgba(231, 31, 105,0.8)',
+					'rgba(248, 179, 26,0.8)'
+				],
 				borderWith: 1
 			}
 		]
