@@ -8,7 +8,7 @@ import StudentModel from '../models/student.model'
 import SubjectModel from '../models/subject.model'
 import SubjectTranscriptionModel from '../models/subjectTrancription.model'
 import { validateSubjectTranscript } from '../validations/subjectTrancription.validation'
-import { getCurrentSchoolYear, getLatestSchoolYear } from './schoolYear.service'
+import { getCurrentSchoolYear } from './schoolYear.service'
 
 // Nhập điểm nhiều học sinh 1 lúc / môn / lớp
 export const insertSubjectTranscriptByClass = async (
