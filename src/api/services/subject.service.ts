@@ -1,7 +1,6 @@
 import createHttpError from 'http-errors'
 import { isValidObjectId } from 'mongoose'
 import { ISubject } from '../../types/subject.type'
-import LearningMaterialModel from '../models/learningMaterial.model'
 import SubjectModel from '../models/subject.model'
 import { validateSubjectRequestBody, validateSubjectUpdateBody } from '../validations/subject.validation'
 
@@ -46,9 +45,6 @@ export const updateSubject = async (id: string, subject: Partial<Omit<ISubject, 
 
 // force delete
 export const deleteSubject = async (id: string) => {
-	const learningMaterialBySubject = await LearningMaterialModel.exists({ subject: id })
-	if (learningMaterialBySubject)
-		throw createHttpError.Conflict('Cannot delete this subject due to existing learning material of this subject !')
 	if (!isValidObjectId(id)) throw createHttpError.BadRequest('_id of the subject is invalid')
 	return await SubjectModel.deleteOne({ _id: id })
 }
