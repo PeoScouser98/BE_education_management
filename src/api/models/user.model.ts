@@ -41,8 +41,7 @@ const UserSchema = new mongoose.Schema<IUser>(
 		},
 		picture: {
 			type: String,
-			trim: true,
-			required: true
+			trim: true
 		},
 		eduBackground: {
 			type: {
@@ -106,10 +105,10 @@ UserSchema.pre('save', function (next) {
 	next()
 })
 
-UserSchema.plugin(mongooseDelete, {
-	overrideMethods: ['find', 'findOne', 'findOneAndUpdate'],
-	deletedAt: true
-})
+// UserSchema.plugin(mongooseDelete, {
+// 	overrideMethods: ['find', 'findOne', 'findOneAndUpdate'],
+// 	deletedAt: true
+// })
 UserSchema.plugin(mongooseLeanVirtuals)
 UserSchema.plugin(mongooseAutoPopulate)
 
