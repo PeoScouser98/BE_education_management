@@ -3,7 +3,7 @@ import * as permissionController from '../controllers/permission.controllers'
 import { checkIsHeadmaster, checkAuthenticated } from '../middlewares/authGuard.middleware'
 const router = express.Router()
 
-router.get('/permissions/get-by-roll', checkAuthenticated, permissionController.getPermissionByRole)
+router.get('/permissions/get-by-role', checkAuthenticated, permissionController.getPermissionByRole)
 router.post('/permissions', checkAuthenticated, checkIsHeadmaster, permissionController.createPermission)
 router.patch('/permissions/:id', checkAuthenticated, checkIsHeadmaster, permissionController.updatePermission)
 router.patch(
