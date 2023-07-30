@@ -9,6 +9,7 @@ import SubjectModel from '../models/subject.model'
 import SubjectTranscriptionModel from '../models/subjectTrancription.model'
 import { validateSubjectTranscript } from '../validations/subjectTrancription.validation'
 import { getCurrentSchoolYear } from './schoolYear.service'
+import TimeTableModel from '../models/timeTable.model'
 
 // Nhập điểm nhiều học sinh 1 lúc / môn / lớp
 export const insertSubjectTranscriptByClass = async (
@@ -58,7 +59,7 @@ export const insertSubjectTranscriptByClass = async (
 }
 
 // lấy bảng điểm của tất học sinh trong 1 lớp theo môn học
-export const selectSubjectTranscriptByClass = async (classId: string, subjectId: string) => {
+export const getSubjectTranscriptByClass = async (classId: string, subjectId: string) => {
 	if (!classId || !subjectId || !isValidObjectId(classId) || !isValidObjectId(subjectId)) {
 		throw createHttpError.BadRequest('classId or subjectId is not in the correct ObjectId format')
 	}
@@ -67,23 +68,70 @@ export const selectSubjectTranscriptByClass = async (classId: string, subjectId:
 	const schoolYear = await getCurrentSchoolYear()
 
 	// lấy ra list học sinh của lớp
-	const listStudent: IStudent[] = await StudentModel.find({
-		class: classId,
-		dropoutDate: null,
-		transferSchool: null
-	})
-		.select('_id')
-		.lean()
+
+	const [listStudent, subject, currentClass] = await Promise.all([
+		StudentModel.find({
+			class: classId,
+			dropoutDate: null,
+			transferSchool: null
+		})
+			.select('_id fullName')
+			.lean(),
+		SubjectModel.findById(subjectId),
+		ClassModel.findById(classId)
+	])
+
+	if (!subject || !currentClass) throw createHttpError.NotFound('Cannot find subject or class to get transcript !')
+
+	if (!subject.appliedForGrades.includes(currentClass.grade))
+		throw createHttpError.UnprocessableEntity('Subject cannot be applied to transcript for this class !')
 
 	// lấy ra bảng điểm của những học sinh đó
-	const transcriptStudentList = await SubjectTranscriptionModel.find({
+	let transcriptStudentList = (await SubjectTranscriptionModel.find({
 		student: { $in: listStudent },
 		schoolYear: schoolYear._id,
 		subject: subjectId
 	})
 		.populate({ path: 'student', select: '-absentDays' })
 		.populate({ path: 'schoolYear', select: 'startAt endAt' })
-		.select('-_id')
+		.select('student isPassed firstSemester secondSemester')) as Array<Partial<ISubjectTranscript>>
+
+	if (transcriptStudentList.length < listStudent.length) {
+		transcriptStudentList = listStudent.map((std) => {
+			const existedTranscriptOfStudent = transcriptStudentList.find(
+				(item) => item.student?.toString() === std._id.toString()
+			)
+			if (existedTranscriptOfStudent) return existedTranscriptOfStudent
+			if (!subject?.isMainSubject)
+				return {
+					student: { _id: std._id, fullName: std.fullName },
+					isPassed: false
+				}
+
+			const isSeniorGrade = (currentClass?.grade as number) > 3
+			if (isSeniorGrade)
+				return {
+					student: { _id: std._id, fullName: std.fullName },
+					firstSemester: {
+						midtermTest: 0,
+						finalTest: 0
+					},
+					secondSemester: {
+						midtermTest: 0,
+						finalTest: 0
+					}
+				}
+			return {
+				student: { _id: std._id, fullName: std.fullName },
+				firstSemester: {
+					finalTest: 0
+				},
+				secondSemester: {
+					finalTest: 0
+				}
+			}
+		}) as Array<Partial<ISubjectTranscript>>
+	}
 
 	return transcriptStudentList
 }
@@ -228,7 +276,11 @@ export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYe
 	])
 
 	// Khối 1,2 chỉ có 9 môn, khối 3,4,5 có 11 môn
-	const totalSubjectsOfTranscript = [1, 2].includes(grade) ? 9 : 11
+	const JUNIOR_GRADES = [1, 2]
+	const TOTAL_SBJ_OF_JUNIOR_STUDENT = 9
+	const TOTAL_SBJ_OF_SENIOR_STUDENT = 11
+
+	const totalSubjects = JUNIOR_GRADES.includes(grade) ? TOTAL_SBJ_OF_JUNIOR_STUDENT : TOTAL_SBJ_OF_SENIOR_STUDENT
 
 	const transcripts = await SubjectTranscriptionModel.aggregate()
 		.match({
@@ -283,7 +335,7 @@ export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYe
 			transcript: { $arrayToObject: '$transcript' },
 			completedProgram: {
 				$and: [
-					{ $eq: [{ $size: '$transcript' }, totalSubjectsOfTranscript] },
+					{ $eq: [{ $size: '$transcript' }, totalSubjects] },
 					{
 						$eq: [
 							{
@@ -295,7 +347,7 @@ export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYe
 											in: '$$transcript.v.isPassed'
 										}
 									},
-									Array(totalSubjectsOfTranscript).fill(true)
+									Array(totalSubjects).fill(true)
 								]
 							},
 							true
@@ -333,4 +385,12 @@ export const getValidSchoolYearOfStudentTranscript = async (studentId: string) =
 		.group({ _id: '$schoolYear' })
 		.sort({ endAt: -1 })
 	return result.map((scy) => scy._id)
+}
+
+export const getSubjectTeacherCanInsertTranscript = async (userId: string, subjectId: string, classId: string) => {
+	return await TimeTableModel.exists({
+		teacher: userId,
+		subject: subjectId,
+		class: classId
+	})
 }

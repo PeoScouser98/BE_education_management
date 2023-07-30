@@ -1,11 +1,10 @@
 import { Request, Response } from 'express'
-import * as TranscriptService from '../services/subjectTrancription.service'
+import createHttpError from 'http-errors'
+import mongoose, { ObjectId, isValidObjectId } from 'mongoose'
 import { HttpStatusCode } from '../../configs/statusCode.config'
 import useCatchAsync from '../../helpers/useCatchAsync'
 import { getCurrentSchoolYear } from '../services/schoolYear.service'
-import mongoose, { ObjectId, isValidObjectId } from 'mongoose'
-import createHttpError from 'http-errors'
-import SubjectTranscriptionModel from '../models/subjectTrancription.model'
+import * as TranscriptService from '../services/subjectTrancription.service'
 
 // [POST] /api/transcripts/:classId/:subjectId
 export const insertSubjectTranscriptByClass = useCatchAsync(async (req: Request, res: Response) => {
@@ -20,7 +19,7 @@ export const insertSubjectTranscriptByClass = useCatchAsync(async (req: Request,
 export const getTranscriptByClass = useCatchAsync(async (req: Request, res: Response) => {
 	const subjectId = req.params.subjectId
 	const classId = req.params.classId
-	const result = await TranscriptService.selectSubjectTranscriptByClass(classId, subjectId)
+	const result = await TranscriptService.getSubjectTranscriptByClass(classId, subjectId)
 	return res.status(HttpStatusCode.OK).json(result)
 })
 
