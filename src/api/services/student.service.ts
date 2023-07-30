@@ -7,6 +7,7 @@ import SchoolYearModel from '../models/schoolYear.model'
 import StudentModel from '../models/student.model'
 import { validateReqBodyStudent, validateUpdateReqBodyStudent } from '../validations/student.validation'
 import { deactivateParentsUser } from './user.service'
+import generatePicureByName from '../../helpers/generatePicture'
 
 // create new student using form
 export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
@@ -378,3 +379,6 @@ export const getStudentsByParents = async (parentsId: string | ObjectId) =>
 			}
 		})
 		.select('-parents -createdAt -updatedAt')
+		.transform((students) =>
+			students.map((std) => ({ ...std.toObject(), picture: generatePicureByName(std.fullName) }))
+		)
