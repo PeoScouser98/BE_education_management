@@ -7,16 +7,19 @@ import { validateNewSchoolYear, validateUpdateSchoolYearData } from '../validati
 
 // lấy ra toàn bộ các năm học
 export const getAllSchoolYear = async (limit: number, page: number) => {
-	return await SchoolYearModel.paginate(
-		{},
-		{
-			limit: limit,
-			page: page,
-			sort: { startAt: 'asc' }
-		}
-	)
+	const [currentSchoolyear, schoolYearList] = await Promise.all([
+		getCurrentSchoolYear(),
+		SchoolYearModel.paginate(
+			{},
+			{
+				limit: limit,
+				page: page,
+				sort: { startAt: 'asc' }
+			}
+		)
+	])
+	return { unableToCreateSchoolYear: !!currentSchoolyear, ...schoolYearList }
 }
-
 // tạo mới 1 năm học
 export const createSchoolYear = async (payload: Omit<ISchoolYear, '_id'>) => {
 	const allSchoolYears = await SchoolYearModel.find().sort({ endAt: -1 })
