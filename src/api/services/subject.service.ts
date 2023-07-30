@@ -1,8 +1,9 @@
 import createHttpError from 'http-errors'
-import { isValidObjectId } from 'mongoose'
+import mongoose, { isValidObjectId } from 'mongoose'
 import { ISubject } from '../../types/subject.type'
 import SubjectModel from '../models/subject.model'
 import { validateSubjectRequestBody, validateSubjectUpdateBody } from '../validations/subject.validation'
+import TimeTableModel from '../models/timeTable.model'
 
 export const getAllSubjects = async () => await SubjectModel.find().sort({ subjectName: 1 })
 
@@ -47,4 +48,37 @@ export const updateSubject = async (id: string, subject: Partial<Omit<ISubject, 
 export const deleteSubject = async (id: string) => {
 	if (!isValidObjectId(id)) throw createHttpError.BadRequest('_id of the subject is invalid')
 	return await SubjectModel.deleteOne({ _id: id })
+}
+
+export const getSubjectAppliedForClass = async (grade: number) => {
+	// const VALID_GRADES  = [1,2,3,4,5]
+	// if (!VALID_GRADES.includes(grade)) throw createHttp
+	return SubjectModel.find({ appliedForGrades: { $in: [grade] } })
+}
+
+export const getSubjectsUserTeachingInClass = async (classId: string, teacherId: string) => {
+	const teachingSubjects = await TimeTableModel.aggregate()
+		.match({
+			class: new mongoose.Types.ObjectId(classId),
+			teacher: new mongoose.Types.ObjectId(teacherId)
+		})
+		.lookup({
+			from: 'subjects',
+			localField: 'subject',
+			foreignField: '_id',
+			as: 'subject',
+			pipeline: [
+				{
+					$project: {
+						_id: 1,
+						subjectName: 1
+					}
+				}
+			]
+		})
+		.group({
+			_id: '$subject'
+		})
+
+	return teachingSubjects.filter((item) => !!item._id.length).map(({ _id }) => _id.at(0))
 }
