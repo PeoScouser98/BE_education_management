@@ -57,3 +57,9 @@ export const getClassTrash = useCatchAsync(async (req: Request, res: Response) =
 	})
 	return res.status(HttpStatusCode.OK).json(result)
 })
+
+export const getTeachingClasses = useCatchAsync(async (req: Request, res: Response) => {
+	const teacherId = req.profile._id as string
+	const teachingClasses = await ClassService.getTeachingClasses(teacherId)
+	return res.status(HttpStatusCode.OK).json(teachingClasses)
+})

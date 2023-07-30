@@ -3,11 +3,11 @@ import * as ClassController from '../controllers/class.controller'
 import { checkAuthenticated, checkIsHeadmaster, checkIsTeacher } from '../middlewares/authGuard.middleware'
 const router = express.Router()
 
+router.get('/classes/teaching-classes', checkAuthenticated, checkIsTeacher, ClassController.getTeachingClasses)
+router.get('/classes/:id', checkAuthenticated, checkIsTeacher, ClassController.getOneClass)
 router.post('/classes', checkAuthenticated, checkIsHeadmaster, ClassController.createClass)
 router.patch('/classes/:id', checkAuthenticated, checkIsHeadmaster, ClassController.updateClass)
 router.delete('/classes/:id', checkAuthenticated, checkIsHeadmaster, ClassController.removeClass)
-router.get('/classes/trash', checkAuthenticated, checkIsHeadmaster, ClassController.getClassTrash)
-router.get('/classes', checkAuthenticated, ClassController.getClasses)
-router.get('/classes/:id', checkAuthenticated, checkIsTeacher, ClassController.getOneClass)
+router.get('/classes', checkAuthenticated, checkIsHeadmaster, ClassController.getClasses)
 
 export default router

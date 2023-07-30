@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import createHttpError from 'http-errors'
 import { IClass, TClassSortOption } from '../../types/class.type'
 import ClassModel from '../models/class.model'
 import { validateClassData, validateClassEditData } from '../validations/class.validation'
+import TimeTableModel from '../models/timeTable.model'
+import mongoose from 'mongoose'
 
 export const getOneClass = async (classId: string) =>
 	await ClassModel.findOne({ _id: classId }).populate({
@@ -48,4 +51,32 @@ export const deleteClass = async (classId: string) => {
 		message: 'Class has been permanently deleted',
 		statusCode: 200
 	}
+}
+
+export const getHeadTeacherClass = async (userId: string) => {
+	return await ClassModel.findOne({ headTeacher: userId })
+}
+
+export const getTeachingClasses = async (teacherId: string) => {
+	const teacherTimeTable = await TimeTableModel.aggregate()
+		.match({ teacher: new mongoose.Types.ObjectId(teacherId) })
+		.lookup({
+			from: 'classes',
+			localField: 'class',
+			foreignField: '_id',
+			as: 'class',
+			pipeline: [
+				{
+					$project: {
+						_id: 1,
+						className: 1
+					}
+				}
+			]
+		})
+		.group({
+			_id: '$class'
+		})
+
+	return teacherTimeTable.filter((item) => !!item._id.length).map(({ _id }) => _id.at(0))
 }
