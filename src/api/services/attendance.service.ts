@@ -65,7 +65,8 @@ export const getClassAttendanceBySession = async (headTeacher: string, date: str
 		attendanceOfClass = studentsByClass.map(
 			(std) =>
 				({
-					...std,
+					_id: std._id,
+					student: std.fullName,
 					isPresent: true
 				} as Pick<IAttendance, 'student' | 'isPresent'>)
 		)
