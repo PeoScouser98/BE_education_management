@@ -46,9 +46,9 @@ export const getStudentAttendance = async (studentId: string, timeRangeOption?: 
 // Reset form save attandance by class
 export const getClassAttendanceBySession = async (headTeacher: string, date: string | undefined, session: string) => {
 	if (!!date && !moment(date).isValid()) throw createHttpError.BadRequest('Invalid date')
-	const classId = await ClassModel.findOne({ headTeacher: headTeacher }).distinct('_id')
-	console.log('classId', classId)
-	const studentsByClass = await StudentModel.find({ class: classId }).select('_id fullName').lean()
+	const currentClass = await ClassModel.findOne({ headTeacher: headTeacher }).select('className').lean()
+	console.log('classId', currentClass)
+	const studentsByClass = await StudentModel.find({ class: currentClass?._id }).select('_id fullName').lean()
 	let attendanceOfClass = (await AttendanceModel.find({
 		student: { $in: studentsByClass.map((std) => std._id) },
 		date: moment(date).format('YYYY-MM-DD'),
@@ -57,19 +57,30 @@ export const getClassAttendanceBySession = async (headTeacher: string, date: str
 		.populate({
 			path: 'student',
 			select: '_id fullName',
-			options: { sort: { fullName: 'asc' }, lean: true }
+			options: { sort: { fullName: 'asc' }, lean: true },
+			populate: { path: 'class', select: 'className' }
 		})
+		.transform((docs) =>
+			docs.map((atd) => ({
+				_id: atd.student?._id,
+				student: atd.student?.fullName,
+				isPresent: atd.isPresent,
+				reason: atd.reason
+			}))
+		)
 		.select('-session -createdAt -updatedAt -date')) as Array<Pick<IAttendance, 'student' | 'isPresent'>>
 
 	if (!attendanceOfClass.length)
 		attendanceOfClass = studentsByClass.map(
 			(std) =>
 				({
-					...std,
+					_id: std._id,
+					student: std.fullName,
 					isPresent: true
 				} as Pick<IAttendance, 'student' | 'isPresent'>)
 		)
 	return {
+		class: currentClass?.className,
 		session: AttendanceSessionEnum[session as keyof typeof AttendanceSessionEnum],
 		date: moment(date).format('DD/MM/YYYY'),
 		attendances: attendanceOfClass
