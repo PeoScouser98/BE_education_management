@@ -45,6 +45,7 @@ export const getStudentAttendance = useCatchAsync(async (req: Request, res: Resp
 export const getClassAttendanceBySession = useCatchAsync(async (req: Request, res: Response) => {
 	const session = req.query._ss
 	const date = req.query._dt ? req.query._dt.toString() : undefined
+	const classId = req.query._class ? req.query._class.toString() : null
 	if (!session) throw createHttpError.BadRequest('Session is required for searching!')
 	if (!Object.keys(AttendanceSessionEnum).includes(session.toString().toUpperCase()))
 		throw createHttpError.BadRequest('Invalid session filter value! Valid values are "morning", "afternoon"')
@@ -52,7 +53,8 @@ export const getClassAttendanceBySession = useCatchAsync(async (req: Request, re
 	const result = await AttendanceService.getClassAttendanceBySession(
 		headTeacherId,
 		date,
-		session.toString().toUpperCase()
+		session.toString().toUpperCase(),
+		classId
 	)
 	return res.status(HttpStatusCode.OK).json(result)
 })

@@ -14,3 +14,7 @@ export interface IAttendance extends Document {
 	isPresent: boolean
 	reason: string
 }
+
+export type TAttendancePayload = Array<
+	Pick<IAttendance, 'isPresent' | 'reason'> & { student: Pick<IStudent, '_id' | 'fullName'> }
+>

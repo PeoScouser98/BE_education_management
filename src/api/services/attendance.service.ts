@@ -2,7 +2,7 @@
 import createHttpError from 'http-errors'
 import moment from 'moment'
 import mongoose, { isValidObjectId } from 'mongoose'
-import { IAttendance } from '../../types/attendance.type'
+import { IAttendance, TAttendancePayload } from '../../types/attendance.type'
 import AttendanceModel from '../models/attendance.model'
 import ClassModel from '../models/class.model'
 import StudentModel from '../models/student.model'
@@ -44,10 +44,26 @@ export const getStudentAttendance = async (studentId: string, timeRangeOption?: 
 }
 
 // Reset form save attandance by class
-export const getClassAttendanceBySession = async (headTeacher: string, date: string | undefined, session: string) => {
+export const getClassAttendanceBySession = async (
+	headTeacher: string,
+	date: string | undefined,
+	session: string,
+	classId: string | null
+) => {
 	if (!!date && !moment(date).isValid()) throw createHttpError.BadRequest('Invalid date')
-	const currentClass = await ClassModel.findOne({ headTeacher: headTeacher }).select('className').lean()
-	console.log('classId', currentClass)
+	const currentClass = await ClassModel.findOne({
+		$or: [
+			{
+				_id: classId
+			},
+			{
+				headTeacher: headTeacher
+			}
+		]
+	})
+		.select('className')
+		.lean()
+
 	const studentsByClass = await StudentModel.find({ class: currentClass?._id }).select('_id fullName').lean()
 	let attendanceOfClass = (await AttendanceModel.find({
 		student: { $in: studentsByClass.map((std) => std._id) },
@@ -60,25 +76,26 @@ export const getClassAttendanceBySession = async (headTeacher: string, date: str
 			options: { sort: { fullName: 'asc' }, lean: true },
 			populate: { path: 'class', select: 'className' }
 		})
-		.transform((docs) =>
-			docs.map((atd) => ({
+		.select('-session -createdAt -updatedAt -date')
+		.transform((docs) => {
+			const data = docs as TAttendancePayload
+
+			return data.map((atd) => ({
 				_id: atd.student?._id,
 				student: atd.student?.fullName,
 				isPresent: atd.isPresent,
 				reason: atd.reason
 			}))
-		)
-		.select('-session -createdAt -updatedAt -date')) as Array<Pick<IAttendance, 'student' | 'isPresent'>>
+		})) as unknown as TAttendancePayload
+	console.log(attendanceOfClass)
 
-	if (!attendanceOfClass.length)
-		attendanceOfClass = studentsByClass.map(
-			(std) =>
-				({
-					_id: std._id,
-					student: std.fullName,
-					isPresent: true
-				} as Pick<IAttendance, 'student' | 'isPresent'>)
-		)
+	if (!attendanceOfClass?.length)
+		attendanceOfClass = studentsByClass.map((std) => ({
+			_id: std._id,
+			student: std.fullName,
+			isPresent: true
+		})) as unknown as TAttendancePayload
+
 	return {
 		class: currentClass?.className,
 		session: AttendanceSessionEnum[session as keyof typeof AttendanceSessionEnum],
