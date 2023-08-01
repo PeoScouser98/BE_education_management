@@ -71,7 +71,8 @@ export const getSubjectsUserTeachingInClass = async (classId: string, teacherId:
 				{
 					$project: {
 						_id: 1,
-						subjectName: 1
+						subjectName: 1,
+						isMainSubject: 1
 					}
 				}
 			]
