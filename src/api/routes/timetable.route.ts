@@ -6,10 +6,7 @@ const router = express.Router()
 
 router.get('/time-table/teacher', checkAuthenticated, checkIsTeacher, TimeTableController.getTeacherTimetable)
 router.get('/time-table/:classId', checkAuthenticated, TimeTableController.getTimeTableByClass)
-router.put(
-	'/time-table/:classId',
-	// checkAuthenticated, checkIsHeadmaster,
-	TimeTableController.saveTimeTable
-)
+router.get('/time-table/student/:studentId', TimeTableController.getStudentTimeTable)
+router.put('/time-table/:classId', checkAuthenticated, checkIsHeadmaster, TimeTableController.saveTimeTable)
 
 export default router

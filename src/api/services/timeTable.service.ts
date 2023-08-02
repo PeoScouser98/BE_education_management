@@ -3,11 +3,10 @@
 import createHttpError from 'http-errors'
 import _ from 'lodash'
 import mongoose from 'mongoose'
-import { DayInWeekEnum, ITimeTable } from '../../types/timeTable.type'
+import { ITimeTable } from '../../types/timeTable.type'
+import StudentModel from '../models/student.model'
 import TimeTableModel from '../models/timeTable.model'
 import { validateTimeTableData } from '../validations/timeTable.validation'
-import { ISubject } from '../../types/subject.type'
-import { IClass } from '../../types/class.type'
 
 export const saveTimeTableByClass = async (payload: { [key: string]: Partial<ITimeTable>[] }, classId: string) => {
 	const schedule = _.flatMap(payload, (items, dayOfWeek) =>
@@ -80,6 +79,7 @@ export const saveTimeTableByClass = async (payload: { [key: string]: Partial<ITi
 }
 
 export const getTimeTableDetail = async (classId: string) => {
+	console.log(1)
 	const data = await TimeTableModel.find({ class: classId })
 		.populate({ path: 'subject', select: '_id subjectName', options: { lean: true } })
 		.populate({ path: 'teacher', select: '_id displayName', options: { lean: true } })
@@ -134,4 +134,11 @@ export const getTeacherTimeTable = async (teacherId: string) => {
 
 	return timetable
 	// return result
+}
+
+export const getStudentTimeTable = async (studentId: string) => {
+	const [classOfStudent] = await StudentModel.findOne({ _id: studentId }).distinct('class')
+	if (!classOfStudent) throw createHttpError.NotFound('Cannot find time table of student !')
+	const timeTable = await getTimeTableDetail(classOfStudent)
+	return timeTable
 }
