@@ -7,3 +7,13 @@ export const getStdPercentageByGrade = useCatchAsync(async (req: Request, res: R
 	const result = await StatisticsService.getStdPercentageByGrade()
 	return res.status(HttpStatusCode.OK).json(result)
 })
+
+export const getGoodStudentByClass = useCatchAsync(async (req: Request, res: Response) => {
+	const result = await StatisticsService.getGoodStudentByClass(req.params.classId)
+	return res.status(HttpStatusCode.OK).json(result)
+})
+
+export const getPolicyBeneficiary = useCatchAsync(async (req: Request, res: Response) => {
+	const result = await StatisticsService.getPolicyBeneficiary()
+	return res.status(HttpStatusCode.OK).json(result)
+})
