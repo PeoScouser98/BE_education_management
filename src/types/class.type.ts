@@ -6,7 +6,7 @@ export interface IClass {
 	_id: ObjectId
 	grade: 1 | 2 | 3 | 4 | 5
 	className: string
-	headTeacher: ObjectId | Pick<IUser, '_id' | 'displayName' | 'email' | 'phone'>
+	headTeacher: ObjectId | Pick<IUser, '_id' | 'displayName' | 'email' | 'phone'> | string
 	students: Array<ObjectId>
 	totalStudents?: number
 }

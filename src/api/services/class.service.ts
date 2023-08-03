@@ -5,6 +5,7 @@ import ClassModel from '../models/class.model'
 import { validateClassData, validateClassEditData } from '../validations/class.validation'
 import TimeTableModel from '../models/timeTable.model'
 import mongoose from 'mongoose'
+import { ObjectId } from 'mongodb'
 
 export const getOneClass = async (classId: string) =>
 	await ClassModel.findOne({ _id: classId }).populate({
@@ -28,9 +29,9 @@ export const createClass = async (payload: Omit<IClass, '_id'>) => {
 }
 
 export const updateClass = async (payload: Partial<Omit<IClass, '_id'>>, classId: string) => {
-	const existedClass = await ClassModel.findOne({ _id: classId })
+	const existedClass = await ClassModel.findOne({ _id: classId }).lean()
 	if (!existedClass) throw createHttpError.NotFound('Classes does not exist')
-	// trường hợp className và grade không khớp nhau
+	// Check is valid class name
 	if (payload.className && !payload.grade && !payload.className.startsWith(JSON.stringify(existedClass?.grade)))
 		throw createHttpError.BadRequest(`Invalid Class name, class's name: grade+"A|B|C|D...`)
 	// check validate data gửi lên
@@ -38,7 +39,25 @@ export const updateClass = async (payload: Partial<Omit<IClass, '_id'>>, classId
 	if (error) {
 		throw createHttpError.BadRequest(error.message)
 	}
-	return await ClassModel.findOneAndUpdate({ _id: classId }, payload, { new: true })
+	if (payload.headTeacher) {
+		const existedClassHasCurrentHeadTeacher = await ClassModel.exists({
+			class: { $ne: classId },
+			headTeacher: payload.headTeacher
+		})
+
+		if (existedClassHasCurrentHeadTeacher) {
+			await ClassModel.findOneAndUpdate(
+				{ _id: existedClassHasCurrentHeadTeacher },
+				{ headTeacher: null },
+				{ new: true }
+			)
+		}
+	}
+	return await ClassModel.findOneAndUpdate(
+		{ _id: classId },
+		{ ...payload, className: payload.className?.toUpperCase() },
+		{ new: true }
+	)
 }
 
 export const deleteClass = async (classId: string) => {
