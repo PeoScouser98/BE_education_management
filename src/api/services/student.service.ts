@@ -8,6 +8,7 @@ import StudentModel from '../models/student.model'
 import { validateReqBodyStudent, validateUpdateReqBodyStudent } from '../validations/student.validation'
 import { deactivateParentsUser } from './user.service'
 import generatePicureByName from '../../helpers/generatePicture'
+import { toCapitalize } from '../../helpers/toolkit'
 
 // create new student using form
 export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
@@ -44,7 +45,11 @@ export const updateStudent = async (id: string, data: Partial<Omit<IStudent, '_i
 	if (!student) {
 		throw createHttpError.NotFound('Student does not exist!')
 	}
-	return await StudentModel.findOneAndUpdate({ _id: id }, data, { new: true })
+	return await StudentModel.findOneAndUpdate(
+		{ _id: id },
+		{ ...data, fullName: <string>toCapitalize(<string>data.fullName) },
+		{ new: true }
+	)
 }
 
 // get detail student
@@ -123,32 +128,12 @@ export const setDropoutStudent = async (id: string, date: string) => {
 }
 
 // Lấy ra các học sinh đã chuyển trường
-export const getStudentTransferSchool = async (year: number | 'all', page: number, limit: number) => {
-	const filter =
-		year === 'all'
-			? { transferSchoolDate: { $ne: null } }
-			: {
-					$expr: { $eq: [{ $year: '$transferSchoolDate' }, year] }
-			  }
-	return await StudentModel.paginate(filter, {
-		page: page,
-		limit: limit
-	})
+export const getStudentTransferSchool = async () => {
+	return await StudentModel.find({ transferSchoolDate: { $ne: null } })
 }
 
-export const getStudentDropout = async (year: 'all' | number, page: number, limit: number) => {
-	let condition: FilterQuery<IStudent> = {
-		$expr: { $eq: [{ $year: '$dropoutDate' }, year] }
-	}
-
-	if (year === 'all') {
-		condition = { dropoutDate: { $ne: null } }
-	}
-
-	return await StudentModel.paginate(condition, {
-		page: page,
-		limit: limit
-	})
+export const getStudentDropout = async () => {
+	return await StudentModel.find({ dropoutDate: { $ne: null } })
 }
 
 // Lấy ra tình trạng điểm danh của 1 học sinh trong 1 tháng (sẽ trả về ngày vắng mặt trong tháng đấy)

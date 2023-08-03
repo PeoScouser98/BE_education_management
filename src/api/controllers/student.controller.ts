@@ -62,9 +62,7 @@ export const serviceStudent = useCatchAsync(async (req: Request, res: Response) 
 // [GET] /api/students/stop/:type
 export const getStudentLeftSchool = useCatchAsync(async (req: Request, res: Response) => {
 	const type = req.query._type
-	const page = req.query._page || 1
-	const limit = req.query._limit || 10
-	const year = req.query._year || new Date().getFullYear()
+
 	const optionList = {
 		transferSchool: 'transfer',
 		dropout: 'dropout'
@@ -73,10 +71,10 @@ export const getStudentLeftSchool = useCatchAsync(async (req: Request, res: Resp
 
 	switch (type) {
 		case optionList.transferSchool:
-			result = await StudentServices.getStudentTransferSchool(Number(year), Number(page), Number(limit))
+			result = await StudentServices.getStudentTransferSchool()
 			break
 		case optionList.dropout:
-			result = await StudentServices.getStudentDropout(Number(year), Number(page), Number(limit))
+			result = await StudentServices.getStudentDropout()
 			break
 		default:
 			throw createHttpError(400, 'Type is not valid')

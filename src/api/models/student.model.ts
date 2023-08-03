@@ -74,8 +74,9 @@ StudentSchema.virtual('remarkOfHeadTeacher', {
 	justOne: true
 })
 
-StudentSchema.pre('save', function () {
+StudentSchema.pre('save', function (next) {
 	this.fullName = toCapitalize(this.fullName) as string
+	next()
 })
 const StudentModel: TPaginatedStudentModel = mongoose.model<IStudentDocument, TPaginatedStudentModel>(
 	'Students',
