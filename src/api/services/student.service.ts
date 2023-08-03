@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import createHttpError from 'http-errors'
 import mongoose, { FilterQuery, ObjectId, isValidObjectId } from 'mongoose'
 import { IAttendance } from '../../types/attendance.type'
@@ -6,9 +7,10 @@ import { IUser } from '../../types/user.type'
 import SchoolYearModel from '../models/schoolYear.model'
 import StudentModel from '../models/student.model'
 import { validateReqBodyStudent, validateUpdateReqBodyStudent } from '../validations/student.validation'
-import { deactivateParentsUser } from './user.service'
+import { deactivateParentsUser, getParentsUserByClass } from './user.service'
 import generatePicureByName from '../../helpers/generatePicture'
 import { toCapitalize } from '../../helpers/toolkit'
+import ClassModel from '../models/class.model'
 
 // create new student using form
 export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
@@ -367,3 +369,9 @@ export const getStudentsByParents = async (parentsId: string | ObjectId) =>
 		.transform((students) =>
 			students.map((std) => ({ ...std.toObject(), picture: generatePicureByName(std.fullName) }))
 		)
+
+export const getStudentsByHeadTeacherClass = async (headTeacherId: string) => {
+	const classOfHeadTeacher = await ClassModel.findOne({ headTeacher: headTeacherId }).select('_id')
+	if (!classOfHeadTeacher) throw createHttpError.NotFound('You have not play a role as a head teacher for any class !')
+	return await getStudentsByClass(classOfHeadTeacher._id.toString())
+}

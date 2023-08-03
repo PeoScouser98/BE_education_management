@@ -21,7 +21,7 @@ export const createTeacherAccount = useCatchAsync(async (req: Request, res: Resp
 		throw createHttpError.BadRequest(error.message)
 	}
 	const newUser = (await UserService.createUser({ ...req.body, role: UserRoleEnum.TEACHER })) as IUser
-	const token = jwt.sign({ auth: newUser.email }, process.env.ACCESS_TOKEN_SECRET!, {
+	const token = jwt.sign({ auth: newUser.email }, <string>process.env.ACCESS_TOKEN_SECRET, {
 		expiresIn: '7d'
 	})
 	const domain = req.protocol + '://' + req.get('host')
@@ -59,7 +59,7 @@ export const createParentsAccount = useCatchAsync(async (req: Request, res: Resp
 		const sendMailPromises = payload.map(
 			(recipient: Partial<IUser>) =>
 				new Promise((resolve) => {
-					const token = jwt.sign({ auth: recipient?.email }, process.env.ACCESS_TOKEN_SECRET!, {
+					const token = jwt.sign({ auth: recipient?.email }, <string>process.env.ACCESS_TOKEN_SECRET, {
 						expiresIn: '7d'
 					})
 
@@ -79,7 +79,7 @@ export const createParentsAccount = useCatchAsync(async (req: Request, res: Resp
 	}
 	// Send mail for one user
 	else {
-		const token = jwt.sign({ auth: payload?.email }, process.env.ACCESS_TOKEN_SECRET!, {
+		const token = jwt.sign({ auth: payload?.email }, <string>process.env.ACCESS_TOKEN_SECRET, {
 			expiresIn: '7d'
 		})
 		sendMail(
@@ -159,4 +159,10 @@ export const updateParentsInfo = useCatchAsync(async (req: Request, res: Respons
 	const updatedParentsUser = await UserService.updateParentsUserInfo(parentsId, value)
 	if (!updatedParentsUser) throw createHttpError.NotFound('Cannot find parents user to update !')
 	return res.status(HttpStatusCode.CREATED).json(updatedParentsUser)
+})
+
+export const getParentsByHeadTeacherClass = useCatchAsync(async (req: Request, res: Response) => {
+	const headTeacherId = <string>req.profile._id
+	const parents = await UserService.getParentsOfHeadTeacherClass(headTeacherId)
+	return res.status(HttpStatusCode.OK).json(parents)
 })

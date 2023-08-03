@@ -29,6 +29,12 @@ router.patch(
 	UserController.updateTeacherInfo
 )
 router.patch('/users/parents/:parentsId', checkAuthenticated, checkIsTeacher, UserController.updateParentsInfo)
+router.get(
+	'/users/by-head-teacher-class',
+	checkAuthenticated,
+	checkIsTeacher,
+	UserController.getParentsByHeadTeacherClass
+)
 router.get('/users/teachers', checkAuthenticated, UserController.getTeachersByStatus)
 router.get('/users/:userId', checkAuthenticated, UserController.getUserDetails)
 router.get('/users/parents/:classId', checkAuthenticated, UserController.getParentsUserByClass)

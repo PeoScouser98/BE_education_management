@@ -6,6 +6,7 @@ import UserModel from '../models/user.model'
 import { UserRoleEnum } from './../../types/user.type'
 import { sendMail } from './mail.service'
 import { getDeactivateUserEmail } from '../../helpers/mailTemplates'
+import ClassModel from '../models/class.model'
 
 export const createUser = async (payload: Partial<IUser> & Array<Partial<IUser>>) => {
 	if (Array.isArray(payload) && payload.every((user) => user.role === UserRoleEnum.PARENTS)) {
@@ -76,7 +77,7 @@ export const updateParentsUserInfo = async (parentsId: string, payload: Partial<
 export const getUserDetails = async (userId: string) => await UserModel.findOne({ _id: userId }).lean()
 
 export const changePassword = async (userId: string, newPassword: string) => {
-	const encryptedNewPassword = hashSync(newPassword, genSaltSync(+process.env.SALT_ROUND!))
+	const encryptedNewPassword = hashSync(newPassword, genSaltSync(Number(process.env.SALT_ROUND)))
 	return await UserModel.findOneAndUpdate({ _id: userId }, { password: encryptedNewPassword }, { new: true })
 }
 
@@ -157,3 +158,9 @@ export const getUserByEmail = async (email: string) =>
 	await UserModel.findOne({ email })
 		.select('_id displayName role phone email')
 		.transform((doc) => ({ ...doc?.toObject(), _id: doc?._id.toString() }))
+
+export const getParentsOfHeadTeacherClass = async (headTeacherId: string) => {
+	const classOfHeadTeacher = await ClassModel.findOne({ headTeacher: headTeacherId }).select('_id')
+	if (!classOfHeadTeacher) throw createHttpError.NotFound('You have not play a role as a head teacher for any class !')
+	return await getParentsUserByClass(classOfHeadTeacher._id.toString())
+}
