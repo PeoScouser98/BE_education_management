@@ -23,7 +23,7 @@ export const saveAttendanceByClass = useCatchAsync(async (req: Request, res: Res
 
 export const getStudentAttendance = useCatchAsync(async (req: Request, res: Response) => {
 	const studentId: string = req.params.studentId
-	const { _f: from, _t: to } = req.query as { [key: string]: string }
+	const { _from: from, _to: to } = req.query as { [key: string]: string }
 	let timeRangeSearchTerm
 
 	if (from && to) {
