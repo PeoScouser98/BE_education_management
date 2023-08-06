@@ -21,9 +21,7 @@ const SubjectTranscriptSchema = new mongoose.Schema<ISubjectTranscriptDocument>(
 			ref: 'Subjects',
 			autopopulate: { select: 'subjectName' }
 		},
-		isPassed: {
-			type: Boolean
-		},
+
 		firstSemester: {
 			midtermTest: {
 				type: Number,
@@ -34,7 +32,8 @@ const SubjectTranscriptSchema = new mongoose.Schema<ISubjectTranscriptDocument>(
 				type: Number,
 				min: 0,
 				max: 10
-			}
+			},
+			isPassed: Boolean
 		},
 		secondSemester: {
 			midtermTest: {
@@ -46,7 +45,8 @@ const SubjectTranscriptSchema = new mongoose.Schema<ISubjectTranscriptDocument>(
 				type: Number,
 				min: 0,
 				max: 10
-			}
+			},
+			isPassed: Boolean
 		}
 	},
 	{

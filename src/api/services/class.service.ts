@@ -88,7 +88,8 @@ export const getTeachingClasses = async (teacherId: string) => {
 				{
 					$project: {
 						_id: 1,
-						className: 1
+						className: 1,
+						grade: 1
 					}
 				}
 			]

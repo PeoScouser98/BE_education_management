@@ -47,5 +47,5 @@ export const selectTranscriptAllSubjectByClass = useCatchAsync(async (req: Reque
 
 export const getValidSchoolYearOfStudentTranscript = useCatchAsync(async (req: Request, res: Response) => {
 	const validSchoolYears = await TranscriptService.getValidSchoolYearOfStudentTranscript(req.params.studentId)
-	return res.status(HttpStatusCode.CREATED).json(validSchoolYears)
+	return res.status(HttpStatusCode.OK).json(validSchoolYears)
 })

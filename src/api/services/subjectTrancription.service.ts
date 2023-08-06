@@ -10,6 +10,7 @@ import SubjectTranscriptionModel from '../models/subjectTrancription.model'
 import { validateSubjectTranscript } from '../validations/subjectTrancription.validation'
 import { getCurrentSchoolYear } from './schoolYear.service'
 import TimeTableModel from '../models/timeTable.model'
+import { getAllSubjectOfStudentStudying } from './subject.service'
 
 // Nhập điểm nhiều học sinh 1 lúc / môn / lớp
 export const insertSubjectTranscriptByClass = async (
@@ -40,7 +41,10 @@ export const insertSubjectTranscriptByClass = async (
 	if (!isAllStudentInClass) throw createHttpError.Conflict('Some students do not exist in this class !')
 
 	// validate bảng điểm của các student gửi lên
-	const { error, value } = validateSubjectTranscript(data, currentSubject, currentClass)
+	const { error, value } = validateSubjectTranscript(data, {
+		isMainSubject: currentSubject.isMainSubject,
+		isSeniorGrade: currentClass.grade > 3
+	})
 	if (error) throw createHttpError.BadRequest(error.message)
 
 	const bulkWriteOption = value.map((item: ISubjectTranscript) => ({
@@ -63,7 +67,6 @@ export const getSubjectTranscriptByClass = async (classId: string, subjectId: st
 	if (!classId || !subjectId || !isValidObjectId(classId) || !isValidObjectId(subjectId)) {
 		throw createHttpError.BadRequest('classId or subjectId is not in the correct ObjectId format')
 	}
-
 	// lấy ra schoolYear hiện tại
 	const schoolYear = await getCurrentSchoolYear()
 
@@ -75,64 +78,86 @@ export const getSubjectTranscriptByClass = async (classId: string, subjectId: st
 			dropoutDate: null,
 			transferSchool: null
 		})
-			.select('_id fullName')
+			.select('_id fullName code')
 			.lean(),
 		SubjectModel.findById(subjectId),
 		ClassModel.findById(classId)
 	])
 
 	if (!subject || !currentClass) throw createHttpError.NotFound('Cannot find subject or class to get transcript !')
-
 	if (!subject.appliedForGrades.includes(currentClass.grade))
 		throw createHttpError.UnprocessableEntity('Subject cannot be applied to transcript for this class !')
-
 	// lấy ra bảng điểm của những học sinh đó
-	let transcriptStudentList = (await SubjectTranscriptionModel.find({
-		student: { $in: listStudent },
+	let transcriptStudentList: Array<Partial<ISubjectTranscript>> = await SubjectTranscriptionModel.find({
+		student: { $in: listStudent.map((student) => student._id) },
 		schoolYear: schoolYear._id,
 		subject: subjectId
 	})
-		.populate({ path: 'student', select: '-absentDays' })
-		.populate({ path: 'schoolYear', select: 'startAt endAt' })
-		.select('student isPassed firstSemester secondSemester')) as Array<Partial<ISubjectTranscript>>
+		.populate({ path: 'student', select: '_id fullName code' })
+		.select('student isPassed firstSemester secondSemester')
+		.transform((docs) =>
+			docs.map((doc) => ({
+				...doc.toObject(),
+				student: doc.student?._id,
+				fullName: doc.student.fullName,
+				code: doc.student.code
+			}))
+		)
 
-	if (transcriptStudentList.length < listStudent.length) {
-		transcriptStudentList = listStudent.map((std) => {
+	const isSeniorGrade = (currentClass?.grade as number) > 3
+
+	if (!transcriptStudentList.length) {
+		transcriptStudentList = <Array<Partial<ISubjectTranscript>>>listStudent.map((std) => {
 			const existedTranscriptOfStudent = transcriptStudentList.find(
 				(item) => item.student?.toString() === std._id.toString()
 			)
-			if (existedTranscriptOfStudent) return existedTranscriptOfStudent
-			if (!subject?.isMainSubject)
-				return {
-					student: { _id: std._id, fullName: std.fullName },
-					isPassed: false
-				}
 
-			const isSeniorGrade = (currentClass?.grade as number) > 3
-			if (isSeniorGrade)
-				return {
-					student: { _id: std._id, fullName: std.fullName },
-					firstSemester: {
-						midtermTest: 0,
-						finalTest: 0
-					},
-					secondSemester: {
-						midtermTest: 0,
-						finalTest: 0
+			switch (true) {
+				case existedTranscriptOfStudent:
+					return existedTranscriptOfStudent
+
+				case subject?.isMainSubject:
+					if (isSeniorGrade)
+						return {
+							student: std._id,
+							fullName: std.fullName,
+							code: std.code,
+							firstSemester: {
+								midtermTest: 0,
+								finalTest: 0
+							},
+							secondSemester: {
+								midtermTest: 0,
+								finalTest: 0
+							}
+						}
+					return {
+						student: std._id,
+						fullName: std.fullName,
+						code: std.code,
+						firstSemester: {
+							finalTest: 0
+						},
+						secondSemester: {
+							finalTest: 0
+						}
 					}
-				}
-			return {
-				student: { _id: std._id, fullName: std.fullName },
-				firstSemester: {
-					finalTest: 0
-				},
-				secondSemester: {
-					finalTest: 0
-				}
-			}
-		}) as Array<Partial<ISubjectTranscript>>
-	}
 
+				default:
+					return {
+						student: std._id,
+						fullName: std.fullName,
+						code: std.code,
+						firstSemester: {
+							isPassed: false
+						},
+						secondSemester: {
+							isPassed: false
+						}
+					}
+			}
+		})
+	}
 	return transcriptStudentList
 }
 
@@ -266,13 +291,14 @@ export const getStudentTranscript = async (id: string | ObjectId, schoolYear: st
 export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYear: ObjectId) => {
 	if (!isValidObjectId(classId)) throw createHttpError.BadRequest('Invalid class ID')
 
-	const [listStudent, [grade]] = await Promise.all([
+	const [listStudent, [grade], AllStudyingSubjects] = await Promise.all([
 		StudentModel.find({
 			class: classId,
 			dropoutDate: null,
 			transferSchool: null
 		}).distinct('_id'),
-		ClassModel.findOne({ _id: classId }).distinct('grade')
+		ClassModel.findOne({ _id: classId }).distinct('grade'),
+		getAllSubjectOfStudentStudying(<string>classId)
 	])
 
 	// Khối 1,2 chỉ có 9 môn, khối 3,4,5 có 11 môn
@@ -282,7 +308,7 @@ export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYe
 
 	const totalSubjects = JUNIOR_GRADES.includes(grade) ? TOTAL_SBJ_OF_JUNIOR_STUDENT : TOTAL_SBJ_OF_SENIOR_STUDENT
 
-	const transcripts = await SubjectTranscriptionModel.aggregate()
+	let data = await SubjectTranscriptionModel.aggregate()
 		.match({
 			student: { $in: listStudent },
 			schoolYear: schoolYear
@@ -364,27 +390,96 @@ export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYe
 			transcript: 1,
 			completedProgram: 1
 		})
+	const isLackOfSubjectInTranscript = data.every(
+		(item) => Object.keys(item.transcript).length < AllStudyingSubjects.length
+	)
+	if (isLackOfSubjectInTranscript) {
+		const existedSubjectsInEachTranscript = data.at(0)?.transcript ? Object.keys(data.at(0)?.transcript) : []
+		const lackingSubjects = AllStudyingSubjects.filter(
+			(sbj) => !existedSubjectsInEachTranscript.some((ex) => ex === sbj?.subjectName)
+		)
+		const defaultTranscriptOfLackingSbj: {
+			[key: string]: Pick<ISubjectTranscript, 'firstSemester' | 'secondSemester' | 'isPassed'> & {
+				hasNoData?: boolean
+			}
+		} = {}
+		lackingSubjects.forEach((sbj) => {
+			// Nếu khối lớp hiện tại là từ khối 4 trở lên thì sẽ có điểm giữa kỳ đối với môn xét = điểm
+			if (sbj.isMainSubject) {
+				if (grade > 4)
+					defaultTranscriptOfLackingSbj[sbj.subjectName] = {
+						firstSemester: {
+							midtermTest: 0,
+							finalTest: 0
+						},
+						secondSemester: {
+							midtermTest: 0,
+							finalTest: 0
+						},
+						hasNoData: true,
+						isPassed: false
+					}
+				else
+					defaultTranscriptOfLackingSbj[sbj.subjectName] = {
+						[sbj.subjectName]: {
+							firstSemester: {
+								finalTest: 0
+							},
+							secondSemester: {
+								finalTest: 0
+							},
+							hasNoData: true,
+							isPassed: false
+						}
+					}
+			} else {
+				defaultTranscriptOfLackingSbj[sbj.subjectName] = {
+					isPassed: false,
+					hasNoData: true
+				}
+			}
+		})
+		data = data.map((item) => {
+			return {
+				...item,
+				transcript: { ...item.transcript, student: item.student?.fullName, ...defaultTranscriptOfLackingSbj }
+			}
+		})
+	}
 
-	const transformedTranscripts = transcripts.map((doc) => {
+	data = data.map((doc) => {
 		const { transcript, ...rest } = doc
 		return { ...rest, ...transcript }
 	})
-	return transformedTranscripts
+
+	return {
+		studyingSubjects: AllStudyingSubjects.map((sbj) => sbj.subjectName).sort((a, b) => a.localeCompare(b)),
+		transcripts: data
+	}
 }
 
 export const getValidSchoolYearOfStudentTranscript = async (studentId: string) => {
-	const result = await SubjectTranscriptionModel.aggregate()
-		.match({ student: new mongoose.Types.ObjectId(studentId) })
-		.lookup({
-			from: 'school_years', // replace with your SchoolYear collection name
-			localField: 'schoolYear',
-			foreignField: '_id',
-			as: 'schoolYear'
-		})
-		.unwind('$schoolYear')
-		.group({ _id: '$schoolYear' })
-		.sort({ endAt: -1 })
-	return result.map((scy) => scy._id)
+	const [existedSchoolYear, currentSchoolYear] = await Promise.all([
+		SubjectTranscriptionModel.aggregate()
+			.match({ student: new mongoose.Types.ObjectId(studentId) })
+			.lookup({
+				from: 'school_years', // replace with your SchoolYear collection name
+				localField: 'schoolYear',
+				foreignField: '_id',
+				as: 'schoolYear',
+				pipeline: [{ $sort: { endAt: -1 } }]
+			})
+			.unwind('$schoolYear')
+			.group({ _id: '$schoolYear' })
+			.sort({ endAt: -1 }),
+		getCurrentSchoolYear()
+	])
+	const availableSchoolYears = existedSchoolYear.map((s) => s._id)
+	const result = !availableSchoolYears.some((scy) => scy._id.equals(currentSchoolYear._id))
+		? [...availableSchoolYears, currentSchoolYear]
+		: availableSchoolYears
+
+	return result
 }
 
 export const getSubjectTeacherCanInsertTranscript = async (userId: string, subjectId: string, classId: string) => {

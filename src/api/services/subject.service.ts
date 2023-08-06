@@ -81,5 +81,33 @@ export const getSubjectsUserTeachingInClass = async (classId: string, teacherId:
 			_id: '$subject'
 		})
 
-	return teachingSubjects.filter((item) => !!item._id.length).map(({ _id }) => _id.at(0))
+	return teachingSubjects.map((sbj) => sbj._id).flat()
+}
+
+export const getAllSubjectOfStudentStudying = async (classId: string) => {
+	const subjects = await TimeTableModel.aggregate()
+		.match({ class: new mongoose.Types.ObjectId(classId) })
+		.lookup({
+			from: 'subjects',
+			localField: 'subject',
+			foreignField: '_id',
+			as: 'subject',
+			pipeline: [
+				{
+					$project: {
+						subjectName: 1,
+						isMainSubject: 1,
+						isElectiveSubject: 1
+					}
+				},
+				{
+					$sort: {
+						subjectName: 1 // Sort by subjectName in ascending order
+					}
+				}
+			]
+		})
+		.group({ _id: '$subject' })
+
+	return subjects.map((sbj) => sbj._id).flat()
 }
