@@ -440,16 +440,19 @@ export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYe
 			}
 		})
 		data = data.map((item) => {
-			return {
+			const transformedItem = {
 				...item,
-				transcript: { ...item.transcript, student: item.student?.fullName, ...defaultTranscriptOfLackingSbj }
+				transcript: { ...item.transcript, ...defaultTranscriptOfLackingSbj, student: item.student?.fullName }
 			}
+			console.log(transformedItem)
+			return transformedItem
 		})
 	}
 
 	data = data.map((doc) => {
 		const { transcript, ...rest } = doc
-		return { ...rest, ...transcript }
+		console.log('docs', doc)
+		return { ...rest, ...transcript, student: doc.student?.fullName }
 	})
 
 	return {
