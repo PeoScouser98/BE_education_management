@@ -95,7 +95,7 @@ export const setStudentTransferSchool = async (id: string, date: string) => {
 	if (parentsOfStudent) await deactivateParentsUser(parentsOfStudent)
 	return await StudentModel.findOneAndUpdate(
 		{ _id: id },
-		{ transferSchoolDate: date, status: StudentStatusEnum.TRANSFER_SCHOOL },
+		{ transferSchoolDate: date, status: StudentStatusEnum.TRANSFER_SCHOOL, class: null },
 		{ new: true }
 	)
 }
@@ -124,7 +124,7 @@ export const setDropoutStudent = async (id: string, date: string) => {
 	await deactivateParentsUser(student.parents as unknown as Pick<IUser, '_id' | 'email'>)
 	return await StudentModel.findOneAndUpdate(
 		{ _id: id },
-		{ dropoutDate: date, status: StudentStatusEnum.DROPPED_OUT },
+		{ dropoutDate: date, status: StudentStatusEnum.DROPPED_OUT, class: null },
 		{ new: true }
 	)
 }
