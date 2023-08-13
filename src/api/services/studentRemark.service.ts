@@ -8,21 +8,22 @@ import { getStudentsByClass } from './student.service'
 import { validateNewStudentRemark } from '../validations/studentRemark.validation'
 import { getCurrentSchoolYear } from './schoolYear.service'
 import { faker } from '@faker-js/faker'
+import StudentModel from '../models/student.model'
 
 export const createStudentRemarkEntireClass = async (
 	data: Array<Omit<IStudentRemark, '_id'>>,
-	headTeacherId: string | ObjectId,
+	headTeacherId: string | ObjectId
 ) => {
 	const currentSchoolYear = await getCurrentSchoolYear()
 	const currentClass = await ClassModel.findOne({ headTeacher: headTeacherId })
 	if (!currentClass) throw createHttpError.Forbidden('Only head teacher can remark conduct for this student !')
 	const payload = data.map(
 		(item) =>
-		({
-			...item,
-			schoolYear: currentSchoolYear._id?.toString(),
-			remarkedBy: headTeacherId
-		} as Omit<IStudentRemark, '_id'>)
+			({
+				...item,
+				schoolYear: currentSchoolYear._id?.toString(),
+				remarkedBy: headTeacherId
+			} as Omit<IStudentRemark, '_id'>)
 	)
 	const { error, value } = validateNewStudentRemark(payload)
 	if (error) throw createHttpError.BadRequest(error.message)
@@ -40,15 +41,22 @@ export const createStudentRemarkEntireClass = async (
 export const getStudentRemarkByClass = async <T extends string | ObjectId>(headTeacherId: T) => {
 	const currentSchoolYear = await getCurrentSchoolYear()
 	const currentClass = await getHeadTeacherClass(headTeacherId as string)
-
+	const studentsOfClass = await StudentModel.find({ class: currentClass?._id }).distinct('_id')
 	if (!currentClass) throw createHttpError.NotFound("Can't find the current class")
 
-	const filter = { schoolYear: currentSchoolYear?._id, remarkedBy: headTeacherId }
-	const remarkList = await StudentRemarkModel.find(filter)
+	const remarkList = await StudentRemarkModel.find({
+		schoolYear: currentSchoolYear?._id,
+		remarkedBy: headTeacherId,
+		student: { $in: studentsOfClass }
+	})
 
 	if (!remarkList) throw createHttpError.NotFound("Can't get student remarks for the current class!")
 
-	return remarkList;
+	return remarkList
+}
+
+export const getStudentRemark = async (studentId: string, schoolYearId: string) => {
+	return await StudentRemarkModel.findOne({ student: studentId, schoolYear: schoolYearId })
 }
 
 export const generateFakeStudentRemark = async <T extends string | ObjectId>(headTeacherId: T) => {
@@ -78,6 +86,5 @@ function generateRemark<T extends string | ObjectId>(studentId: T, schoolYear: T
 		proficiency: faker.helpers.arrayElement(REMARKS),
 		isQualified: faker.datatype.boolean(),
 		remarkedBy: headTeacherId || faker.string.uuid()
-	};
-
+	}
 }
