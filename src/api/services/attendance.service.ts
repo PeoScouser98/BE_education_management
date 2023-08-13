@@ -51,6 +51,8 @@ export const getClassAttendanceBySession = async (
 	classId: string | null
 ) => {
 	if (!!date && !moment(date).isValid()) throw createHttpError.BadRequest('Invalid date')
+	let isEmpty = false
+
 	const currentClass = await ClassModel.findOne({
 		$or: [
 			{
@@ -87,19 +89,21 @@ export const getClassAttendanceBySession = async (
 				reason: atd.reason
 			}))
 		})) as unknown as TAttendancePayload
-	console.log(attendanceOfClass)
 
-	if (!attendanceOfClass?.length)
+	if (!attendanceOfClass?.length) {
 		attendanceOfClass = studentsByClass.map((std) => ({
 			_id: std._id,
 			student: std.fullName,
 			isPresent: true
 		})) as unknown as TAttendancePayload
+		isEmpty = true
+	}
 
 	return {
 		class: currentClass?.className,
 		session: AttendanceSessionEnum[session as keyof typeof AttendanceSessionEnum],
 		date: moment(date).format('DD/MM/YYYY'),
-		attendances: attendanceOfClass
+		attendances: attendanceOfClass,
+		isEmpty
 	}
 }
