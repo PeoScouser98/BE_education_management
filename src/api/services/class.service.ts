@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import createHttpError from 'http-errors'
-import { IClass, TClassSortOption } from '../../types/class.type'
+import { IClass, IClassDocument, TClassSortOption } from '../../types/class.type'
 import ClassModel from '../models/class.model'
 import { validateClassData, validateClassEditData } from '../validations/class.validation'
 import TimeTableModel from '../models/timeTable.model'
 import mongoose from 'mongoose'
-import { ObjectId } from 'mongodb'
+import { ObjectId } from 'mongoose'
+import { IStudent } from '../../types/student.type'
+import StudentModel from '../models/student.model'
 
 export const getOneClass = async (classId: string) =>
 	await ClassModel.findOne({ _id: classId }).populate({
@@ -99,4 +101,22 @@ export const getTeachingClasses = async (teacherId: string) => {
 		})
 
 	return teacherTimeTable.filter((item) => !!item._id.length).map(({ _id }) => _id.at(0))
+}
+
+export const arrangeClass = async ({
+	studentsList,
+	newClass
+}: {
+	studentsList: Array<Pick<IStudent, '_id'>>
+	newClass: Pick<IClassDocument, '_id'>
+}) => {
+	const classToArrage = await ClassModel.findOne({ _id: newClass }).select('_id className')
+
+	if (!classToArrage) throw createHttpError.NotFound('Cannot find class to arrange !')
+	const result = await StudentModel.updateMany(
+		{ _id: { $in: studentsList.map((std) => std._id) } },
+		{ class: newClass },
+		{ new: true }
+	)
+	return { message: `${result.modifiedCount} đã được xếp lớp ${classToArrage.className}` }
 }

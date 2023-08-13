@@ -63,3 +63,9 @@ export const getTeachingClasses = useCatchAsync(async (req: Request, res: Respon
 	const teachingClasses = await ClassService.getTeachingClasses(teacherId)
 	return res.status(HttpStatusCode.OK).json(teachingClasses)
 })
+
+export const arrangeClass = useCatchAsync(async (req: Request, res: Response) => {
+	const { studentsList, newClass } = req.body
+	const result = await ClassService.arrangeClass({ studentsList, newClass })
+	return res.status(HttpStatusCode.CREATED).json(result)
+})
