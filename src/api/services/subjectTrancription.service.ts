@@ -351,8 +351,7 @@ export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYe
 					k: '$subject.subjectName',
 					v: {
 						firstSemester: '$firstSemester',
-						secondSemester: '$secondSemester',
-						isPassed: '$isPassed'
+						secondSemester: '$secondSemester'
 					}
 				}
 			}
@@ -382,7 +381,6 @@ export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYe
 				]
 			}
 		})
-
 		.sort({ student: 1 })
 		.project({
 			_id: 0,

@@ -8,14 +8,14 @@ import { HttpStatusCode } from '../../configs/statusCode.config'
 export const createStudentRemark = useCatchAsync(async (req: Request, res: Response) => {
 	const newStudenConductRemark = await StudentConductService.createStudentRemarkEntireClass(
 		req.body,
-		req.profile?._id!
+		<string>req.profile?._id
 	)
 	return res.status(HttpStatusCode.CREATED).json(newStudenConductRemark)
 })
 
 // [GET] /api/student-remark
-export const getStudentRemark = useCatchAsync(async (req: Request, res: Response) => {
-	const headTeacherID = req.profile?._id!
+export const getStudentsRemarkByHeadTeacher = useCatchAsync(async (req: Request, res: Response) => {
+	const headTeacherID = <string>req.profile?._id
 	const remarks = await StudentConductService.getStudentRemarkByClass(headTeacherID)
 	return res.status(HttpStatusCode.OK).json(remarks)
 })
@@ -23,6 +23,13 @@ export const getStudentRemark = useCatchAsync(async (req: Request, res: Response
 //! FOR TESTING PURPOSE ONLY
 // [GET] /api/student-remark/gen/
 export const generateStudentRemark = useCatchAsync(async (req: Request, res: Response) => {
-	const generatedRemarks = await StudentConductService.generateFakeStudentRemark(req.profile?._id!)
+	const generatedRemarks = await StudentConductService.generateFakeStudentRemark(<string>req.profile?._id)
 	return res.status(HttpStatusCode.CREATED).json(generatedRemarks)
+})
+
+export const getStudentRemark = useCatchAsync(async (req: Request, res: Response) => {
+	const studentId = req.params.studentId
+	const selectedSchoolYear = req.query._scy
+	const remarkOfStudent = await StudentConductService.getStudentRemark(studentId, <string>selectedSchoolYear)
+	return res.status(HttpStatusCode.OK).json(remarkOfStudent)
 })
