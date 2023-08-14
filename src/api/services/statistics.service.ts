@@ -46,36 +46,34 @@ export const handleTranscriptStudent = (
 					typeof studentCurrent.class !== 'string' &&
 					[1, 2].includes((studentCurrent.class as IClass).grade)
 				) {
-					const firstSemester = transcriptStudent?.firstSemester?.midtermTest
 					const secondSemester = transcriptStudent?.secondSemester?.midtermTest
 
-					if (!firstSemester || !secondSemester) {
+					if (!secondSemester) {
 						throw createHttpError(400, 'Học sinh chưa đủ điều kiện để đánh giá học lực')
 					}
 
 					return {
-						mediumScore: (firstSemester + secondSemester) / 2,
+						mediumScore: secondSemester,
 						student: studentCurrent._id
 					}
 				}
 
 				// Các khối còn lại
-				const firstSemester = transcriptStudent?.firstSemester?.midtermTest
 				const secondSemester = transcriptStudent?.secondSemester?.midtermTest
 
-				if (!firstSemester || !secondSemester) {
+				if (!secondSemester) {
 					throw createHttpError(400, 'Học sinh chưa đủ điều kiện để đánh giá học lực')
 				}
 
 				return {
-					mediumScore: (firstSemester + secondSemester) / 2,
+					mediumScore: secondSemester,
 					student: studentCurrent._id
 				}
 			}
 
 			// Môn tính bằng nhận sét
 			return {
-				isPassed: transcriptStudent.isPassed,
+				isPassed: transcriptStudent.secondSemester?.isPassed,
 				student: studentCurrent._id
 			}
 		})
@@ -139,21 +137,7 @@ export const getStdPercentageByGrade = async () => {
 			{
 				label: 'Tỉ lệ học sinh giữa các khối',
 				data: data,
-				backgroundColor: [
-					'rgba(16, 185, 129, 1)',
-					'rgba(79, 70, 229, 1)',
-					'rgba(25, 118, 210, 1)',
-					'rgba(231, 31, 105, 1)',
-					'rgba(248, 179, 26, 1)'
-				],
-				borderColor: [
-					'rgba(16, 185, 129,0.8)',
-					'rgba(79, 70, 229,0.8)',
-					'rgba(25, 118, 210,0.8)',
-					'rgba(231, 31, 105,0.8)',
-					'rgba(248, 179, 26,0.8)'
-				],
-				borderWith: 1
+				backgroundColor: 'rgba(255, 99, 132, 0.5)'
 			}
 		]
 	}
@@ -188,13 +172,21 @@ export const getGoodStudentByClass = async (classId: string) => {
 					label: 'Thống kê học lực học sinh',
 					data: [level1, level2, level3],
 					backgroundColor: [
-						'rgba(26,50,71,1)',
-						'rgba(81,112,129,1)',
-						'rgba(168,168,168,1)',
-						'rgba(97,155,184,1)',
-						'rgba(31,105,142,1)'
+						'rgba(255, 99, 132, 0.2)',
+						'rgba(54, 162, 235, 0.2)',
+						'rgba(255, 206, 86, 0.2)',
+						'rgba(75, 192, 192, 0.2)',
+						'rgba(153, 102, 255, 0.2)',
+						'rgba(255, 159, 64, 0.2)'
 					],
-					borderColor: [],
+					borderColor: [
+						'rgba(255, 99, 132, 1)',
+						'rgba(54, 162, 235, 1)',
+						'rgba(255, 206, 86, 1)',
+						'rgba(75, 192, 192, 1)',
+						'rgba(153, 102, 255, 1)',
+						'rgba(255, 159, 64, 1)'
+					],
 					borderWith: 1
 				}
 			]
@@ -220,17 +212,14 @@ export const getPolicyBeneficiary = async () => {
 			})
 		)
 		return {
-			labels: classes.map((classItem) => classItem.className),
-			data: data,
-			backgroundColor: [
-				'rgba(26,50,71,1)',
-				'rgba(81,112,129,1)',
-				'rgba(168,168,168,1)',
-				'rgba(97,155,184,1)',
-				'rgba(31,105,142,1)'
-			],
-			borderColor: [],
-			borderWith: 1
+			labels: classes.map((item) => item.className),
+			datasets: [
+				{
+					label: 'Học sinh hoàn cảnh',
+					data: data,
+					backgroundColor: 'rgba(255, 99, 132, 0.5)'
+				}
+			]
 		}
 	} catch (error) {
 		throw error
@@ -238,7 +227,7 @@ export const getPolicyBeneficiary = async () => {
 }
 
 // Xếp hạng học lực học sinh toàn trường
-export const getStdAllClass = async (level: 'level1' | 'level2' | 'level3') => {
+export const getStdAllClass = async () => {
 	try {
 		// all class
 		const classes: IClass[] = await ClassModel.find({}).sort({ grade: 'asc' })
@@ -254,7 +243,7 @@ export const getStdAllClass = async (level: 'level1' | 'level2' | 'level3') => {
 
 				const levels = handleLevelStudent(transcriptStdsConverted, studentIds)
 
-				return levels?.[level]
+				return levels
 			})
 		)
 
@@ -262,17 +251,19 @@ export const getStdAllClass = async (level: 'level1' | 'level2' | 'level3') => {
 			labels: classes.map((item) => item.className),
 			datasets: [
 				{
-					label: 'Thống kê ' + String((NAME_LEVEL as any)[level]).toLocaleLowerCase,
-					data: levelAllClass,
-					backgroundColor: [
-						'rgba(26,50,71,1)',
-						'rgba(81,112,129,1)',
-						'rgba(168,168,168,1)',
-						'rgba(97,155,184,1)',
-						'rgba(31,105,142,1)'
-					],
-					borderColor: [],
-					borderWith: 1
+					label: NAME_LEVEL.level1,
+					data: levelAllClass.map((item) => item.level1),
+					backgroundColor: 'rgba(255, 99, 132, 0.5)'
+				},
+				{
+					label: NAME_LEVEL.level2,
+					data: levelAllClass.map((item) => item.level2),
+					backgroundColor: 'rgba(53, 162, 235, 0.5)'
+				},
+				{
+					label: NAME_LEVEL.level3,
+					data: levelAllClass.map((item) => item.level3),
+					backgroundColor: 'rgb(255,245,221)'
 				}
 			]
 		}
