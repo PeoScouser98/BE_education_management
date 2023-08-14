@@ -2,7 +2,6 @@ import { Request, Response } from 'express'
 import useCatchAsync from '../../helpers/useCatchAsync'
 import * as StatisticsService from '../services/statistics.service'
 import { HttpStatusCode } from '../../configs/statusCode.config'
-import createHttpError from 'http-errors'
 
 export const getStdPercentageByGrade = useCatchAsync(async (req: Request, res: Response) => {
 	const result = await StatisticsService.getStdPercentageByGrade()
@@ -20,11 +19,6 @@ export const getPolicyBeneficiary = useCatchAsync(async (req: Request, res: Resp
 })
 
 export const getStdAllClass = useCatchAsync(async (req: Request, res: Response) => {
-	const level = req.query.level
-	if (!level) {
-		throw createHttpError(400, 'Không xác định được loại học lực cần thống kê')
-	}
-
-	const result = await StatisticsService.getStdAllClass(level as 'level1' | 'level2' | 'level3')
+	const result = await StatisticsService.getStdAllClass()
 	return res.status(HttpStatusCode.OK).json(result)
 })
