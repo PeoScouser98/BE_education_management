@@ -7,6 +7,7 @@ import { ITimeTable } from '../../types/timeTable.type'
 import StudentModel from '../models/student.model'
 import TimeTableModel from '../models/timeTable.model'
 import { validateTimeTableData } from '../validations/timeTable.validation'
+import generatePictureByName from '../../helpers/generatePicture'
 
 export const saveTimeTableByClass = async (payload: { [key: string]: Partial<ITimeTable>[] }, classId: string) => {
 	const schedule = _.flatMap(payload, (items, dayOfWeek) =>
@@ -133,7 +134,6 @@ export const getTeacherTimeTable = async (teacherId: string) => {
 	}, {})
 
 	return timetable
-	// return result
 }
 
 export const getStudentTimeTable = async (studentId: string) => {
@@ -141,4 +141,36 @@ export const getStudentTimeTable = async (studentId: string) => {
 	if (!classOfStudent) throw createHttpError.NotFound('Cannot find time table of student !')
 	const timeTable = await getTimeTableDetail(classOfStudent)
 	return timeTable
+}
+
+// Get all teachers with time table by class
+export const getAllTeacherTimeTableByClass = async (classId: string) => {
+	const result = await TimeTableModel.aggregate()
+		.match({ class: new mongoose.Types.ObjectId(classId) })
+		.lookup({
+			from: 'users',
+			localField: 'teacher',
+			foreignField: '_id',
+			as: 'teacher'
+		})
+		.group({
+			_id: { $arrayElemAt: ['$teacher._id', 0] },
+			totalPeriod: { "$sum": 1 },
+			displayName: { $first: '$teacher.displayName' }
+		})
+		.project({
+			_id: 1,
+			totalPeriod: 1,
+			displayName: { $arrayElemAt: ['$displayName', 0] }
+		})
+		.sort({
+			_id: 1, 'totalPeriod': 1
+		})
+
+	const resultWithPicture = result.map((item) => {
+		item.picture = generatePictureByName(item.displayName)
+		return item
+	})
+
+	return result
 }

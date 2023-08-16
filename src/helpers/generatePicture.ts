@@ -5,7 +5,7 @@ const randomHexColor = () => {
 	return RanHexColor
 }
 
-const generatePicureByName = (char: string) => {
+const generatePictureByName = (char: string) => {
 	return (
 		'https://ui-avatars.com/api/' +
 		paramsStringify({
@@ -14,4 +14,4 @@ const generatePicureByName = (char: string) => {
 	)
 }
 
-export default generatePicureByName
+export default generatePictureByName

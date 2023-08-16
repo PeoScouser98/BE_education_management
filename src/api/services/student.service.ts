@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import createHttpError from 'http-errors'
 import mongoose, { ObjectId, isValidObjectId } from 'mongoose'
-import generatePicureByName from '../../helpers/generatePicture'
+import generatePictureByName from '../../helpers/generatePicture'
 import { toCapitalize } from '../../helpers/toolkit'
 import { IStudent, StudentStatusEnum } from '../../types/student.type'
 import { IUser } from '../../types/user.type'
@@ -387,7 +387,7 @@ export const getStudentsByParents = async (parentsId: string | ObjectId) =>
 		})
 		.select('-parents -createdAt -updatedAt')
 		.transform((students) =>
-			students.map((std) => ({ ...std.toObject(), picture: generatePicureByName(std.fullName) }))
+			students.map((std) => ({ ...std.toObject(), picture: generatePictureByName(std.fullName) }))
 		)
 
 export const getStudentsByHeadTeacherClass = async (headTeacherId: string) => {
