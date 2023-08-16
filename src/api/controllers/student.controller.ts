@@ -107,3 +107,12 @@ export const getStudentsByHeadTeacherClass = useCatchAsync(async (req: Request, 
 	const students = await StudentServices.getStudentsByHeadTeacherClass(headTeacherId)
 	return res.status(HttpStatusCode.OK).json(students)
 })
+
+export const getGraduatedStudentsBySchoolYear = useCatchAsync(async (req: Request, res: Response) => {
+	const page = req.query._page || 1
+	const limit = req.query._limit || 20
+	const schoolYearId = req.params.schoolYearId
+
+	const graduatedStudents = await StudentServices.getGraduatedStudents(+page, +limit, schoolYearId)
+	return res.status(HttpStatusCode.OK).json(graduatedStudents)
+})

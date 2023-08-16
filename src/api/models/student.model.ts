@@ -4,6 +4,7 @@ import mongoosePaginate from 'mongoose-paginate-v2'
 import { toCapitalize } from '../../helpers/toolkit'
 import { IStudentDocument, StudentStatusEnum, TPaginatedStudentModel } from '../../types/student.type'
 import { UserGenderEnum } from '../../types/user.type'
+import { ObjectId } from 'mongodb'
 
 const StudentSchema = new mongoose.Schema<IStudentDocument>(
 	{
@@ -49,6 +50,11 @@ const StudentSchema = new mongoose.Schema<IStudentDocument>(
 		transferSchoolDate: {
 			type: Date,
 			default: null
+		},
+		graduatedAt: {
+			type: ObjectId,
+			ref: 'SchoolYears',
+			autopopulate: { select: '_id name' }
 		},
 		dropoutDate: {
 			type: Date,

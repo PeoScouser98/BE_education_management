@@ -1,16 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import createHttpError from 'http-errors'
-import mongoose, { FilterQuery, ObjectId, isValidObjectId } from 'mongoose'
-import { IAttendance } from '../../types/attendance.type'
+import mongoose, { ObjectId, isValidObjectId } from 'mongoose'
+import generatePicureByName from '../../helpers/generatePicture'
+import { toCapitalize } from '../../helpers/toolkit'
 import { IStudent, StudentStatusEnum } from '../../types/student.type'
 import { IUser } from '../../types/user.type'
+import ClassModel from '../models/class.model'
 import SchoolYearModel from '../models/schoolYear.model'
 import StudentModel from '../models/student.model'
 import { validateReqBodyStudent, validateUpdateReqBodyStudent } from '../validations/student.validation'
-import { deactivateParentsUser, getParentsUserByClass } from './user.service'
-import generatePicureByName from '../../helpers/generatePicture'
-import { toCapitalize } from '../../helpers/toolkit'
-import ClassModel from '../models/class.model'
+import { deactivateParentsUser } from './user.service'
 
 // create new student using form
 export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
@@ -22,7 +21,11 @@ export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent,
 	if (Array.isArray(data)) {
 		const hasExistedStudent = await StudentModel.exists({ code: { $in: data.map((student) => student.code) } })
 		if (hasExistedStudent) throw createHttpError(409, 'Some students already exists ')
-		return await StudentModel.insertMany(data)
+		if (data.length > 35)
+			throw createHttpError.UnprocessableEntity('Class size cannot be greater than 35 students each class !')
+		return await StudentModel.insertMany(
+			data.map((student) => ({ ...student, fullName: toCapitalize(student.fullName) }))
+		)
 	}
 
 	const hasExistedStudent = await StudentModel.exists({
@@ -138,25 +141,6 @@ export const getStudentDropout = async () => {
 	return await StudentModel.find({ dropoutDate: { $ne: null } })
 }
 
-// Lấy ra tình trạng điểm danh của 1 học sinh trong 1 tháng (sẽ trả về ngày vắng mặt trong tháng đấy)
-export const attendanceOfStudentByMonth = async (id: string, month: number, year: number) => {
-	const { absentDays } = await getDetailStudent(id)
-
-	const result: IAttendance[] = []
-
-	absentDays?.forEach((item) => {
-		const date = new Date(item.date)
-		const monthItem = date.getMonth() + 1
-		const yearItem = date.getFullYear()
-
-		if (monthItem === month && yearItem === year) {
-			result.push(item)
-		}
-	})
-
-	return result
-}
-
 // Lấy ra các học sinh chính sách
 export const getPolicyBeneficiary = async (page: number, limit: number) => {
 	return await StudentModel.paginate(
@@ -256,7 +240,7 @@ export const getStudentsByClass = async (classId: string) => {
 			as: 'class',
 			pipeline: [{ $project: { grade: 1, className: 1 } }]
 		})
-		.unwind('$class')
+		.unwind({ path: '$class', preserveNullAndEmptyArrays: true })
 
 		.addFields({
 			completedProgram: {
@@ -274,7 +258,12 @@ export const getStudentsByClass = async (classId: string) => {
 													$filter: {
 														input: '$completedProgram',
 														as: 'item',
-														cond: { $eq: ['$$item.isPassed', true] }
+														cond: {
+															$or: [
+																{ $eq: ['$$item.secondSemester.isPassed', true] },
+																{ $gt: ['$$item.secondSemester.finalTest', 5] }
+															]
+														}
 													}
 												}
 											},
@@ -294,7 +283,12 @@ export const getStudentsByClass = async (classId: string) => {
 													$filter: {
 														input: '$completedProgram',
 														as: 'item',
-														cond: { $eq: ['$$item.isPassed', true] }
+														cond: {
+															$or: [
+																{ $eq: ['$$item.secondSemester.isPassed', true] },
+																{ $gt: ['$$item.secondSemester.finalTest', 5] }
+															]
+														}
 													}
 												}
 											},
@@ -330,15 +324,22 @@ export const getStudentsByClass = async (classId: string) => {
 }
 
 export const promoteStudentsByClass = async (classId: string) => {
-	const studentsInClass = await getStudentsByClass(classId)
+	const [studentsInClass, currentClass] = await Promise.all([
+		getStudentsByClass(classId),
+		ClassModel.findOne({ _id: classId })
+	])
+
+	if (!currentClass) throw createHttpError.NotFound('Cannot find current class to promote student included in !')
+	if (!studentsInClass.length) throw createHttpError.NotFound('No student can be promoted !')
+
 	const promotedStudents = studentsInClass.filter(
 		(student: IStudent & { remarkAsQualified: boolean; completedProgram: boolean }) =>
 			student.remarkAsQualified && student.completedProgram
 	)
-	const isAbleToPromoted =
-		promotedStudents.length > 0 &&
-		promotedStudents.every((student) => student.class?.grade === 5 && student.class !== null)
-	if (isAbleToPromoted) {
+
+	const canPromoteToGraduate = promotedStudents.every((student) => student.class?.grade === 5)
+
+	if (canPromoteToGraduate) {
 		const [graduatedStudents, _] = await Promise.all([
 			StudentModel.updateMany(
 				{
@@ -350,8 +351,27 @@ export const promoteStudentsByClass = async (classId: string) => {
 			deactivateParentsUser(promotedStudents.map((student) => student.parents))
 		])
 		return { message: `${graduatedStudents.modifiedCount} students has been promoted.` }
+	} else {
+		/* Next class student can be transfered */
+		const nextClassName = currentClass.className.slice(1)
+		const nextClassStudentPossibleTransfer = await ClassModel.findOne({
+			className: currentClass.grade + nextClassName
+		})
+
+		if (!nextClassStudentPossibleTransfer)
+			throw createHttpError.UnprocessableEntity('Hiện chưa có lớp học phù hợp để hiện chuyển lớp')
+		const { modifiedCount } = await StudentModel.updateMany(
+			{
+				_id: { $in: promotedStudents }
+			},
+			{
+				class: nextClassStudentPossibleTransfer._id
+			},
+			{ new: true }
+		)
+
+		return { message: `${modifiedCount} students has been promoted.` }
 	}
-	return { message: 'No student to promoted' }
 }
 
 export const getStudentsByParents = async (parentsId: string | ObjectId) =>
@@ -374,4 +394,18 @@ export const getStudentsByHeadTeacherClass = async (headTeacherId: string) => {
 	const classOfHeadTeacher = await ClassModel.findOne({ headTeacher: headTeacherId }).select('_id')
 	if (!classOfHeadTeacher) throw createHttpError.NotFound('You have not play a role as a head teacher for any class !')
 	return await getStudentsByClass(classOfHeadTeacher._id.toString())
+}
+
+export const getGraduatedStudents = async (page: number, limit: number, schoolYearId: string) => {
+	return StudentModel.paginate(
+		{
+			status: StudentStatusEnum.GRADUATED,
+			graduatedAt: schoolYearId
+		},
+		{
+			limit: limit,
+			page: page,
+			sort: { graduatedAt: -1 }
+		}
+	)
 }
