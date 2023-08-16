@@ -15,11 +15,12 @@ export interface IStudent extends Document {
 	parents: ObjectId | Pick<IUser, '_id' | 'email' | 'phone' | 'displayName' | 'address'>
 	status: StudentStatusEnum
 	isPolicyBeneficiary?: boolean
-	isGraduated?: boolean
+	// isGraduated?: boolean
+	graduatedAt: ObjectId
 	transferSchoolDate?: Date
 	dropoutDate?: Date
-	absentDays?: IAttendance[]
-	remarkOfHeadTeacher?: Pick<IStudentRemark, 'isQualified' | 'conduct' | 'proficiency'> | null
+	// absentDays?: IAttendance[]
+	// remarkOfHeadTeacher?: Pick<IStudentRemark, 'isQualified' | 'conduct' | 'proficiency'> | null
 }
 
 export enum StudentStatusEnum {
@@ -39,7 +40,7 @@ export interface IStudentRemark extends Document {
 	remarkedBy: string | ObjectId | Pick<IUser, '_id' | 'displayName'>
 }
 
-export interface IStudentDocument extends Omit<SoftDeleteDocument, '_id'>, IStudent { }
+export interface IStudentDocument extends Omit<SoftDeleteDocument, '_id'>, IStudent {}
 export type TStudentModel = Model<IStudentDocument>
 export type TSoftDeleteStudentModel = SoftDeleteModel<IStudentDocument, TStudentModel>
 export type TPaginatedStudentModel = PaginateModel<IStudentDocument>
