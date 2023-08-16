@@ -8,7 +8,7 @@ import SchoolYearModel from '../models/schoolYear.model'
 import StudentModel from '../models/student.model'
 import { validateReqBodyStudent, validateUpdateReqBodyStudent } from '../validations/student.validation'
 import { deactivateParentsUser, getParentsUserByClass } from './user.service'
-import generatePicureByName from '../../helpers/generatePicture'
+import generatePictureByName from '../../helpers/generatePicture'
 import { toCapitalize } from '../../helpers/toolkit'
 import ClassModel from '../models/class.model'
 
@@ -367,7 +367,7 @@ export const getStudentsByParents = async (parentsId: string | ObjectId) =>
 		})
 		.select('-parents -createdAt -updatedAt')
 		.transform((students) =>
-			students.map((std) => ({ ...std.toObject(), picture: generatePicureByName(std.fullName) }))
+			students.map((std) => ({ ...std.toObject(), picture: generatePictureByName(std.fullName) }))
 		)
 
 export const getStudentsByHeadTeacherClass = async (headTeacherId: string) => {
