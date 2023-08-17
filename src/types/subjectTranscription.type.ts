@@ -11,12 +11,12 @@ export interface ISubjectTranscript extends Document {
 	isPassed?: boolean
 	firstSemester?: {
 		midtermTest?: number
-		finalTest: number
+		finalTest?: number
 		isPassed?: boolean
 	}
 	secondSemester?: {
 		midtermTest?: number
-		finalTest: number
+		finalTest?: number
 		isPassed?: boolean
 	}
 }
