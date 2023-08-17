@@ -96,12 +96,6 @@ export const getStudentsByParents = useCatchAsync(async (req: Request, res: Resp
 	return res.status(HttpStatusCode.OK).json(children)
 })
 
-export const promoteStudentsByClass = useCatchAsync(async (req: Request, res: Response) => {
-	const classId = req.params.classId
-	const result = await StudentServices.promoteStudentsByClass(classId)
-	return res.status(HttpStatusCode.OK).json(result)
-})
-
 export const getStudentsByHeadTeacherClass = useCatchAsync(async (req: Request, res: Response) => {
 	const headTeacherId = <string>req.profile._id
 	const students = await StudentServices.getStudentsByHeadTeacherClass(headTeacherId)

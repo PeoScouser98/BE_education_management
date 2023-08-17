@@ -8,7 +8,6 @@ import {
 	getStudentLeftSchool,
 	getPolicyBeneficiary,
 	getStudentsByParents,
-	promoteStudentsByClass,
 	getStudentsByHeadTeacherClass,
 	getGraduatedStudentsBySchoolYear
 } from '../controllers/student.controller'
@@ -22,14 +21,11 @@ router.get('/students/left-school', checkAuthenticated, checkIsTeacher, getStude
 router.get('/students/by-head-teacher-class', checkAuthenticated, checkIsTeacher, getStudentsByHeadTeacherClass)
 router.get('/students/detail/:id', checkAuthenticated, getStudentDetail)
 router.get('/students/:classId', checkAuthenticated, checkIsTeacher, getStudentsByClass)
-router.patch(
-	'/students/promote/:classId',
-	// checkAuthenticated, checkIsTeacher,
-	promoteStudentsByClass
-)
 router.post('/students', checkAuthenticated, checkIsHeadmaster, createStudent)
 router.patch('/students/services/:id', checkAuthenticated, serviceStudent)
 router.patch('/students/:id', checkAuthenticated, checkIsHeadmaster, updateStudent)
-router.get('/sutdents/graduated/:schoolYearId', checkAuthenticated, checkIsHeadmaster, getGraduatedStudentsBySchoolYear)
+router.get('/sutdents/graduated/:schoolYearId', getGraduatedStudentsBySchoolYear)
+
+//!DEPRECATED router.patch('/students/promote/:classId', promoteStudentsByClass)
 
 export default router

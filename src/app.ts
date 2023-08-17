@@ -17,6 +17,10 @@ import path from 'path'
 import rootRouter from './api/routes'
 import AppConfig from './configs/app.config'
 import { HttpStatusCode } from './configs/statusCode.config'
+
+// Cronjobs
+import './api/auto/cronjob.auto'
+
 // resolve path
 const ROOT_FOLDER = path.join(__dirname, '..')
 const SRC_FOLDER = path.join(ROOT_FOLDER, 'src')

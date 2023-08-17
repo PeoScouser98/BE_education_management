@@ -1,9 +1,8 @@
 import { Model, ObjectId, PaginateModel } from 'mongoose'
 import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete'
-import { IUser } from './user.type'
 import { IClass } from './class.type'
-import { IAttendance } from './attendance.type'
 import { ISchoolYear } from './schoolYear.type'
+import { IUser } from './user.type'
 
 export interface IStudent extends Document {
 	_id: ObjectId
@@ -14,19 +13,21 @@ export interface IStudent extends Document {
 	class: ObjectId | string | Partial<IClass>
 	parents: ObjectId | Pick<IUser, '_id' | 'email' | 'phone' | 'displayName' | 'address'>
 	status: StudentStatusEnum
+	// studyProgress: StudyProgressEnum
 	isPolicyBeneficiary?: boolean
-	// isGraduated?: boolean
 	graduatedAt: ObjectId
 	transferSchoolDate?: Date
 	dropoutDate?: Date
-	// absentDays?: IAttendance[]
-	// remarkOfHeadTeacher?: Pick<IStudentRemark, 'isQualified' | 'conduct' | 'proficiency'> | null
 }
 
 export enum StudentStatusEnum {
 	STUDYING = 'Đang học',
 	TRANSFER_SCHOOL = 'Chuyển trường',
 	DROPPED_OUT = 'Thôi học',
+	COMPLETE_GRADE1 = 'Được lên lớp 2',
+	COMPLETE_GRADE2 = 'Được lên lớp 3',
+	COMPLETE_GRADE3 = 'Được lên lớp 4',
+	COMPLETE_GRADE4 = 'Được lên lớp 5',
 	GRADUATED = 'Hoàn thành chương trình tiểu học'
 }
 
