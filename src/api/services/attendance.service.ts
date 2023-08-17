@@ -65,8 +65,8 @@ export const getClassAttendanceBySession = async (
 	})
 		.select('className')
 		.lean()
+	const studentsByClass = await StudentModel.find({ class: currentClass?._id }).select('_id fullName')
 
-	const studentsByClass = await StudentModel.find({ class: currentClass?._id }).select('_id fullName').lean()
 	let attendanceOfClass = (await AttendanceModel.find({
 		student: { $in: studentsByClass.map((std) => std._id) },
 		date: moment(date).format('YYYY-MM-DD'),
@@ -75,13 +75,11 @@ export const getClassAttendanceBySession = async (
 		.populate({
 			path: 'student',
 			select: '_id fullName',
-			options: { sort: { fullName: 'asc' }, lean: true },
-			populate: { path: 'class', select: 'className' }
+			options: { sort: { fullName: 'asc' }, lean: true }
 		})
 		.select('-session -createdAt -updatedAt -date')
 		.transform((docs) => {
 			const data = docs as TAttendancePayload
-
 			return data.map((atd) => ({
 				_id: atd.student?._id,
 				student: atd.student?.fullName,
@@ -89,8 +87,7 @@ export const getClassAttendanceBySession = async (
 				reason: atd.reason
 			}))
 		})) as unknown as TAttendancePayload
-
-	if (!attendanceOfClass?.length) {
+	if (attendanceOfClass?.length === 0) {
 		attendanceOfClass = studentsByClass.map((std) => ({
 			_id: std._id,
 			student: std.fullName,

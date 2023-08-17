@@ -155,7 +155,7 @@ export const getAllTeacherTimeTableByClass = async (classId: string) => {
 		})
 		.group({
 			_id: { $arrayElemAt: ['$teacher._id', 0] },
-			totalPeriod: { "$sum": 1 },
+			totalPeriod: { $sum: 1 },
 			displayName: { $first: '$teacher.displayName' }
 		})
 		.project({
@@ -164,7 +164,8 @@ export const getAllTeacherTimeTableByClass = async (classId: string) => {
 			displayName: { $arrayElemAt: ['$displayName', 0] }
 		})
 		.sort({
-			_id: 1, 'totalPeriod': 1
+			_id: 1,
+			totalPeriod: 1
 		})
 
 	const resultWithPicture = result.map((item) => {
