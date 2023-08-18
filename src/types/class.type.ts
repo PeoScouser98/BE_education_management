@@ -9,6 +9,7 @@ export interface IClass {
 	headTeacher: ObjectId | Pick<IUser, '_id' | 'displayName' | 'email' | 'phone'> | string
 	students: Array<ObjectId>
 	totalStudents?: number
+	isTemporary: boolean
 }
 export type TClassSortOption = {
 	className?: SortOrder

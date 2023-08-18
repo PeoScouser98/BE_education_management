@@ -1,21 +1,22 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import createHttpError from 'http-errors'
+import mongoose, { FilterQuery } from 'mongoose'
 import { IClass, IClassDocument, TClassSortOption } from '../../types/class.type'
-import ClassModel from '../models/class.model'
-import { validateClassData, validateClassEditData } from '../validations/class.validation'
-import TimeTableModel from '../models/timeTable.model'
-import mongoose from 'mongoose'
-import { ObjectId } from 'mongoose'
 import { IStudent } from '../../types/student.type'
+import ClassModel from '../models/class.model'
 import StudentModel from '../models/student.model'
+import TimeTableModel from '../models/timeTable.model'
+import { validateClassData, validateClassEditData } from '../validations/class.validation'
 
 export const getOneClass = async (classId: string) =>
 	await ClassModel.findOne({ _id: classId }).populate({
 		path: 'totalStudents'
 	})
 
-export const getAllClass = async (sortOption: TClassSortOption) =>
-	await ClassModel.find().populate({ path: 'totalStudents' }).sort(sortOption)
+export const getAllClass = async (
+	filterQuery: FilterQuery<IClassDocument> = { isTemporary: true },
+	sortOption: TClassSortOption
+) => await ClassModel.find(filterQuery).populate({ path: 'totalStudents' }).sort(sortOption)
 
 export const createClass = async (payload: Omit<IClass, '_id'>) => {
 	const { error } = validateClassData(payload)
@@ -114,7 +115,7 @@ export const arrangeClass = async ({
 
 	if (!classToArrage) throw createHttpError.NotFound('Cannot find class to arrange !')
 	const result = await StudentModel.updateMany(
-		{ _id: { $in: studentsList.map((std) => std._id) } },
+		{ _id: { $in: studentsList.map((std) => std?._id) } },
 		{ class: newClass },
 		{ new: true }
 	)
