@@ -37,7 +37,11 @@ export const getClasses = useCatchAsync(async (req: Request, res: Response) => {
 	if (!sortableFields.includes(fieldToSort as string)) {
 		throw createHttpError.BadRequest("_sort can only belong to ['className', 'grade','createdAt','updatedAt']")
 	}
-	const classes = await ClassService.getAllClass({ [fieldToSort]: order })
+	let filterQuery = { isTemporary: false }
+	const isTemporary = req.query._temp
+	if (isTemporary) filterQuery = { isTemporary: JSON.parse(<string>isTemporary) }
+
+	const classes = await ClassService.getAllClass(filterQuery, { [fieldToSort]: order })
 	return res.status(HttpStatusCode.OK).json(classes)
 })
 
