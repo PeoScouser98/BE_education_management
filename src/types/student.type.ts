@@ -13,7 +13,6 @@ export interface IStudent extends Document {
 	class: ObjectId | string | Partial<IClass>
 	parents: ObjectId | Pick<IUser, '_id' | 'email' | 'phone' | 'displayName' | 'address'>
 	status: StudentStatusEnum
-	// studyProgress: StudyProgressEnum
 	isPolicyBeneficiary?: boolean
 	graduatedAt: ObjectId
 	transferSchoolDate?: Date
@@ -24,10 +23,7 @@ export enum StudentStatusEnum {
 	STUDYING = 'Đang học',
 	TRANSFER_SCHOOL = 'Chuyển trường',
 	DROPPED_OUT = 'Thôi học',
-	COMPLETE_GRADE1 = 'Được lên lớp 2',
-	COMPLETE_GRADE2 = 'Được lên lớp 3',
-	COMPLETE_GRADE3 = 'Được lên lớp 4',
-	COMPLETE_GRADE4 = 'Được lên lớp 5',
+	WAITING_ARRANGE_CLASS = 'Chờ xếp lớp',
 	GRADUATED = 'Hoàn thành chương trình tiểu học'
 }
 

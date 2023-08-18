@@ -10,6 +10,7 @@ import SchoolYearModel from '../models/schoolYear.model'
 import StudentModel from '../models/student.model'
 import { validateReqBodyStudent, validateUpdateReqBodyStudent } from '../validations/student.validation'
 import { deactivateParentsUser } from './user.service'
+import { IClass } from '../../types/class.type'
 
 // create new student using form
 export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
@@ -19,12 +20,13 @@ export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent,
 	}
 
 	if (Array.isArray(data)) {
+		console.log(data)
 		const hasExistedStudent = await StudentModel.exists({ code: { $in: data.map((student) => student.code) } })
 		if (hasExistedStudent) throw createHttpError(409, 'Some students already exists ')
 		if (data.length > 35)
 			throw createHttpError.UnprocessableEntity('Class size cannot be greater than 35 students each class !')
 
-		return await Promise.all(data.map((student) => Promise.resolve(new StudentModel(student).save())))
+		return await StudentModel.insertMany(data)
 	}
 
 	const hasExistedStudent = await StudentModel.exists({
@@ -161,8 +163,54 @@ export const getStudentsByClass = async (classId: string) => {
 	})
 }
 
+const transferClass = async (grade: number, tempClasses: Array<IClass>, promotedStudents: Array<any>) => {
+	const tempClassToTransfer = tempClasses.find((cls) => cls.grade === grade + 1)
+	const studentsToArrangeClass = promotedStudents.filter((student) => student.class?.grade === grade)
+	const currentClassName = studentsToArrangeClass.at(0)?.class?.className
+
+	let availableClassToTransfer = null
+	if (currentClassName) {
+		/**
+		 * Tìm lớp học có tên tương ứng
+		 * Example: 1A -> 2A
+		 */
+		const nextClassNameToFind = currentClassName.replace(currentClassName.charAt(0), grade + 1)
+		availableClassToTransfer = await ClassModel.findOne({ className: nextClassNameToFind })
+
+		// Nếu có học sinh trong lớp được chuyển đến -> ko cập nhật
+		if (availableClassToTransfer) {
+			const existedStudentsInClassToTransfer = await StudentModel.exists({ class: availableClassToTransfer._id })
+			if (existedStudentsInClassToTransfer) return
+		}
+	}
+
+	/**
+	 * Nếu ko có lớp thích hợp -> Chờ xếp lớp & chuyển đến lớp chờ cho khối đang học
+	 * Ngược lại -> Đang học & chuyển đến lớp phù hợp
+	 */
+	const updateStatusKey = !!availableClassToTransfer
+		? <keyof typeof StudentStatusEnum>'STUDYING'
+		: <keyof typeof StudentStatusEnum>'WAITING_ARRANGE_CLASS'
+
+	const classToTransfer = availableClassToTransfer?._id || tempClassToTransfer?._id
+
+	return await StudentModel.updateMany(
+		{
+			_id: { $in: studentsToArrangeClass }
+		},
+		{
+			status: StudentStatusEnum[updateStatusKey],
+			class: classToTransfer
+		},
+		{ new: true }
+	)
+}
+
 export const promoteStudents = async () => {
 	console.log('Run auto promote students')
+	const NON_SENIOR_GRADES = [1, 2, 3, 4]
+	const tempClasses = await ClassModel.find({ isTemporary: true })
+
 	const [currentSchoolYear] = await SchoolYearModel.find().sort({ endAt: -1 })
 	const promotedStudents = (await getStudentsInformation({})).filter(
 		(student) => student.completedProgram && student.remarkAsQualified
@@ -172,39 +220,13 @@ export const promoteStudents = async () => {
 	return await Promise.all([
 		StudentModel.updateMany(
 			{
-				_id: { $in: promotedStudents.filter((student) => student.class?.grade === 1) }
-			},
-			{ status: StudentStatusEnum.COMPLETE_GRADE1, class: null, graduatedAt: currentSchoolYear._id },
-			{ new: true }
-		),
-		StudentModel.updateMany(
-			{
-				_id: { $in: promotedStudents.filter((student) => student.class?.grade === 2) }
-			},
-			{ status: StudentStatusEnum.COMPLETE_GRADE2, class: null },
-			{ new: true }
-		),
-		StudentModel.updateMany(
-			{
-				_id: { $in: promotedStudents.filter((student) => student.class?.grade === 3) }
-			},
-			{ status: StudentStatusEnum.COMPLETE_GRADE3, class: null },
-			{ new: true }
-		),
-		StudentModel.updateMany(
-			{
-				_id: { $in: promotedStudents.filter((student) => student.class?.grade === 4) }
-			},
-			{ status: StudentStatusEnum.COMPLETE_GRADE4, class: null },
-			{ new: true }
-		),
-		StudentModel.updateMany(
-			{
 				_id: { $in: graduatedStudents }
 			},
-			{ status: StudentStatusEnum.GRADUATED, class: null },
+			{ status: StudentStatusEnum.GRADUATED, class: null, graduatedAt: currentSchoolYear?._id },
 			{ new: true }
 		),
+
+		...NON_SENIOR_GRADES.map(async (grade) => await transferClass(grade, tempClasses, promotedStudents)),
 		deactivateParentsUser(graduatedStudents.map((student) => student.parents))
 	])
 }
@@ -264,7 +286,7 @@ export const getStudentsInformation = async (filter: FilterQuery<IStudent>) => {
 				}
 			]
 		})
-		.unwind('$parents')
+		.unwind({ path: '$parents', preserveNullAndEmptyArrays: true })
 		.lookup({
 			from: 'student_remarks',
 			localField: '_id',
