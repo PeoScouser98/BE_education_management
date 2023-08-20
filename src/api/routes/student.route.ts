@@ -18,6 +18,7 @@ const router = express.Router()
 
 router.get('/students/children-of-parents', checkAuthenticated, getStudentsByParents)
 router.get('/students/policy-beneficiary', checkAuthenticated, checkIsHeadmaster, getPolicyBeneficiary)
+// Lấy danh sách học sinh chờ xếp lớp
 router.get(
 	'/students/waiting-arrange-class/:classId',
 	checkAuthenticated,
