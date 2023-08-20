@@ -17,3 +17,21 @@ export const validateTimeTableData = (payload: Array<Partial<ITimeTable>>) => {
 	const arraySchema = Joi.array().items(schema).required()
 	return arraySchema.validate(payload)
 }
+
+// .custom((value, helpers) => {
+// 	const subjects = new Set()
+// 	const teachers = new Set()
+
+// 	for (const item of value) {
+// 		if (subjects.has(item.subject) && teachers.has(item.teacher)) {
+// 			return helpers.error('any.invalid', {
+// 				message: 'Không thể phân công 1 môn học cho nhiều hơn 2 giáo viên trong 1 thời khóa biểu'
+// 			})
+// 		}
+
+// 		subjects.add(item.subject)
+// 		teachers.add(item.teacher)
+// 	}
+
+// 	return value
+// })

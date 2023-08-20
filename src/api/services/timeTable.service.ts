@@ -17,9 +17,15 @@ export const saveTimeTableByClass = async (payload: { [key: string]: Partial<ITi
 		})
 	)
 
+	const { error } = validateTimeTableData(schedule)
+	if (error) {
+		throw createHttpError.BadRequest(error.message)
+	}
 	const existedLectures = await schedule.reduce<Promise<Partial<ITimeTable>[]>>(async (accumulator, currentValue) => {
 		const extLecture = await TimeTableModel.findOne({
-			class: { $ne: currentValue.class },
+			class: {
+				$ne: currentValue.class
+			},
 			period: currentValue.period,
 			teacher: currentValue.teacher,
 			dayOfWeek: currentValue.dayOfWeek
@@ -29,33 +35,24 @@ export const saveTimeTableByClass = async (payload: { [key: string]: Partial<ITi
 		if (extLecture) currAcc.push(extLecture.toObject())
 		return currAcc
 	}, Promise.resolve([]))
-
 	if (existedLectures.length > 0) {
+		const existedLecturesObj = _.groupBy(existedLectures, 'dayOfWeek')
+
 		const errData = payload
-		Object.keys(errData).forEach((dayOfWeek) => {
-			existedLectures.forEach((i) => {
-				if (i.dayOfWeek === dayOfWeek) {
-					errData[dayOfWeek] = errData[dayOfWeek].map((j) => {
-						if (j.period === i.period) {
-							return {
-								...j,
-								subject: '',
-								teacher: ''
-							}
-						} else return j
-					})
-				}
+
+		Object.keys(existedLecturesObj).forEach((duplicateDay) => {
+			errData[duplicateDay] = errData[duplicateDay].map((i) => {
+				if (existedLecturesObj[duplicateDay].find((j) => i.period === j.period)) {
+					return { ...i, teacher: '' }
+				} else return i
 			})
 		})
+
 		return {
 			error: createHttpError.Conflict('Một sô giáo viên đã bị trùng lịch dạy'),
 			errData: errData,
 			payload: payload
 		}
-	}
-	const { error } = validateTimeTableData(schedule)
-	if (error) {
-		throw createHttpError.BadRequest(error.message)
 	}
 
 	// * Using mongodb.AnyBulkWriteOperation<T> causes lagging for Typescript intellisense

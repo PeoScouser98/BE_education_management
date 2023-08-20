@@ -1,15 +1,13 @@
 import createHttpError from 'http-errors'
-import StudentModel from '../models/student.model'
-import { IStudent } from '../../types/student.type'
-import { IClass } from '../../types/class.type'
-import SubjectModel from '../models/subject.model'
-import { ISubject } from '../../types/subject.type'
-import SubjectTranscriptionModel from '../models/subjectTrancription.model'
-import { ISubjectTranscript } from '../../types/subjectTranscription.type'
-import ClassModel from '../models/class.model'
-import { ObjectId } from 'mongodb'
 import { Schema } from 'mongoose'
 import { NAME_LEVEL } from '../../constants/nameLevel'
+import { IClass } from '../../types/class.type'
+import { IStudent } from '../../types/student.type'
+import { ISubject } from '../../types/subject.type'
+import { ISubjectTranscript } from '../../types/subjectTranscription.type'
+import ClassModel from '../models/class.model'
+import StudentModel from '../models/student.model'
+import SubjectTranscriptionModel from '../models/subjectTrancription.model'
 
 export type SubjectTrancriptConvert = (
 	| {
@@ -137,7 +135,7 @@ export const getStdPercentageByGrade = async () => {
 			{
 				label: 'Tỉ lệ học sinh giữa các khối',
 				data: data,
-				backgroundColor: 'rgba(255, 99, 132, 0.5)'
+				backgroundColor: '#6366f150'
 			}
 		]
 	}
@@ -198,7 +196,9 @@ export const getGoodStudentByClass = async (classId: string) => {
 
 export const getPolicyBeneficiary = async () => {
 	try {
-		const classes: IClass[] = await ClassModel.find({}).select('_id className').sort({ grade: 'asc' })
+		const classes: IClass[] = await ClassModel.find({ isTemporary: false })
+			.select('_id className')
+			.sort({ grade: 'asc' })
 		const allClassId = classes.map((classItem) => classItem._id)
 
 		const data = await Promise.all(
@@ -217,7 +217,7 @@ export const getPolicyBeneficiary = async () => {
 				{
 					label: 'Học sinh hoàn cảnh',
 					data: data,
-					backgroundColor: 'rgba(255, 99, 132, 0.5)'
+					backgroundColor: '#6366f150'
 				}
 			]
 		}

@@ -97,11 +97,11 @@ export const getTeachingClasses = async (teacherId: string) => {
 				}
 			]
 		})
+		.unwind({ path: '$class', preserveNullAndEmptyArrays: true })
 		.group({
 			_id: '$class'
 		})
-
-	return teacherTimeTable.filter((item) => !!item._id.length).map(({ _id }) => _id.at(0))
+	return teacherTimeTable.filter((item) => !!item._id).map(({ _id }) => _id)
 }
 
 export const arrangeClass = async ({
