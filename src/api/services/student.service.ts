@@ -51,11 +51,9 @@ export const updateStudent = async (id: string, data: Partial<Omit<IStudent, '_i
 	if (!student) {
 		throw createHttpError.NotFound('Student does not exist!')
 	}
-	return await StudentModel.findOneAndUpdate(
-		{ _id: id },
-		{ ...data, fullName: <string>toCapitalize(<string>data.fullName) },
-		{ new: true }
-	)
+	if (data.fullName) data.fullName = <string>toCapitalize(<string>data.fullName)
+
+	return await StudentModel.findOneAndUpdate({ _id: id }, data, { new: true })
 }
 
 // get detail student
