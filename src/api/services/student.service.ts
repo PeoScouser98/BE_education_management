@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import createHttpError from 'http-errors'
-import mongoose, { FilterQuery, ObjectId, isValidObjectId } from 'mongoose'
+import mongoose, { FilterQuery, ObjectId, PaginateOptions, isValidObjectId } from 'mongoose'
 import generatePictureByName from '../../helpers/generatePicture'
 import { toCapitalize } from '../../helpers/toolkit'
 import { IStudent, StudentStatusEnum } from '../../types/student.type'
@@ -266,10 +266,16 @@ export const getGraduatedStudents = async (page: number, limit: number, schoolYe
 	)
 }
 
-export const getStudentsInformation = async (filter: FilterQuery<IStudent>) => {
+export const getStudentsWaitingArrangeClass = async (waitingClassId: string, paginateOptions: PaginateOptions) => {
+	const isWaitingClass = await ClassModel.exists({ isTemporary: true, _id: waitingClassId })
+	if (!isWaitingClass) throw createHttpError.NotFound('Cannot find waiting class !')
+	return await StudentModel.paginate({ class: waitingClassId }, paginateOptions)
+}
+
+export const getStudentsInformation = async (filterQuery: FilterQuery<IStudent>) => {
 	const [currentSchoolYear] = await SchoolYearModel.find().sort({ endAt: -1 })
 	return await StudentModel.aggregate()
-		.match(filter)
+		.match(filterQuery)
 		.lookup({
 			from: 'users',
 			localField: 'parents',
@@ -349,7 +355,6 @@ export const getStudentsInformation = async (filter: FilterQuery<IStudent>) => {
 			pipeline: [{ $project: { grade: 1, className: 1 } }]
 		})
 		.unwind({ path: '$class', preserveNullAndEmptyArrays: true })
-
 		.addFields({
 			completedProgram: {
 				$cond: {
