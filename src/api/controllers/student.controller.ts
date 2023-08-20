@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import createHttpError from 'http-errors'
-import { isValidObjectId } from 'mongoose'
+import { PaginateOptions, isValidObjectId } from 'mongoose'
 import { HttpStatusCode } from '../../configs/statusCode.config'
 import useCatchAsync from '../../helpers/useCatchAsync'
 import { IStudent } from '../../types/student.type'
@@ -109,4 +109,18 @@ export const getGraduatedStudentsBySchoolYear = useCatchAsync(async (req: Reques
 
 	const graduatedStudents = await StudentServices.getGraduatedStudents(+page, +limit, schoolYearId)
 	return res.status(HttpStatusCode.OK).json(graduatedStudents)
+})
+
+export const getStudentsWaitingArrangeClass = useCatchAsync(async (req: Request, res: Response) => {
+	const waitingClassId = req.params.classId
+	if (!isValidObjectId(waitingClassId)) throw createHttpError.BadRequest('Invalid class ID !')
+	const limit = req.query._limit || 10
+	const page = req.query._page || 1
+
+	const paginateOptions = <PaginateOptions>{ limit, page, sort: { fullName: 1 } }
+	const studentsWaitingArrangeClass = await StudentServices.getStudentsWaitingArrangeClass(
+		waitingClassId,
+		paginateOptions
+	)
+	return res.status(HttpStatusCode.OK).json(studentsWaitingArrangeClass)
 })
