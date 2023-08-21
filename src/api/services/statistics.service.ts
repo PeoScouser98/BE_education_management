@@ -23,10 +23,7 @@ export type SubjectTrancriptConvert = (
 	| undefined
 )[]
 
-export const handleTranscriptStudent = (
-	transcriptStudents: ISubjectTranscript[],
-	students: IStudent[]
-): SubjectTrancriptConvert => {
+export const handleTranscriptStudent = (transcriptStudents: ISubjectTranscript[], students: IStudent[]): any => {
 	return transcriptStudents
 		.map((transcriptStudent) => {
 			const studentCurrent = students.find((item) => String(item._id) === String(transcriptStudent.student))
@@ -44,11 +41,8 @@ export const handleTranscriptStudent = (
 					typeof studentCurrent.class !== 'string' &&
 					[1, 2].includes((studentCurrent.class as IClass).grade)
 				) {
-					const secondSemester = transcriptStudent?.secondSemester?.midtermTest
-
-					if (!secondSemester) {
-						throw createHttpError(400, 'Học sinh chưa đủ điều kiện để đánh giá học lực')
-					}
+					const secondSemester =
+						transcriptStudent?.secondSemester?.finalTest || transcriptStudent?.secondSemester?.isPassed
 
 					return {
 						mediumScore: secondSemester,
@@ -58,10 +52,6 @@ export const handleTranscriptStudent = (
 
 				// Các khối còn lại
 				const secondSemester = transcriptStudent?.secondSemester?.midtermTest
-
-				if (!secondSemester) {
-					throw createHttpError(400, 'Học sinh chưa đủ điều kiện để đánh giá học lực')
-				}
 
 				return {
 					mediumScore: secondSemester,
@@ -88,8 +78,10 @@ export const handleLevelStudent = (transcriptConvert: SubjectTrancriptConvert, s
 
 		studentTranscript.forEach((transcript) => {
 			const mediumScore = transcript?.mediumScore
+			// console.log(mediumScore)
 			const isPassed = transcript?.isPassed
-			if (mediumScore && !isPassed && mediumScore < 5) {
+
+			if (!!mediumScore && !isPassed && mediumScore < 5) {
 				level3++
 			}
 
@@ -135,7 +127,7 @@ export const getStdPercentageByGrade = async () => {
 			{
 				label: 'Tỉ lệ học sinh giữa các khối',
 				data: data,
-				backgroundColor: '#6366f150'
+				backgroundColor: '#34d39950'
 			}
 		]
 	}
@@ -228,46 +220,38 @@ export const getPolicyBeneficiary = async () => {
 
 // Xếp hạng học lực học sinh toàn trường
 export const getStdAllClass = async () => {
-	try {
-		// all class
-		const classes: IClass[] = await ClassModel.find({}).sort({ grade: 'asc' })
-		const classIds = classes.map((item) => item._id)
+	const classes: IClass[] = await ClassModel.find({ isTemporary: false }).sort({ grade: 'asc' })
+	const classIds = classes.map((item) => item._id)
 
-		const levelAllClass = await Promise.all(
-			classIds.map(async (classId) => {
-				const students = await StudentModel.find({ class: classId })
-				const studentIds = students.map((item) => item._id.toString())
-				const transcriptStds = await SubjectTranscriptionModel.find({ student: { $in: studentIds } })
+	const levelAllClass = await Promise.all(
+		classIds.map(async (classId) => {
+			const students = await StudentModel.find({ class: classId })
+			const studentIds = students.map((item) => item._id.toString())
+			const transcriptStds = await SubjectTranscriptionModel.find({ student: { $in: studentIds } })
+			const transcriptStdsConverted = handleTranscriptStudent(transcriptStds, students)
+			const levels = handleLevelStudent(transcriptStdsConverted, studentIds)
+			return levels
+		})
+	)
 
-				const transcriptStdsConverted = handleTranscriptStudent(transcriptStds, students)
-
-				const levels = handleLevelStudent(transcriptStdsConverted, studentIds)
-
-				return levels
-			})
-		)
-
-		return {
-			labels: classes.map((item) => item.className),
-			datasets: [
-				{
-					label: NAME_LEVEL.level1,
-					data: levelAllClass.map((item) => item.level1),
-					backgroundColor: 'rgba(255, 99, 132, 0.5)'
-				},
-				{
-					label: NAME_LEVEL.level2,
-					data: levelAllClass.map((item) => item.level2),
-					backgroundColor: 'rgba(53, 162, 235, 0.5)'
-				},
-				{
-					label: NAME_LEVEL.level3,
-					data: levelAllClass.map((item) => item.level3),
-					backgroundColor: 'rgb(255,245,221)'
-				}
-			]
-		}
-	} catch (error) {
-		throw error
+	return {
+		labels: classes.map((item) => item.className),
+		datasets: [
+			{
+				label: NAME_LEVEL.level1,
+				data: levelAllClass.map((item) => item.level1),
+				backgroundColor: '#34d39950'
+			},
+			{
+				label: NAME_LEVEL.level2,
+				data: levelAllClass.map((item) => item.level2),
+				backgroundColor: '#0ea5e950'
+			},
+			{
+				label: NAME_LEVEL.level3,
+				data: levelAllClass.map((item) => item.level3),
+				backgroundColor: '#f43f5e50'
+			}
+		]
 	}
 }
