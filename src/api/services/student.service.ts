@@ -10,7 +10,7 @@ import SchoolYearModel from '../models/schoolYear.model'
 import StudentModel from '../models/student.model'
 import { validateReqBodyStudent, validateUpdateReqBodyStudent } from '../validations/student.validation'
 import { deactivateParentsUser } from './user.service'
-import { IClass } from '../../types/class.type'
+import { IClass, IClassDocument } from '../../types/class.type'
 
 // create new student using form
 export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
@@ -161,44 +161,15 @@ export const getStudentsByClass = async (classId: string) => {
 	})
 }
 
-const transferClass = async (grade: number, tempClasses: Array<IClass>, promotedStudents: Array<any>) => {
-	const tempClassToTransfer = tempClasses.find((cls) => cls.grade === grade + 1)
-	const studentsToArrangeClass = promotedStudents.filter((student) => student.class?.grade === grade)
-	const currentClassName = studentsToArrangeClass.at(0)?.class?.className
-
-	let availableClassToTransfer = null
-	if (currentClassName) {
-		/**
-		 * Tìm lớp học có tên tương ứng
-		 * Example: 1A -> 2A
-		 */
-		const nextClassNameToFind = currentClassName.replace(currentClassName.charAt(0), grade + 1)
-		availableClassToTransfer = await ClassModel.findOne({ className: nextClassNameToFind })
-
-		// Nếu có học sinh trong lớp được chuyển đến -> ko cập nhật
-		if (availableClassToTransfer) {
-			const existedStudentsInClassToTransfer = await StudentModel.exists({ class: availableClassToTransfer._id })
-			if (existedStudentsInClassToTransfer) return
-		}
-	}
-
-	/**
-	 * Nếu ko có lớp thích hợp -> Chờ xếp lớp & chuyển đến lớp chờ cho khối đang học
-	 * Ngược lại -> Đang học & chuyển đến lớp phù hợp
-	 */
-	const updateStatusKey = !!availableClassToTransfer
-		? <keyof typeof StudentStatusEnum>'STUDYING'
-		: <keyof typeof StudentStatusEnum>'WAITING_ARRANGE_CLASS'
-
-	const classToTransfer = availableClassToTransfer?._id || tempClassToTransfer?._id
-
+const transferStudentsClass = async (studentsToArrangeClass: Array<any>, tempClassToTransfer: IClassDocument) => {
+	const updateStatusKey = <keyof typeof StudentStatusEnum>'WAITING_ARRANGE_CLASS'
 	return await StudentModel.updateMany(
 		{
 			_id: { $in: studentsToArrangeClass }
 		},
 		{
 			status: StudentStatusEnum[updateStatusKey],
-			class: classToTransfer
+			class: tempClassToTransfer?._id
 		},
 		{ new: true }
 	)
@@ -213,7 +184,8 @@ export const promoteStudents = async () => {
 	const promotedStudents = (await getStudentsInformation({})).filter(
 		(student) => student.completedProgram && student.remarkAsQualified
 	)
-	const graduatedStudents = promotedStudents.filter((student) => student.class?.grade === 5)
+
+	const graduatedStudents = promotedStudents.filter((student) => student.isGraduated)
 
 	return await Promise.all([
 		StudentModel.updateMany(
@@ -224,7 +196,11 @@ export const promoteStudents = async () => {
 			{ new: true }
 		),
 
-		...NON_SENIOR_GRADES.map(async (grade) => await transferClass(grade, tempClasses, promotedStudents)),
+		...NON_SENIOR_GRADES.map(async (grade) => {
+			const tempClassToTransfer = tempClasses.find((cls) => cls.grade === grade + 1)
+			const studentsToArrangeClass = promotedStudents.filter((student) => student.class?.grade === grade)
+			return await transferStudentsClass(<Array<any>>studentsToArrangeClass, <IClassDocument>tempClassToTransfer)
+		}),
 		deactivateParentsUser(graduatedStudents.map((student) => student.parents))
 	])
 }
@@ -372,7 +348,7 @@ export const getStudentsInformation = async (filterQuery: FilterQuery<IStudent>)
 														cond: {
 															$or: [
 																{ $eq: ['$$item.secondSemester.isPassed', true] },
-																{ $gt: ['$$item.secondSemester.finalTest', 5] }
+																{ $gte: ['$$item.secondSemester.finalTest', 5] }
 															]
 														}
 													}
@@ -397,7 +373,7 @@ export const getStudentsInformation = async (filterQuery: FilterQuery<IStudent>)
 														cond: {
 															$or: [
 																{ $eq: ['$$item.secondSemester.isPassed', true] },
-																{ $gt: ['$$item.secondSemester.finalTest', 5] }
+																{ $gte: ['$$item.secondSemester.finalTest', 5] }
 															]
 														}
 													}
