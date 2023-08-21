@@ -83,7 +83,6 @@ export const getSubjectTranscriptByClass = async (classId: string, subjectId: st
 		SubjectModel.findById(subjectId),
 		ClassModel.findById(classId)
 	])
-
 	if (!subject || !currentClass) throw createHttpError.NotFound('Cannot find subject or class to get transcript !')
 	if (!subject.appliedForGrades.includes(currentClass.grade))
 		throw createHttpError.UnprocessableEntity('Subject cannot be applied to transcript for this class !')
@@ -94,7 +93,7 @@ export const getSubjectTranscriptByClass = async (classId: string, subjectId: st
 		subject: subjectId
 	})
 		.populate({ path: 'student', select: '_id fullName code' })
-		.select('student isPassed firstSemester secondSemester')
+		.select('student firstSemester secondSemester')
 		.transform((docs) =>
 			docs.map((doc) => ({
 				...doc.toObject(),
@@ -104,9 +103,8 @@ export const getSubjectTranscriptByClass = async (classId: string, subjectId: st
 			}))
 		)
 
-	const isSeniorGrade = (currentClass?.grade as number) > 3
-
-	if (!transcriptStudentList.length) {
+	const isSeniorGrade = <number>currentClass?.grade > 3
+	if (!transcriptStudentList.length || transcriptStudentList.length < listStudent.length) {
 		transcriptStudentList = <Array<Partial<ISubjectTranscript>>>listStudent.map((std) => {
 			const existedTranscriptOfStudent = transcriptStudentList.find(
 				(item) => item.student?.toString() === std._id.toString()
