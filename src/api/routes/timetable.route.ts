@@ -12,7 +12,7 @@ router.get(
 )
 
 router.get(
-	'/time-table/assigned-teachers',
+	'/time-table/unassigned-teachers',
 	TimeTableController.getUnassignedTeacher
 )
 router.get('/time-table/teacher', checkAuthenticated, checkIsTeacher, TimeTableController.getTeacherTimetable)
