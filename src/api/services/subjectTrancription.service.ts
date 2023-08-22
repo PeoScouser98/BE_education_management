@@ -11,6 +11,60 @@ import { validateSubjectTranscript } from '../validations/subjectTrancription.va
 import { getCurrentSchoolYear } from './schoolYear.service'
 import TimeTableModel from '../models/timeTable.model'
 import { getAllSubjectOfStudentStudying } from './subject.service'
+import { ITimeTable } from '../../types/timeTable.type'
+import { ISubject } from '../../types/subject.type'
+
+export const fakeDataTranscript = async (studentId: string) => {
+	const student = await StudentModel.findOne({ _id: studentId })
+	const schoolYearCurr = await getCurrentSchoolYear()
+	const timeTableClass: ITimeTable[] = await TimeTableModel.find({ class: (student?.class as IClass)?._id })
+		.populate({
+			path: 'class',
+			select: '_id ',
+			options: { lean: true }
+		})
+		.populate({
+			path: 'subject',
+			options: { lean: true }
+		})
+
+	const subjectOnly: string[] = []
+	const timeTableOnly: ITimeTable[] = []
+	timeTableClass.forEach((item) => {
+		const subject: ISubject | undefined = item?.subject as ISubject | undefined
+		if (subject && !subjectOnly.includes(String(subject._id))) {
+			subjectOnly.push(String(subject._id))
+			timeTableOnly.push(item)
+		}
+	})
+
+	const dataFake = timeTableOnly.map((timeTable) => {
+		const subject: ISubject | undefined = timeTable?.subject as ISubject | undefined
+		const mainSubjectData = {
+			midtermTest: null,
+			finalTest: null
+		}
+		const electiveSubjectData = {
+			isPassed: null
+		}
+		return {
+			subject: {
+				_id: subject?._id,
+				subjectName: subject?.subjectName
+			},
+			firstSemester: subject?.isMainSubject ? mainSubjectData : electiveSubjectData,
+			secondSemester: subject?.isMainSubject ? mainSubjectData : electiveSubjectData,
+			hasNoData: true
+		}
+	})
+
+	return {
+		completedProgram: false,
+		schoolYear: [schoolYearCurr],
+		student: student,
+		transcript: dataFake
+	}
+}
 
 // Nhập điểm nhiều học sinh 1 lúc / môn / lớp
 export const insertSubjectTranscriptByClass = async (
@@ -282,7 +336,8 @@ export const getStudentTranscript = async (id: string | ObjectId, schoolYear: st
 			completedProgram: 1
 		})
 
-	return studentTranscripts.at(0)
+	const fakeData = fakeDataTranscript(id as string)
+	return studentTranscripts.at(0) || fakeData
 }
 
 // Lấy bảng điểm tất cả các môn của 1 lớp

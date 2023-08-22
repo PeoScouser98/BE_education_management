@@ -232,7 +232,7 @@ export const getStdAllClass = async (schoolYear?: string) => {
 			const studentIds = students.map((item) => item._id.toString())
 			const transcriptStds = await SubjectTranscriptionModel.find({
 				student: { $in: studentIds },
-				schoolYear: schoolYear || schoolYearCurr.id
+				schoolYear: schoolYear || schoolYearCurr._id
 			})
 			const transcriptStdsConverted = handleTranscriptStudent(transcriptStds, students)
 			const levels = handleLevelStudent(transcriptStdsConverted, studentIds)
