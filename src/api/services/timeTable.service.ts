@@ -172,3 +172,8 @@ export const getAllTeacherTimeTableByClass = async (classId: string) => {
 
 	return result
 }
+
+export const resetAllTimeTable = async () => {
+	const result = await TimeTableModel.deleteMany({})
+	return result
+}

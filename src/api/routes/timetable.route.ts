@@ -14,5 +14,5 @@ router.get('/time-table/teacher', checkAuthenticated, checkIsTeacher, TimeTableC
 router.get('/time-table/:classId', checkAuthenticated, TimeTableController.getTimeTableByClass)
 router.get('/time-table/student/:studentId', TimeTableController.getStudentTimeTable)
 router.put('/time-table/:classId', checkAuthenticated, checkIsHeadmaster, TimeTableController.saveTimeTable)
-
+router.delete('/time-table', checkAuthenticated, checkIsHeadmaster, TimeTableController.resetAllTimeTable)
 export default router
