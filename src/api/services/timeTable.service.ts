@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import createHttpError from 'http-errors'
-import _ from 'lodash'
-import mongoose from 'mongoose'
+import _, { pick, xorBy } from 'lodash'
+import mongoose, { mongo } from 'mongoose'
 import { ITimeTable } from '../../types/timeTable.type'
 import StudentModel from '../models/student.model'
 import TimeTableModel from '../models/timeTable.model'
 import { validateTimeTableData } from '../validations/timeTable.validation'
 import generatePictureByName from '../../helpers/generatePicture'
+import { getTeacherUsersByStatus } from './user.service'
 
 export const saveTimeTableByClass = async (payload: { [key: string]: Partial<ITimeTable>[] }, classId: string) => {
 	const schedule = _.flatMap(payload, (items, dayOfWeek) =>
@@ -77,7 +78,6 @@ export const saveTimeTableByClass = async (payload: { [key: string]: Partial<ITi
 }
 
 export const getTimeTableDetail = async (classId: string) => {
-	console.log(1)
 	const data = await TimeTableModel.find({ class: classId })
 		.populate({ path: 'subject', select: '_id subjectName', options: { lean: true } })
 		.populate({ path: 'teacher', select: '_id displayName', options: { lean: true } })
@@ -171,4 +171,18 @@ export const getAllTeacherTimeTableByClass = async (classId: string) => {
 	})
 
 	return result
+}
+
+// Get unassigned teacher
+export const getUnassignedTeacher = async (classId: string, dayOfWeek: string, period: number) => {
+	const result = await TimeTableModel.findOne({
+		class: new mongoose.Types.ObjectId(classId),
+		dayOfWeek: dayOfWeek,
+		period: period
+	}).populate({ path: 'teacher', select: '_id displayName', options: { lean: true } }).select('teacher')
+
+	const assignedTeacher = result?.teacher;
+	let unassignedTeacher = await getTeacherUsersByStatus('in_working')
+	if (unassignedTeacher.length) unassignedTeacher = unassignedTeacher.map((item) => ({ _id: item.id, displayName: item.displayName })).filter((item) => item._id.toString() !== assignedTeacher?._id.toString())
+	return unassignedTeacher
 }

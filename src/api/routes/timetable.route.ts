@@ -10,6 +10,11 @@ router.get(
 	checkIsHeadmaster,
 	TimeTableController.getAllTeacherTimeTableByClass
 )
+
+router.get(
+	'/time-table/assigned-teachers',
+	TimeTableController.getUnassignedTeacher
+)
 router.get('/time-table/teacher', checkAuthenticated, checkIsTeacher, TimeTableController.getTeacherTimetable)
 router.get('/time-table/:classId', checkAuthenticated, TimeTableController.getTimeTableByClass)
 router.get('/time-table/student/:studentId', TimeTableController.getStudentTimeTable)
