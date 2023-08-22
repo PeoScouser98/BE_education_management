@@ -41,13 +41,13 @@ export const insertSubjectTranscriptByClass = async (
 	if (!isAllStudentInClass) throw createHttpError.Conflict('Some students do not exist in this class !')
 
 	// validate bảng điểm của các student gửi lên
-	const { error, value } = validateSubjectTranscript(data, {
-		isMainSubject: currentSubject.isMainSubject,
-		isSeniorGrade: currentClass.grade > 3
-	})
-	if (error) throw createHttpError.BadRequest(error.message)
+	// const { error, value } = validateSubjectTranscript(data, {
+	// 	isMainSubject: currentSubject.isMainSubject,
+	// 	isSeniorGrade: currentClass.grade > 3
+	// })
+	// if (error) throw createHttpError.BadRequest(error.message)
 
-	const bulkWriteOption: any = value.map((item: ISubjectTranscript) => ({
+	const bulkWriteOption: any = data.map((item: any) => ({
 		updateOne: {
 			filter: {
 				student: item.student,
