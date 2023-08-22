@@ -40,3 +40,9 @@ export const getAllTeacherTimeTableByClass = useCatchAsync(async (req: Request, 
 	const result = await TimeTableService.getAllTeacherTimeTableByClass(req.params.classId)
 	return res.status(HttpStatusCode.OK).json(result)
 })
+
+// [DELETE] /time-table
+export const resetAllTimeTable = useCatchAsync(async (req: Request, res: Response) => {
+	const result = await TimeTableService.resetAllTimeTable()
+	return res.status(HttpStatusCode.OK).json(result)
+})
