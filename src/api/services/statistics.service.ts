@@ -86,9 +86,9 @@ export const handleLevelStudent = (transcriptConvert: SubjectTrancriptConvert, s
 				level3++
 			}
 
-			if (!mediumScore && !isPassed) {
-				level3++
-			}
+			// if (!mediumScore && !isPassed) {
+			// 	level3++
+			// }
 
 			if (mediumScore && mediumScore >= 5 && mediumScore < 9) {
 				level2++
