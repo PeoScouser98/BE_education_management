@@ -19,6 +19,7 @@ export const getPolicyBeneficiary = useCatchAsync(async (req: Request, res: Resp
 })
 
 export const getStdAllClass = useCatchAsync(async (req: Request, res: Response) => {
-	const result = await StatisticsService.getStdAllClass()
+	const schoolYear = req.query.schoolYear
+	const result = await StatisticsService.getStdAllClass((schoolYear as string) || undefined)
 	return res.status(HttpStatusCode.OK).json(result)
 })
