@@ -8,6 +8,7 @@ import { ISubjectTranscript } from '../../types/subjectTranscription.type'
 import ClassModel from '../models/class.model'
 import StudentModel from '../models/student.model'
 import SubjectTranscriptionModel from '../models/subjectTrancription.model'
+import { getCurrentSchoolYear } from './schoolYear.service'
 
 export type SubjectTrancriptConvert = (
 	| {
@@ -219,7 +220,9 @@ export const getPolicyBeneficiary = async () => {
 }
 
 // Xếp hạng học lực học sinh toàn trường
-export const getStdAllClass = async () => {
+export const getStdAllClass = async (schoolYear?: string) => {
+	const schoolYearCurr = await getCurrentSchoolYear()
+
 	const classes: IClass[] = await ClassModel.find({ isTemporary: false }).sort({ grade: 'asc' })
 	const classIds = classes.map((item) => item._id)
 
@@ -227,7 +230,10 @@ export const getStdAllClass = async () => {
 		classIds.map(async (classId) => {
 			const students = await StudentModel.find({ class: classId })
 			const studentIds = students.map((item) => item._id.toString())
-			const transcriptStds = await SubjectTranscriptionModel.find({ student: { $in: studentIds } })
+			const transcriptStds = await SubjectTranscriptionModel.find({
+				student: { $in: studentIds },
+				schoolYear: schoolYear || schoolYearCurr.id
+			})
 			const transcriptStdsConverted = handleTranscriptStudent(transcriptStds, students)
 			const levels = handleLevelStudent(transcriptStdsConverted, studentIds)
 			return levels
