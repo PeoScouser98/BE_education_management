@@ -1,14 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import createHttpError from 'http-errors'
-import _, { pick, xorBy } from 'lodash'
-import mongoose, { mongo } from 'mongoose'
+import _ from 'lodash'
+import mongoose from 'mongoose'
 import { ITimeTable } from '../../types/timeTable.type'
 import StudentModel from '../models/student.model'
 import TimeTableModel from '../models/timeTable.model'
 import { validateTimeTableData } from '../validations/timeTable.validation'
 import generatePictureByName from '../../helpers/generatePicture'
 import { getTeacherUsersByStatus } from './user.service'
+import UserModel from '../models/user.model'
 
 export const saveTimeTableByClass = async (payload: { [key: string]: Partial<ITimeTable>[] }, classId: string) => {
 	const schedule = _.flatMap(payload, (items, dayOfWeek) =>
@@ -175,14 +174,38 @@ export const getAllTeacherTimeTableByClass = async (classId: string) => {
 
 // Get unassigned teacher
 export const getUnassignedTeacher = async (classId: string, dayOfWeek: string, period: number) => {
-	const result = await TimeTableModel.findOne({
-		class: new mongoose.Types.ObjectId(classId),
-		dayOfWeek: dayOfWeek,
-		period: period
-	}).populate({ path: 'teacher', select: '_id displayName', options: { lean: true } }).select('teacher')
+	let result = await TimeTableModel.aggregate([
+		{ $match: { dayOfWeek: dayOfWeek, period: Number(period), class: { $ne: new mongoose.Types.ObjectId(classId) } } },
+		{
+			$lookup: {
+				from: 'users',
+				localField: 'teacher',
+				foreignField: '_id',
+				as: 'teacher',
+			},
+		},
+		{
+			$group: {
+				_id: { $arrayElemAt: ['$teacher._id', 0] },
+				displayName: { $first: '$teacher.displayName' }
+			}
+		},
+		{
+			$project: {
+				_id: 1,
+				displayName: { $arrayElemAt: ['$displayName', 0] }
+			}
+		}
+	]);
 
-	const assignedTeacher = result?.teacher;
-	let unassignedTeacher = await getTeacherUsersByStatus('in_working')
-	if (unassignedTeacher.length) unassignedTeacher = unassignedTeacher.map((item) => ({ _id: item.id, displayName: item.displayName })).filter((item) => item._id.toString() !== assignedTeacher?._id.toString())
-	return unassignedTeacher
+	let allTeachers = await getTeacherUsersByStatus("in_working")
+
+	allTeachers = _.map(allTeachers, (n) => _.pick(n, ["_id", "displayName"]))
+	allTeachers = _.map(allTeachers, (n) => ({ ...n, _id: n._id.toString() }))
+
+	const currentTeacher = (await TimeTableModel.findOne({ class: classId, period, dayOfWeek }).populate({ path: 'teacher', select: '_id displayName' }))?.teacher
+	result.push(currentTeacher)
+	result = _.map(result, (n) => ({ ...n, _id: n._id.toString() }))
+
+	return _.differenceBy(allTeachers, result, "_id")
 }
