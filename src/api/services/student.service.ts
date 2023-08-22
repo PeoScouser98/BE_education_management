@@ -209,7 +209,7 @@ export const getStudentsByParents = async (parentsId: string | ObjectId) =>
 	await StudentModel.find({ parents: parentsId })
 		.populate({
 			path: 'class',
-			select: '_id className headTeacher grade',
+			select: '_id className headTeacher grade isTemporary',
 			options: { lean: true },
 			populate: {
 				path: 'headTeacher',
