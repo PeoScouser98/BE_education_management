@@ -1,5 +1,5 @@
 export const NAME_LEVEL = {
-	level1: 'Học sinh xuất sắc',
+	level1: 'Hoàn thành xuất sắc',
 	level2: 'Hoàn thành tốt',
-	level3: 'Học sinh cần cố gắng'
+	level3: 'Cần cố gắng'
 }

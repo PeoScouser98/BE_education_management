@@ -1,28 +1,13 @@
-import createHttpError from 'http-errors'
-import { Schema } from 'mongoose'
+import { groupBy } from 'lodash'
+import mongoose, { Schema } from 'mongoose'
 import { NAME_LEVEL } from '../../constants/nameLevel'
 import { IClass } from '../../types/class.type'
-import { IStudent } from '../../types/student.type'
+import { IStudent, StudentStatusEnum } from '../../types/student.type'
 import { ISubject } from '../../types/subject.type'
 import { ISubjectTranscript } from '../../types/subjectTranscription.type'
 import ClassModel from '../models/class.model'
+import SchoolYearModel from '../models/schoolYear.model'
 import StudentModel from '../models/student.model'
-import SubjectTranscriptionModel from '../models/subjectTrancription.model'
-import { getCurrentSchoolYear } from './schoolYear.service'
-
-export type SubjectTrancriptConvert = (
-	| {
-			mediumScore: number
-			student: Schema.Types.ObjectId
-			isPassed?: undefined
-	  }
-	| {
-			isPassed: boolean | undefined
-			student: Schema.Types.ObjectId
-			mediumScore?: undefined
-	  }
-	| undefined
-)[]
 
 export const handleTranscriptStudent = (transcriptStudents: ISubjectTranscript[], students: IStudent[]): any => {
 	return transcriptStudents
@@ -69,44 +54,6 @@ export const handleTranscriptStudent = (transcriptStudents: ISubjectTranscript[]
 		.filter((item) => item !== undefined)
 }
 
-export const handleLevelStudent = (transcriptConvert: SubjectTrancriptConvert, studentIds: string[]) => {
-	let level1 = 0
-	let level2 = 0
-	let level3 = 0
-
-	studentIds.forEach((studentId) => {
-		const studentTranscript = transcriptConvert.filter((item) => String(item?.student) === studentId.toString())
-
-		studentTranscript.forEach((transcript) => {
-			const mediumScore = transcript?.mediumScore
-			// console.log(mediumScore)
-			const isPassed = transcript?.isPassed
-
-			if (!!mediumScore && !isPassed && mediumScore < 5) {
-				level3++
-			}
-
-			// if (!mediumScore && !isPassed) {
-			// 	level3++
-			// }
-
-			if (mediumScore && mediumScore >= 5 && mediumScore < 9) {
-				level2++
-			}
-
-			if (mediumScore && mediumScore >= 9) {
-				level1++
-			}
-		})
-	})
-
-	return {
-		level1,
-		level2,
-		level3
-	}
-}
-
 export const getStdPercentageByGrade = async () => {
 	const allGrades = [1, 2, 3, 4, 5]
 	const labels = ['Khối 1', 'Khối 2', 'Khối 3', 'Khối 4', 'Khối 5']
@@ -131,59 +78,6 @@ export const getStdPercentageByGrade = async () => {
 				backgroundColor: '#34d39950'
 			}
 		]
-	}
-}
-
-export const getGoodStudentByClass = async (classId: string) => {
-	try {
-		if (!classId) {
-			throw createHttpError.BadRequest('Parameter classId là bắt buộc')
-		}
-		const students: IStudent[] = await StudentModel.find({ class: classId })
-
-		if (!students || students.length === 0) {
-			throw createHttpError.NotFound('Lớp học không có học sinh')
-		}
-
-		const studentIds = students.map((student) => student._id.toString())
-
-		// lấy ra các bảng điểm của các học sinh
-		const transcriptStudents: ISubjectTranscript[] = await SubjectTranscriptionModel.find({
-			student: { $in: studentIds }
-		})
-
-		const transcriptStudentConvert = handleTranscriptStudent(transcriptStudents, students)
-
-		const { level1, level2, level3 } = handleLevelStudent(transcriptStudentConvert, studentIds)
-
-		return {
-			labels: Object.keys(NAME_LEVEL).map((item) => (NAME_LEVEL as any)[item]),
-			datasets: [
-				{
-					label: 'Thống kê học lực học sinh',
-					data: [level1, level2, level3],
-					backgroundColor: [
-						'rgba(255, 99, 132, 0.2)',
-						'rgba(54, 162, 235, 0.2)',
-						'rgba(255, 206, 86, 0.2)',
-						'rgba(75, 192, 192, 0.2)',
-						'rgba(153, 102, 255, 0.2)',
-						'rgba(255, 159, 64, 0.2)'
-					],
-					borderColor: [
-						'rgba(255, 99, 132, 1)',
-						'rgba(54, 162, 235, 1)',
-						'rgba(255, 206, 86, 1)',
-						'rgba(75, 192, 192, 1)',
-						'rgba(153, 102, 255, 1)',
-						'rgba(255, 159, 64, 1)'
-					],
-					borderWith: 1
-				}
-			]
-		}
-	} catch (error) {
-		throw error
 	}
 }
 
@@ -221,41 +115,213 @@ export const getPolicyBeneficiary = async () => {
 
 // Xếp hạng học lực học sinh toàn trường
 export const getStdAllClass = async (schoolYear?: string) => {
-	const schoolYearCurr = await getCurrentSchoolYear()
+	const [currentSchoolYear] = await SchoolYearModel.find().sort({ endAt: -1 })
 
 	const classes: IClass[] = await ClassModel.find({ isTemporary: false }).sort({ grade: 'asc' })
 	const classIds = classes.map((item) => item._id)
 
-	const levelAllClass = await Promise.all(
-		classIds.map(async (classId) => {
-			const students = await StudentModel.find({ class: classId })
-			const studentIds = students.map((item) => item._id.toString())
-			const transcriptStds = await SubjectTranscriptionModel.find({
-				student: { $in: studentIds },
-				schoolYear: schoolYear || schoolYearCurr.id
-			})
-			const transcriptStdsConverted = handleTranscriptStudent(transcriptStds, students)
-			const levels = handleLevelStudent(transcriptStdsConverted, studentIds)
-			return levels
-		})
-	)
+	const studyRanking = await StudentModel.aggregate([
+		{ $match: { status: { $ne: StudentStatusEnum.WAITING_ARRANGE_CLASS } } },
+		{
+			$lookup: {
+				from: 'classes',
+				localField: 'class',
+				foreignField: '_id',
+				as: 'class',
+				pipeline: [
+					{
+						$project: { grade: 1, className: 1 }
+					}
+				]
+			}
+		},
+		{ $unwind: { path: '$class', preserveNullAndEmptyArrays: true } },
+		{
+			$lookup: {
+				from: 'subject_transcriptions',
+				localField: '_id',
+				let: { studentId: '$_id' },
+				foreignField: 'student',
+				as: 'studyRanking',
+				pipeline: [
+					{
+						$match: {
+							$expr: {
+								$and: [
+									{ $eq: ['$student', '$$studentId'] },
+									{
+										$eq: ['$schoolYear', new mongoose.Types.ObjectId(schoolYear) || currentSchoolYear?._id]
+									}
+								]
+							}
+						}
+					}
+				]
+			}
+		},
+		{
+			$addFields: {
+				studyRanking: {
+					$cond: {
+						if: {
+							$or: [
+								{
+									$and: [
+										{ $in: ['$class.grade', [1, 2]] },
+										{ $eq: [{ $size: '$studyRanking' }, 9] },
+										{
+											$eq: [
+												{
+													$size: {
+														$filter: {
+															input: '$studyRanking',
+															as: 'item',
+															cond: {
+																$or: [
+																	{ $eq: ['$$item.secondSemester.isPassed', true] },
+																	{ $gte: ['$$item.secondSemester.finalTest', 9] }
+																]
+															}
+														}
+													}
+												},
+												9
+											]
+										}
+									]
+								},
+								{
+									$and: [
+										{ $in: ['$class.grade', [3, 4, 5]] },
+										{ $eq: [{ $size: '$studyRanking' }, 11] },
+										{
+											$eq: [
+												{
+													$size: {
+														$filter: {
+															input: '$studyRanking',
+															as: 'item',
+															cond: {
+																$or: [
+																	{ $eq: ['$$item.secondSemester.isPassed', true] },
+																	{ $gte: ['$$item.secondSemester.finalTest', 9] }
+																]
+															}
+														}
+													}
+												},
+												11
+											]
+										}
+									]
+								}
+							]
+						},
+						then: 1,
+						else: {
+							$cond: {
+								if: {
+									$or: [
+										{
+											$and: [
+												{ $in: ['$class.grade', [1, 2]] },
+												{ $eq: [{ $size: '$studyRanking' }, 9] },
+												{
+													$eq: [
+														{
+															$size: {
+																$filter: {
+																	input: '$studyRanking',
+																	as: 'item',
+																	cond: {
+																		$or: [
+																			{ $eq: ['$$item.secondSemester.isPassed', true] },
+																			{ $gte: ['$$item.secondSemester.finalTest', 5] }
+																		]
+																	}
+																}
+															}
+														},
+														9
+													]
+												}
+											]
+										},
+										{
+											$and: [
+												{ $in: ['$class.grade', [3, 4, 5]] },
+												{ $eq: [{ $size: '$studyRanking' }, 11] },
+												{
+													$eq: [
+														{
+															$size: {
+																$filter: {
+																	input: '$studyRanking',
+																	as: 'item',
+																	cond: {
+																		$or: [
+																			{ $eq: ['$$item.secondSemester.isPassed', true] },
+																			{ $gte: ['$$item.secondSemester.finalTest', 5] }
+																		]
+																	}
+																}
+															}
+														},
+														11
+													]
+												}
+											]
+										}
+									]
+								},
+								then: 2,
+								else: 3
+							}
+						}
+					}
+				}
+			}
+		},
+		{ $project: { fullName: 1, code: 1, studyRanking: 1, class: 1 } },
+		{
+			$group: {
+				_id: { class: '$class', studyRanking: '$studyRanking' },
+
+				count: { $sum: 1 }
+			}
+		}
+	])
+
+	const ranking = groupBy(
+		studyRanking.map((item) => ({ ...item, ...item._id })).filter((item) => !!item.class),
+		'class.className'
+	) as { [key: string]: any }
 
 	return {
 		labels: classes.map((item) => item.className),
 		datasets: [
 			{
 				label: NAME_LEVEL.level1,
-				data: levelAllClass.map((item) => item.level1),
+				data: classes.map((cls) => {
+					const className = cls.className
+					return ranking[className].find((item: { studyRanking: number }) => item.studyRanking === 1)?.count
+				}),
 				backgroundColor: '#34d39950'
 			},
 			{
 				label: NAME_LEVEL.level2,
-				data: levelAllClass.map((item) => item.level2),
+				data: classes.map((cls) => {
+					const className = cls.className
+					return ranking[className].find((item: { studyRanking: number }) => item.studyRanking === 2)?.count
+				}),
 				backgroundColor: '#0ea5e950'
 			},
 			{
 				label: NAME_LEVEL.level3,
-				data: levelAllClass.map((item) => item.level3),
+				data: classes.map((cls) => {
+					const className = cls.className
+					return ranking[className].find((item: { studyRanking: number }) => item.studyRanking === 3)?.count
+				}),
 				backgroundColor: '#f43f5e50'
 			}
 		]
