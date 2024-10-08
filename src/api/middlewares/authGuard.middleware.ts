@@ -9,9 +9,9 @@ import { UserRoleEnum } from '../../types/user.type'
 
 export const checkAuthenticated = useCatchAsync(async (req: Request, _res: Response, next: NextFunction) => {
 	if (!req.cookies.uid) throw createHttpError.Unauthorized('Invalid auth id!')
-	const accessTokenKey = AuthRedisKeyPrefix.ACCESS_TOKEN + req.cookies.uid
-	const storedAccessToken = await redisClient.get(accessTokenKey)
-	if (!storedAccessToken) throw createHttpError.Unauthorized()
+	// const accessTokenKey = AuthRedisKeyPrefix.ACCESS_TOKEN + req.cookies.uid
+	// const storedAccessToken = await redisClient.get(accessTokenKey)
+	// if (!storedAccessToken) throw createHttpError.Unauthorized()
 	const accessToken = req.cookies.access_token
 	if (!accessToken) throw createHttpError.Unauthorized()
 	const { payload } = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET!) as JwtPayload

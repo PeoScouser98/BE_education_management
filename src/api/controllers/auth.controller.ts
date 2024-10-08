@@ -33,18 +33,19 @@ export const signinWithGoogle = useCatchAsync(async (req: Request, res: Response
 	const accessToken = jwt.sign({ payload: user }, process.env.ACCESS_TOKEN_SECRET!, {
 		expiresIn: '1h'
 	})
+	console.log('🚀 ~ accessToken:', accessToken)
 	const refreshToken = jwt.sign({ payload: user }, process.env.REFRESH_TOKEN_SECRET!, {
 		expiresIn: '30d'
 	})
 
-	await Promise.all([
-		redisClient.set(AuthRedisKeyPrefix.ACCESS_TOKEN + user._id, accessToken, {
-			EX: 60 * 60
-		}),
-		redisClient.set(AuthRedisKeyPrefix.REFRESH_TOKEN + user._id, refreshToken, {
-			EX: 60 * 60 * 24 * 30
-		})
-	])
+	// await Promise.all([
+	// 	redisClient.set(AuthRedisKeyPrefix.ACCESS_TOKEN + user._id, accessToken, {
+	// 		EX: 60 * 60
+	// 	}),
+	// 	redisClient.set(AuthRedisKeyPrefix.REFRESH_TOKEN + user._id, refreshToken, {
+	// 		EX: 60 * 60 * 24 * 30
+	// 	})
+	// ])
 
 	res.cookie('access_token', accessToken, {
 		maxAge: 60 * 60 * 1000 * 24,
@@ -166,9 +167,9 @@ export const refreshToken = useCatchAsync(async (req: Request, res: Response) =>
 		expiresIn: '1h'
 	})
 	// Lưu lại token mới trong redis
-	await redisClient.set(AuthRedisKeyPrefix.ACCESS_TOKEN + req.cookies.uid, newAccessToken, {
-		EX: 60 * 60 // 1 hour
-	})
+	// await redisClient.set(AuthRedisKeyPrefix.ACCESS_TOKEN + req.cookies.uid, newAccessToken, {
+	// 	EX: 60 * 60 // 1 hour
+	// })
 	return res
 		.status(HttpStatusCode.OK)
 		.cookie('access_token', newAccessToken, {
