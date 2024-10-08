@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import createHttpError from 'http-errors'
-import mongoose, { FilterQuery, ObjectId, isValidObjectId } from 'mongoose'
-import { IAttendance } from '../../types/attendance.type'
+import mongoose, { FilterQuery, ObjectId, PaginateOptions, isValidObjectId } from 'mongoose'
+import generatePictureByName from '../../helpers/generatePicture'
+import { toCapitalize } from '../../helpers/toolkit'
 import { IStudent, StudentStatusEnum } from '../../types/student.type'
 import { IUser } from '../../types/user.type'
+import ClassModel from '../models/class.model'
 import SchoolYearModel from '../models/schoolYear.model'
 import StudentModel from '../models/student.model'
 import { validateReqBodyStudent, validateUpdateReqBodyStudent } from '../validations/student.validation'
-import { deactivateParentsUser, getParentsUserByClass } from './user.service'
-import generatePicureByName from '../../helpers/generatePicture'
-import { toCapitalize } from '../../helpers/toolkit'
-import ClassModel from '../models/class.model'
+import { deactivateParentsUser } from './user.service'
+import { IClass, IClassDocument } from '../../types/class.type'
 
 // create new student using form
 export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent, '_id'>[]) => {
@@ -20,8 +20,12 @@ export const createStudent = async (data: Omit<IStudent, '_id'> | Omit<IStudent,
 	}
 
 	if (Array.isArray(data)) {
+		console.log(data)
 		const hasExistedStudent = await StudentModel.exists({ code: { $in: data.map((student) => student.code) } })
 		if (hasExistedStudent) throw createHttpError(409, 'Some students already exists ')
+		if (data.length > 35)
+			throw createHttpError.UnprocessableEntity('Class size cannot be greater than 35 students each class !')
+
 		return await StudentModel.insertMany(data)
 	}
 
@@ -47,11 +51,9 @@ export const updateStudent = async (id: string, data: Partial<Omit<IStudent, '_i
 	if (!student) {
 		throw createHttpError.NotFound('Student does not exist!')
 	}
-	return await StudentModel.findOneAndUpdate(
-		{ _id: id },
-		{ ...data, fullName: <string>toCapitalize(<string>data.fullName) },
-		{ new: true }
-	)
+	if (data.fullName) data.fullName = <string>toCapitalize(<string>data.fullName)
+
+	return await StudentModel.findOneAndUpdate({ _id: id }, data, { new: true })
 }
 
 // get detail student
@@ -138,25 +140,6 @@ export const getStudentDropout = async () => {
 	return await StudentModel.find({ dropoutDate: { $ne: null } })
 }
 
-// Lấy ra tình trạng điểm danh của 1 học sinh trong 1 tháng (sẽ trả về ngày vắng mặt trong tháng đấy)
-export const attendanceOfStudentByMonth = async (id: string, month: number, year: number) => {
-	const { absentDays } = await getDetailStudent(id)
-
-	const result: IAttendance[] = []
-
-	absentDays?.forEach((item) => {
-		const date = new Date(item.date)
-		const monthItem = date.getMonth() + 1
-		const yearItem = date.getFullYear()
-
-		if (monthItem === month && yearItem === year) {
-			result.push(item)
-		}
-	})
-
-	return result
-}
-
 // Lấy ra các học sinh chính sách
 export const getPolicyBeneficiary = async (page: number, limit: number) => {
 	return await StudentModel.paginate(
@@ -171,13 +154,102 @@ export const getPolicyBeneficiary = async (page: number, limit: number) => {
 }
 
 export const getStudentsByClass = async (classId: string) => {
+	return await getStudentsInformation({
+		class: new mongoose.Types.ObjectId(classId),
+		dropoutDate: null,
+		transferSchoolDate: null
+	})
+}
+
+const transferStudentsClass = async (studentsToArrangeClass: Array<any>, tempClassToTransfer: IClassDocument) => {
+	const updateStatusKey = <keyof typeof StudentStatusEnum>'WAITING_ARRANGE_CLASS'
+	return await StudentModel.updateMany(
+		{
+			_id: { $in: studentsToArrangeClass }
+		},
+		{
+			status: StudentStatusEnum[updateStatusKey],
+			class: tempClassToTransfer?._id
+		},
+		{ new: true }
+	)
+}
+
+export const promoteStudents = async () => {
+	console.log('Run auto promote students')
+	const NON_SENIOR_GRADES = [1, 2, 3, 4]
+	const tempClasses = await ClassModel.find({ isTemporary: true })
+
+	const [currentSchoolYear] = await SchoolYearModel.find().sort({ endAt: -1 })
+	const promotedStudents = (await getStudentsInformation({})).filter(
+		(student) => student.completedProgram && student.remarkAsQualified
+	)
+
+	const graduatedStudents = promotedStudents.filter((student) => student.isGraduated)
+
+	return await Promise.all([
+		StudentModel.updateMany(
+			{
+				_id: { $in: graduatedStudents }
+			},
+			{ status: StudentStatusEnum.GRADUATED, class: null, graduatedAt: currentSchoolYear?._id },
+			{ new: true }
+		),
+
+		...NON_SENIOR_GRADES.map(async (grade) => {
+			const tempClassToTransfer = tempClasses.find((cls) => cls.grade === grade + 1)
+			const studentsToArrangeClass = promotedStudents.filter((student) => student.class?.grade === grade)
+			return await transferStudentsClass(<Array<any>>studentsToArrangeClass, <IClassDocument>tempClassToTransfer)
+		}),
+		deactivateParentsUser(graduatedStudents.map((student) => student.parents))
+	])
+}
+
+export const getStudentsByParents = async (parentsId: string | ObjectId) =>
+	await StudentModel.find({ parents: parentsId })
+		.populate({
+			path: 'class',
+			select: '_id className headTeacher grade isTemporary',
+			options: { lean: true },
+			populate: {
+				path: 'headTeacher',
+				select: 'displayName phone email'
+			}
+		})
+		.select('-parents -createdAt -updatedAt')
+		.transform((students) =>
+			students.map((std) => ({ ...std.toObject(), picture: generatePictureByName(std.fullName) }))
+		)
+
+export const getStudentsByHeadTeacherClass = async (headTeacherId: string) => {
+	const classOfHeadTeacher = await ClassModel.findOne({ headTeacher: headTeacherId }).select('_id')
+	if (!classOfHeadTeacher) throw createHttpError.NotFound('You have not play a role as a head teacher for any class !')
+	return await getStudentsByClass(classOfHeadTeacher._id.toString())
+}
+
+export const getGraduatedStudents = async (page: number, limit: number, schoolYearId: string) => {
+	return StudentModel.paginate(
+		{
+			status: StudentStatusEnum.GRADUATED,
+			graduatedAt: schoolYearId
+		},
+		{
+			limit: limit,
+			page: page
+		}
+	)
+}
+
+export const getStudentsWaitingArrangeClass = async (waitingClassId: string, paginateOptions: PaginateOptions) => {
+	const isWaitingClass = await ClassModel.exists({ isTemporary: true, _id: waitingClassId })
+	if (!isWaitingClass) throw createHttpError.NotFound('Cannot find waiting class !')
+	return await StudentModel.paginate({ class: waitingClassId }, paginateOptions)
+}
+
+export const getStudentsInformation = async (filterQuery: FilterQuery<IStudent>) => {
 	const [currentSchoolYear] = await SchoolYearModel.find().sort({ endAt: -1 })
 	return await StudentModel.aggregate()
-		.match({
-			class: new mongoose.Types.ObjectId(classId),
-			dropoutDate: null,
-			transferSchoolDate: null
-		})
+		.match(filterQuery)
 		.lookup({
 			from: 'users',
 			localField: 'parents',
@@ -194,7 +266,7 @@ export const getStudentsByClass = async (classId: string) => {
 				}
 			]
 		})
-		.unwind('$parents')
+		.unwind({ path: '$parents', preserveNullAndEmptyArrays: true })
 		.lookup({
 			from: 'student_remarks',
 			localField: '_id',
@@ -256,8 +328,7 @@ export const getStudentsByClass = async (classId: string) => {
 			as: 'class',
 			pipeline: [{ $project: { grade: 1, className: 1 } }]
 		})
-		.unwind('$class')
-
+		.unwind({ path: '$class', preserveNullAndEmptyArrays: true })
 		.addFields({
 			completedProgram: {
 				$cond: {
@@ -274,7 +345,12 @@ export const getStudentsByClass = async (classId: string) => {
 													$filter: {
 														input: '$completedProgram',
 														as: 'item',
-														cond: { $eq: ['$$item.isPassed', true] }
+														cond: {
+															$or: [
+																{ $eq: ['$$item.secondSemester.isPassed', true] },
+																{ $gte: ['$$item.secondSemester.finalTest', 5] }
+															]
+														}
 													}
 												}
 											},
@@ -294,7 +370,12 @@ export const getStudentsByClass = async (classId: string) => {
 													$filter: {
 														input: '$completedProgram',
 														as: 'item',
-														cond: { $eq: ['$$item.isPassed', true] }
+														cond: {
+															$or: [
+																{ $eq: ['$$item.secondSemester.isPassed', true] },
+																{ $gte: ['$$item.secondSemester.finalTest', 5] }
+															]
+														}
 													}
 												}
 											},
@@ -327,51 +408,4 @@ export const getStudentsByClass = async (classId: string) => {
 				}
 			}
 		})
-}
-
-export const promoteStudentsByClass = async (classId: string) => {
-	const studentsInClass = await getStudentsByClass(classId)
-	const promotedStudents = studentsInClass.filter(
-		(student: IStudent & { remarkAsQualified: boolean; completedProgram: boolean }) =>
-			student.remarkAsQualified && student.completedProgram
-	)
-	const isAbleToPromoted =
-		promotedStudents.length > 0 &&
-		promotedStudents.every((student) => student.class?.grade === 5 && student.class !== null)
-	if (isAbleToPromoted) {
-		const [graduatedStudents, _] = await Promise.all([
-			StudentModel.updateMany(
-				{
-					_id: { $in: promotedStudents }
-				},
-				{ status: StudentStatusEnum.GRADUATED, class: null },
-				{ new: true }
-			),
-			deactivateParentsUser(promotedStudents.map((student) => student.parents))
-		])
-		return { message: `${graduatedStudents.modifiedCount} students has been promoted.` }
-	}
-	return { message: 'No student to promoted' }
-}
-
-export const getStudentsByParents = async (parentsId: string | ObjectId) =>
-	await StudentModel.find({ parents: parentsId })
-		.populate({
-			path: 'class',
-			select: '_id className headTeacher grade',
-			options: { lean: true },
-			populate: {
-				path: 'headTeacher',
-				select: 'displayName phone email'
-			}
-		})
-		.select('-parents -createdAt -updatedAt')
-		.transform((students) =>
-			students.map((std) => ({ ...std.toObject(), picture: generatePicureByName(std.fullName) }))
-		)
-
-export const getStudentsByHeadTeacherClass = async (headTeacherId: string) => {
-	const classOfHeadTeacher = await ClassModel.findOne({ headTeacher: headTeacherId }).select('_id')
-	if (!classOfHeadTeacher) throw createHttpError.NotFound('You have not play a role as a head teacher for any class !')
-	return await getStudentsByClass(classOfHeadTeacher._id.toString())
 }

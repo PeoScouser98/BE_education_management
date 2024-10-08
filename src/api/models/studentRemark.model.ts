@@ -40,12 +40,12 @@ const StudentRemarkSchema = new mongoose.Schema(
 	{
 		collection: 'student_remarks',
 		versionKey: false,
-		timestamps: true,
+		timestamps: true
 	}
 )
 
 StudentRemarkSchema.plugin(mongooseAutoPopulate)
-StudentRemarkSchema.index({ createdAt: 1 }, { expires: '30d' });
+StudentRemarkSchema.index({ createdAt: 1 }, { expires: '30d' })
 
 const StudentRemarkModel = mongoose.model<IStudentRemark>('StudentRemarks', StudentRemarkSchema)
 

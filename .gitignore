@@ -5,3 +5,4 @@ thunder-tests
 .vscode
 .env
 dist
+mongodb_playground

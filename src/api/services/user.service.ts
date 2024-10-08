@@ -35,7 +35,7 @@ export const createUser = async (payload: Partial<IUser> & Array<Partial<IUser>>
 			throw createHttpError.BadRequest(`Teacher's email or phone number cannot be duplicated!`)
 		}
 
-		return await new UserModel(payload).save()
+		return await new UserModel({ ...payload, employmentStatus: false }).save()
 	}
 }
 

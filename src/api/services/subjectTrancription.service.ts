@@ -41,13 +41,13 @@ export const insertSubjectTranscriptByClass = async (
 	if (!isAllStudentInClass) throw createHttpError.Conflict('Some students do not exist in this class !')
 
 	// validate bảng điểm của các student gửi lên
-	const { error, value } = validateSubjectTranscript(data, {
-		isMainSubject: currentSubject.isMainSubject,
-		isSeniorGrade: currentClass.grade > 3
-	})
-	if (error) throw createHttpError.BadRequest(error.message)
+	// const { error, value } = validateSubjectTranscript(data, {
+	// 	isMainSubject: currentSubject.isMainSubject,
+	// 	isSeniorGrade: currentClass.grade > 3
+	// })
+	// if (error) throw createHttpError.BadRequest(error.message)
 
-	const bulkWriteOption = value.map((item: ISubjectTranscript) => ({
+	const bulkWriteOption: any = data.map((item: any) => ({
 		updateOne: {
 			filter: {
 				student: item.student,
@@ -83,7 +83,6 @@ export const getSubjectTranscriptByClass = async (classId: string, subjectId: st
 		SubjectModel.findById(subjectId),
 		ClassModel.findById(classId)
 	])
-
 	if (!subject || !currentClass) throw createHttpError.NotFound('Cannot find subject or class to get transcript !')
 	if (!subject.appliedForGrades.includes(currentClass.grade))
 		throw createHttpError.UnprocessableEntity('Subject cannot be applied to transcript for this class !')
@@ -94,7 +93,7 @@ export const getSubjectTranscriptByClass = async (classId: string, subjectId: st
 		subject: subjectId
 	})
 		.populate({ path: 'student', select: '_id fullName code' })
-		.select('student isPassed firstSemester secondSemester')
+		.select('student firstSemester secondSemester')
 		.transform((docs) =>
 			docs.map((doc) => ({
 				...doc.toObject(),
@@ -104,16 +103,15 @@ export const getSubjectTranscriptByClass = async (classId: string, subjectId: st
 			}))
 		)
 
-	const isSeniorGrade = (currentClass?.grade as number) > 3
-
-	if (!transcriptStudentList.length) {
+	const isSeniorGrade = <number>currentClass?.grade > 3
+	if (!transcriptStudentList.length || transcriptStudentList.length < listStudent.length) {
 		transcriptStudentList = <Array<Partial<ISubjectTranscript>>>listStudent.map((std) => {
 			const existedTranscriptOfStudent = transcriptStudentList.find(
 				(item) => item.student?.toString() === std._id.toString()
 			)
 
 			switch (true) {
-				case existedTranscriptOfStudent:
+				case !!existedTranscriptOfStudent:
 					return existedTranscriptOfStudent
 
 				case subject?.isMainSubject:
@@ -296,7 +294,7 @@ export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYe
 			class: classId,
 			dropoutDate: null,
 			transferSchool: null
-		}).distinct('_id'),
+		}).select('_id fullName'),
 		ClassModel.findOne({ _id: classId }).distinct('grade'),
 		getAllSubjectOfStudentStudying(<string>classId)
 	])
@@ -310,7 +308,7 @@ export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYe
 
 	let data = await SubjectTranscriptionModel.aggregate()
 		.match({
-			student: { $in: listStudent },
+			student: { $in: listStudent.map((student) => student._id) },
 			schoolYear: schoolYear
 		})
 		.lookup({
@@ -391,13 +389,14 @@ export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYe
 	const isLackOfSubjectInTranscript = data.every(
 		(item) => Object.keys(item.transcript).length < AllStudyingSubjects.length
 	)
+
 	if (isLackOfSubjectInTranscript) {
 		const existedSubjectsInEachTranscript = data.at(0)?.transcript ? Object.keys(data.at(0)?.transcript) : []
 		const lackingSubjects = AllStudyingSubjects.filter(
 			(sbj) => !existedSubjectsInEachTranscript.some((ex) => ex === sbj?.subjectName)
 		)
 		const defaultTranscriptOfLackingSbj: {
-			[key: string]: Pick<ISubjectTranscript, 'firstSemester' | 'secondSemester' | 'isPassed'> & {
+			[key: string]: Pick<ISubjectTranscript, 'firstSemester' | 'secondSemester'> & {
 				hasNoData?: boolean
 			}
 		} = {}
@@ -414,8 +413,7 @@ export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYe
 							midtermTest: 0,
 							finalTest: 0
 						},
-						hasNoData: true,
-						isPassed: false
+						hasNoData: true
 					}
 				else
 					defaultTranscriptOfLackingSbj[sbj.subjectName] = {
@@ -426,34 +424,49 @@ export const getTranscriptsByClass = async (classId: string | ObjectId, schoolYe
 							secondSemester: {
 								finalTest: 0
 							},
-							hasNoData: true,
-							isPassed: false
+							hasNoData: true
 						}
 					}
 			} else {
 				defaultTranscriptOfLackingSbj[sbj.subjectName] = {
-					isPassed: false,
+					firstSemester: {
+						isPassed: false
+					},
+					secondSemester: {
+						isPassed: false
+					},
 					hasNoData: true
 				}
 			}
 		})
-		data = data.map((item) => {
-			const transformedItem = {
-				...item,
-				transcript: { ...item.transcript, ...defaultTranscriptOfLackingSbj, student: item.student?.fullName }
-			}
-			console.log(transformedItem)
-			return transformedItem
+
+		if (data.length > 0) {
+			data = data.map((item) => {
+				const transformedItem = {
+					...item,
+					student: item.student?.fullName,
+					...item.transcript,
+					...defaultTranscriptOfLackingSbj
+				}
+				console.log(transformedItem)
+				return transformedItem
+			})
+		} else {
+			data = listStudent.map((student) => ({
+				...defaultTranscriptOfLackingSbj,
+				student: student.fullName,
+				completedProgram: false
+			}))
+		}
+	} else {
+		data = data.map((doc) => {
+			const { transcript, ...rest } = doc
+			return { ...rest, ...transcript, student: doc.student?.fullName }
 		})
 	}
 
-	data = data.map((doc) => {
-		const { transcript, ...rest } = doc
-		console.log('docs', doc)
-		return { ...rest, ...transcript, student: doc.student?.fullName }
-	})
-
 	return {
+		// teachingSubjects:
 		studyingSubjects: AllStudyingSubjects.map((sbj) => sbj.subjectName).sort((a, b) => a.localeCompare(b)),
 		transcripts: data
 	}

@@ -34,3 +34,15 @@ export const getStudentTimeTable = useCatchAsync(async (req: Request, res: Respo
 	const result = await TimeTableService.getStudentTimeTable(req.params.studentId)
 	return res.status(HttpStatusCode.OK).json(result)
 })
+
+// [GET] /time-table/teacher/:classId
+export const getAllTeacherTimeTableByClass = useCatchAsync(async (req: Request, res: Response) => {
+	const result = await TimeTableService.getAllTeacherTimeTableByClass(req.params.classId)
+	return res.status(HttpStatusCode.OK).json(result)
+})
+
+// [GET] /time-table/assigned-teachers
+export const getUnassignedTeacher = useCatchAsync(async (req: Request, res: Response) => {
+	const result = await TimeTableService.getUnassignedTeacher(req.query._class, req.query._dow, req.query._period)
+	return res.status(HttpStatusCode.OK).json(result)
+}) 

@@ -1,9 +1,8 @@
 import { Model, ObjectId, PaginateModel } from 'mongoose'
 import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete'
-import { IUser } from './user.type'
 import { IClass } from './class.type'
-import { IAttendance } from './attendance.type'
 import { ISchoolYear } from './schoolYear.type'
+import { IUser } from './user.type'
 
 export interface IStudent extends Document {
 	_id: ObjectId
@@ -15,17 +14,16 @@ export interface IStudent extends Document {
 	parents: ObjectId | Pick<IUser, '_id' | 'email' | 'phone' | 'displayName' | 'address'>
 	status: StudentStatusEnum
 	isPolicyBeneficiary?: boolean
-	isGraduated?: boolean
+	graduatedAt: ObjectId
 	transferSchoolDate?: Date
 	dropoutDate?: Date
-	absentDays?: IAttendance[]
-	remarkOfHeadTeacher?: Pick<IStudentRemark, 'isQualified' | 'conduct' | 'proficiency'> | null
 }
 
 export enum StudentStatusEnum {
 	STUDYING = 'Đang học',
 	TRANSFER_SCHOOL = 'Chuyển trường',
 	DROPPED_OUT = 'Thôi học',
+	WAITING_ARRANGE_CLASS = 'Chờ xếp lớp',
 	GRADUATED = 'Hoàn thành chương trình tiểu học'
 }
 
@@ -39,7 +37,7 @@ export interface IStudentRemark extends Document {
 	remarkedBy: string | ObjectId | Pick<IUser, '_id' | 'displayName'>
 }
 
-export interface IStudentDocument extends Omit<SoftDeleteDocument, '_id'>, IStudent { }
+export interface IStudentDocument extends Omit<SoftDeleteDocument, '_id'>, IStudent {}
 export type TStudentModel = Model<IStudentDocument>
 export type TSoftDeleteStudentModel = SoftDeleteModel<IStudentDocument, TStudentModel>
 export type TPaginatedStudentModel = PaginateModel<IStudentDocument>

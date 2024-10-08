@@ -6,26 +6,25 @@ export const validateSubjectTranscript = (
 	data: Omit<ISubjectTranscript, '_id' | 'subject' | 'schoolYear'>[],
 	context: TTranscriptSchemaContext
 ) => {
-	console.log(context.isMainSubject)
+	console.log(context)
 	const semesterSchema = Joi.object({
 		isPassed: Joi.boolean().when(Joi.ref('$isMainSubject'), {
 			is: false,
 			then: Joi.boolean().required(),
 			otherwise: Joi.forbidden()
 		}),
-		midtermTest: Joi.number()
-			.when(Joi.ref('$isSeniorGrade'), {
-				is: true,
-				then: Joi.number().forbidden(),
-				otherwise: Joi.number().min(0).max(10).required()
-			})
-			.concat(
-				Joi.number().when(Joi.ref('$isMainSubject'), {
-					is: false,
-					then: Joi.forbidden(),
-					otherwise: Joi.number().min(0).max(10).required()
-				})
-			),
+		midtermTest: Joi.number().when(Joi.ref('$isSeniorGrade'), {
+			is: true,
+			then: Joi.number().min(0).max(10).required(),
+			otherwise: Joi.number().forbidden()
+		}),
+		// 	.concat(
+		// 		Joi.number().when(Joi.ref('$isMainSubject'), {
+		// 			is: true,
+		// 			then: Joi.number().min(0).max(10).required(),
+		// 			otherwise: Joi.number().forbidden()
+		// 		})
+		// )
 		finalTest: Joi.when(Joi.ref('$isMainSubject'), {
 			is: false,
 			then: Joi.forbidden(),

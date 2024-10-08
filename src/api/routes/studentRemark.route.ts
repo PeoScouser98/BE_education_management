@@ -5,14 +5,14 @@ import { checkAuthenticated, checkIsTeacher } from '../middlewares/authGuard.mid
 const router = express.Router()
 
 router.put('/student-remark', checkAuthenticated, checkIsTeacher, StudentRemarkController.createStudentRemark)
-router.get('/student-remark', checkAuthenticated, checkIsTeacher, StudentRemarkController.getStudentRemark)
-
-//! FOR TESTING PURPOSE ONLY
+router.get('/student-remark/:studentId', checkAuthenticated, StudentRemarkController.getStudentRemark)
 router.get(
-	'/student-remark/gen',
+	'/student-remark',
 	checkAuthenticated,
 	checkIsTeacher,
-	StudentRemarkController.generateStudentRemark
+	StudentRemarkController.getStudentsRemarkByHeadTeacher
 )
+//! FOR TESTING PURPOSE ONLY
+router.get('/student-remark/gen', checkAuthenticated, checkIsTeacher, StudentRemarkController.generateStudentRemark)
 
 export default router
